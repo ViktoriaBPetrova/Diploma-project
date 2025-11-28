@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HealthyRecipes.Data.Data.Entities
 {
-    public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser<Guid>
     {
 
         // ---------- Basic Info ----------

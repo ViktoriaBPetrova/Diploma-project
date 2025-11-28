@@ -13,7 +13,7 @@ namespace HealthyRecipes.Data.Data.Entities
         public Guid Id { get; init; } = Guid.NewGuid();
 
         // ---------- Foreign Key & Navigation ----------
-        public string UserId { get; set; } = null!;
+        public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = null!; // required nav property
 
         // ---------- Core Data ----------

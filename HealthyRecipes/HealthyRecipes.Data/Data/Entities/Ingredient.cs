@@ -26,7 +26,7 @@ namespace HealthyRecipes.Data.Data.Entities
         public Source Source { get; init; } = Source.Global;
 
         // Nullable if not created by a user - from api, created by admin
-        public string? CreatedByUserId { get; set; }
+        public Guid? CreatedByUserId { get; set; }
         public ApplicationUser? User { get; set; }
 
         // ---------- Navigation Collections ----------

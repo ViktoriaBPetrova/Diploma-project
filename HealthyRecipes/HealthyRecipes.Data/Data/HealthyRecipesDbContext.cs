@@ -1,11 +1,12 @@
 ﻿using HealthyRecipes.Data.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 
 namespace HealthyRecipes.Data
 {
-    public class HealthyRecipesDbContext : IdentityDbContext<ApplicationUser>
+    public class HealthyRecipesDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>
     {
         public HealthyRecipesDbContext(DbContextOptions<HealthyRecipesDbContext> options)
             : base(options)

@@ -22,7 +22,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
 })
-.AddRoles<IdentityRole>()
+.AddRoles<IdentityRole<Guid>>()
 .AddEntityFrameworkStores<HealthyRecipesDbContext>();
 
 builder.Services.AddControllersWithViews();

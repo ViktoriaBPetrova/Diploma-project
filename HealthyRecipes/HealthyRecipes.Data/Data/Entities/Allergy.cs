@@ -11,7 +11,7 @@ namespace HealthyRecipes.Data.Data.Entities
         public Guid IngredientId { get; set; }
         public Ingredient Ingredient { get; set; } = null!;
 
-        public string UserId { get; set; } = null!;
+        public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = null!;
     }
 }

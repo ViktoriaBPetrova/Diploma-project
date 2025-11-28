@@ -15,7 +15,7 @@ namespace HealthyRecipes.Data.Data.Entities
 
         // ---------- Properties ----------
         // User who created the meal plan
-        public string UserId { get; set; } = null!;
+        public Guid UserId { get; set; }
         public ApplicationUser User { get; set; } = null!;
 
 

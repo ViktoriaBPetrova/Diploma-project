@@ -17,7 +17,7 @@ namespace HealthyRecipes.Data.Data.Entities
 
 
         // Nullable if not created by a user - created by admin
-        public string? CreatedBy { get; set; }
+        public Guid? CreatedBy { get; set; }
         public ApplicationUser? User { get; set; }
 
 
