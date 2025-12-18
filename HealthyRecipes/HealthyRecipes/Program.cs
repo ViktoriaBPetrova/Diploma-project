@@ -1,5 +1,5 @@
 using HealthyRecipes.Data;
-using HealthyRecipes.Data.Data.Entities;
+using HealthyRecipes.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
