@@ -4,6 +4,7 @@ using HealthyRecipes.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyRecipes.Data.Migrations
 {
     [DbContext(typeof(HealthyRecipesDbContext))]
-    partial class HealthyRecipesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260112152501_Seeding")]
+    partial class Seeding
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,9 +71,6 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.Property<float?>("Height")
                         .HasColumnType("real");
-
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
                         .HasColumnType("nvarchar(max)");
@@ -137,7 +137,7 @@ namespace HealthyRecipes.Data.Migrations
                             Bio = "Fitness enthusiast",
                             Calories = 2500f,
                             CarbsGoal = 300f,
-                            ConcurrencyStamp = "67a287df-fd85-4a1c-8603-fb50a54ca624",
+                            ConcurrencyStamp = "21629e20-4bd6-4212-94a4-2279d0068102",
                             CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Email = "user@email.com",
@@ -149,7 +149,7 @@ namespace HealthyRecipes.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@EMAIL.COM",
                             NormalizedUserName = "USER@EMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAENN8Osd/COD+BNhPiVwcSRWSVLp2nqpbYCazhXnuqSertPmq3ikXhCj0IhLt1DfEVg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFrIDCf7GJMWujVwG6dvRq5bmdjZ4L+6qvizLsO7xQ9HJ1i79QFs36SSBITWVV6kig==",
                             PhoneNumber = "0897123456",
                             PhoneNumberConfirmed = true,
                             ProteinGoal = 150f,
@@ -166,7 +166,7 @@ namespace HealthyRecipes.Data.Migrations
                             Bio = "System administrator",
                             Calories = 2000f,
                             CarbsGoal = 250f,
-                            ConcurrencyStamp = "e4a36463-b39d-4ac6-b748-4d81e8e7e8e9",
+                            ConcurrencyStamp = "43b9fcd1-5bde-4848-aacb-59d8b3ca80d0",
                             CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Email = "admin@email.com",
@@ -178,7 +178,7 @@ namespace HealthyRecipes.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EMAIL.COM",
                             NormalizedUserName = "ADMIN@EMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDZoKDzNOFTI2VDaWN/Fs6od0Ie+BN4qIF2V4oopqWQRBgA56Rs8YTIG2uZISte5aw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENpfAEZCOAiaN8Uyuugs2FFoWUANb9P3dGCgOD3bnfKxLfNPjfaqzo4zuaGRXmVc4g==",
                             PhoneNumber = "0897123456",
                             PhoneNumberConfirmed = true,
                             ProteinGoal = 100f,
@@ -910,9 +910,6 @@ namespace HealthyRecipes.Data.Migrations
                     b.Property<float>("Fat")
                         .HasColumnType("real");
 
-                    b.Property<string>("ImageUrl")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Info")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -923,17 +920,11 @@ namespace HealthyRecipes.Data.Migrations
                     b.Property<float>("Protein")
                         .HasColumnType("real");
 
-                    b.Property<int?>("Servings")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("VideoUrl")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

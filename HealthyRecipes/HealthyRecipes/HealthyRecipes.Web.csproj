@@ -20,9 +20,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\HealthyRecipes.Data\HealthyRecipes.Data.csproj" />
     <ProjectReference Include="..\HealthyRecipes.Services\HealthyRecipes.Services.csproj" />
   </ItemGroup>
-
-
-
+	
 </Project>

@@ -1,6 +1,11 @@
 ﻿using HealthyRecipes.Data.Configs;
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Seeding;
+using HealthyRecipes.Data.Seeding.MappingSeeders.RecipeMappingSeeders;
+using HealthyRecipes.Data.Seeding.MappingSeeders.SavedSeeders;
+using HealthyRecipes.Data.Seeding.MappingSeeders.UserInfoSeedes;
+using HealthyRecipes.Data.Seeding.MealPlanSeeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -50,15 +55,45 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new MealPlanDayConfig());
             builder.ApplyConfiguration(new MealConfig());
 
+            // USER SEEDING
+            var users = UserSeeder.GenerateUsers().ToArray();
+            builder.Entity<ApplicationUser>().HasData(users);
+
+            // INGREDIENT SEEDING
+            var ingredients = IngredientSeeder.GenerateIngredients().ToArray();
+            builder.Entity<Ingredient>().HasData(ingredients);
+
+            // CATEGORY SEEDING
+            var categories = CategorySeeder.GenerateCategories().ToArray();
+            builder.Entity<Category>().HasData(categories);
+
+            // RECIPES
+            var recipes = RecipeSeeder.GenerateRecipes().ToArray();
+            builder.Entity<Recipe>().HasData(recipes);
+
+            // MEAL PLANS
+            var mealPlans = MealPlanSeeder.GenerateMealPlans().ToArray();
+            builder.Entity<MealPlan>().HasData(mealPlans);
+
+            // MEAL PLAN DAYS
+            var mealPlanDays = MealPlanDaySeeder.GenerateMealPlanDays().ToArray();
+            builder.Entity<MealPlanDay>().HasData(mealPlanDays);
+
+            // MEALS
+            var meals = MealSeeder.GenerateMeals().ToArray();
+            builder.Entity<Meal>().HasData(meals);
+
+            // MAPPING ENTITIES
+            builder.Entity<RecipeIngredient>().HasData(RecipeIngredientSeeder.GenerateRecipeIngredients().ToArray());
+            builder.Entity<RecipeMeal>().HasData(RecipeMealSeeder.GenerateRecipeMeals().ToArray());
+            builder.Entity<RecipeCategory>().HasData(RecipeCategorySeeder.GenerateRecipeCategory().ToArray());
+            builder.Entity<SavedRecipe>().HasData(SavedRecipeSeeder.GenerateSavedRecipe().ToArray());
+            builder.Entity<SavedMealPlan>().HasData(SavedMealPlanSeeder.GenerateSavedRecipe().ToArray());
+            builder.Entity<Allergy>().HasData(AllergySeeder.GenerateAllergies().ToArray());
+            builder.Entity<CommentRating>().HasData(CommentRatingSeeder.GenerateCommentRatings().ToArray());
+
             base.OnModelCreating(builder);
 
         }
-
-
-
-
-
-
-
     }
 }

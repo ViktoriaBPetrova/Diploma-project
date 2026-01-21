@@ -7,7 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthyRecipes.Web", "Healt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthyRecipes.Data", "HealthyRecipes.Data\HealthyRecipes.Data.csproj", "{865B6502-702F-4150-AD70-358F55306575}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthyRecipes.Services", "HealthyRecipes.Services\HealthyRecipes.Services.csproj", "{484DAE9D-532E-4CE6-AE64-BD95F690F51C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthyRecipes.Services", "HealthyRecipes.Services\HealthyRecipes.Services.csproj", "{5F5E66BA-CDFE-40F2-B48E-9373AA453CF8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{865B6502-702F-4150-AD70-358F55306575}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{865B6502-702F-4150-AD70-358F55306575}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{865B6502-702F-4150-AD70-358F55306575}.Release|Any CPU.Build.0 = Release|Any CPU
-		{484DAE9D-532E-4CE6-AE64-BD95F690F51C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{484DAE9D-532E-4CE6-AE64-BD95F690F51C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{484DAE9D-532E-4CE6-AE64-BD95F690F51C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{484DAE9D-532E-4CE6-AE64-BD95F690F51C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F5E66BA-CDFE-40F2-B48E-9373AA453CF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F5E66BA-CDFE-40F2-B48E-9373AA453CF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F5E66BA-CDFE-40F2-B48E-9373AA453CF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F5E66BA-CDFE-40F2-B48E-9373AA453CF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

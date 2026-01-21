@@ -28,8 +28,6 @@ namespace HealthyRecipes.Data.Seeding.Constants.MealPlanConstants
         public const float LunchCarbs = 80;
         public const float LunchFat = 20;
 
-        // ---------- MealPlanDay IDs (example, adjust as needed) ----------
-        public const string BreakfastDayId = "11111111-2222-3333-4444-555555555555";
-        public const string LunchDayId = "66666666-7777-8888-9999-000000000000";
+        
     }
 }

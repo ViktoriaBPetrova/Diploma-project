@@ -20,30 +20,35 @@ namespace HealthyRecipes.Data.Seeding
                 seedingDate,
                 Guid.Parse(CategoryConstants.MainDishId),
                 CategoryConstants.MainDishName
+                
             ),
 
             new Category(
                 seedingDate,
                 Guid.Parse(CategoryConstants.HealthyId),
                 CategoryConstants.HealthyName
+               
             ),
 
             new Category(
                 seedingDate,
                 Guid.Parse(CategoryConstants.HighProteinId),
                 CategoryConstants.HighProteinName
+                
             ),
 
             new Category(
                 seedingDate,
                 Guid.Parse(CategoryConstants.EasyQuickId),
                 CategoryConstants.EasyQuickName
+                
             ),
 
             new Category(
                 seedingDate,
                 Guid.Parse(CategoryConstants.MealPrepId),
                 CategoryConstants.MealPrepName
+                
             )
             };
 

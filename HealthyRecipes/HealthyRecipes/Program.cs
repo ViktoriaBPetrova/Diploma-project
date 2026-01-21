@@ -1,5 +1,6 @@
 using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Recipes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +27,8 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 .AddEntityFrameworkStores<HealthyRecipesDbContext>();
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IRecipe, RecipeService>(); // new line
+
 
 var app = builder.Build();
 

@@ -44,13 +44,18 @@ namespace HealthyRecipes.Data.Entities
 
         // ---------- Core Data ----------
         public string Info { get; set; } = null!; // description, max length attribute can be added
-        public float Calories { get; private set; }
-        public float Protein { get; private set; }
-        public float Carbs { get; private set; }
-        public float Fat { get; private set; }
+        public float Calories { get; set; }
+        public float Protein { get; set; }
+        public float Carbs { get; set; }
+        public float Fat { get; set; }
 
         public int? PrepTime { get; set; }      // nullable
         public Difficulty? Difficulty { get; set; } // nullable
+
+        public int? Servings { get; set; } //nullable
+
+        public string? ImageUrl { get; set; } // nullable
+        public string? VideoUrl { get; set; } //nullable
 
         // ---------- Navigation Collections ----------
         //(Many-to-many)
@@ -84,37 +89,10 @@ namespace HealthyRecipes.Data.Entities
             Fat = RecipeIngredients.Sum(ir => ir.Ingredient.FatPer100g * ir.QuantityInGrams);
         }
 
-        /// <summary>
-        /// Updates the info of the recipe safely.
-        /// Does not ignore empty or whitespaces
-        /// Updates the UpdatedAt timestamp automatically.
-        public void UpdateInfo(string newInfo)
-        {
-            if (string.IsNullOrWhiteSpace(newInfo))
-                throw new ArgumentException("Info cannot be empty.");
-
-            Info = newInfo;
-            UpdatedAt = DateTime.UtcNow;
-        }
+        
 
         */
 
-        /// <summary>
-        /// Soft-deletes the ingredient.
-        /// </summary>
-        public void SoftDelete()
-        {
-            Deleted = true;
-            DeletedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Restores a previously soft-deleted ingredient.
-        /// </summary>
-        public void Restore()
-        {
-            Deleted = false;
-            DeletedAt = null;
-        }
+        
     }
 }

@@ -39,6 +39,8 @@ namespace HealthyRecipes.Data.Entities
         public string? Bio { get; set; } 
         public float? Height { get; set; }  // cm
         public float? Weight { get; set; }  // kg
+        public string? ImageUrl { get; set; } // nullable
+
 
         // ---------- Goals ----------// these as well
         public float? ProteinGoal { get; set; }

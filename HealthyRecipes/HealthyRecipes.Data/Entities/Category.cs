@@ -22,6 +22,7 @@ namespace HealthyRecipes.Data.Entities
             Id = id;
             CreatedAt = createdAt;
             UpdatedAt = createdAt;
+            
         }
 
         public Category(DateTime createdAt, Guid id, string name) : this(createdAt, id)
@@ -33,10 +34,10 @@ namespace HealthyRecipes.Data.Entities
         public Guid Id { get; init; }
 
         // Name of the category with validation
-        public string Name { get; private set; } = null!;
+        public string Name { get; set; } = null!;
 
 
-        // Nullable if not created by a user - created by admin
+        // id of user or admin - if by api or created as seed - null
         public Guid? CreatedBy { get; set; }
         public ApplicationUser? User { get; set; }
 

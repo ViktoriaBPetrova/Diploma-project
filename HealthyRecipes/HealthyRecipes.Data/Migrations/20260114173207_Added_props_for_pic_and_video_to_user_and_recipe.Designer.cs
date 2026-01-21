@@ -4,6 +4,7 @@ using HealthyRecipes.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyRecipes.Data.Migrations
 {
     [DbContext(typeof(HealthyRecipesDbContext))]
-    partial class HealthyRecipesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260114173207_Added_props_for_pic_and_video_to_user_and_recipe")]
+    partial class Added_props_for_pic_and_video_to_user_and_recipe
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -137,7 +140,7 @@ namespace HealthyRecipes.Data.Migrations
                             Bio = "Fitness enthusiast",
                             Calories = 2500f,
                             CarbsGoal = 300f,
-                            ConcurrencyStamp = "67a287df-fd85-4a1c-8603-fb50a54ca624",
+                            ConcurrencyStamp = "82542edf-b545-49a4-bbc2-a47c5edf2e5e",
                             CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Email = "user@email.com",
@@ -149,7 +152,7 @@ namespace HealthyRecipes.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "USER@EMAIL.COM",
                             NormalizedUserName = "USER@EMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAENN8Osd/COD+BNhPiVwcSRWSVLp2nqpbYCazhXnuqSertPmq3ikXhCj0IhLt1DfEVg==",
+                            PasswordHash = "AQAAAAIAAYagAAAAENyYRxcUxN0lRZpiYL/S2VEAKA+C98egtSvAeyhJ3vpfcpOwEC1rvgV41vXmpuiWcw==",
                             PhoneNumber = "0897123456",
                             PhoneNumberConfirmed = true,
                             ProteinGoal = 150f,
@@ -166,7 +169,7 @@ namespace HealthyRecipes.Data.Migrations
                             Bio = "System administrator",
                             Calories = 2000f,
                             CarbsGoal = 250f,
-                            ConcurrencyStamp = "e4a36463-b39d-4ac6-b748-4d81e8e7e8e9",
+                            ConcurrencyStamp = "5c35805f-f24e-4e07-aa66-21fd492a9776",
                             CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Email = "admin@email.com",
@@ -178,7 +181,7 @@ namespace HealthyRecipes.Data.Migrations
                             LockoutEnabled = false,
                             NormalizedEmail = "ADMIN@EMAIL.COM",
                             NormalizedUserName = "ADMIN@EMAIL.COM",
-                            PasswordHash = "AQAAAAIAAYagAAAAEDZoKDzNOFTI2VDaWN/Fs6od0Ie+BN4qIF2V4oopqWQRBgA56Rs8YTIG2uZISte5aw==",
+                            PasswordHash = "AQAAAAIAAYagAAAAEMml0QVdaSEEpJHh5gZE/iI9pmB5N0L7VdcBTiE5weYGgmhqQfGhxwMuMuj7qyBSfA==",
                             PhoneNumber = "0897123456",
                             PhoneNumberConfirmed = true,
                             ProteinGoal = 100f,
@@ -922,9 +925,6 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.Property<float>("Protein")
                         .HasColumnType("real");
-
-                    b.Property<int?>("Servings")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
