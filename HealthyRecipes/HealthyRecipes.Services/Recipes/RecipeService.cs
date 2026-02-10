@@ -5,7 +5,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace HealthyRecipes.Services.Recipes
 {
-    public class RecipeService : IRecipe
+    public class RecipeService: IRecipe
     {
         private readonly HealthyRecipesDbContext _context;
 
@@ -79,7 +79,7 @@ namespace HealthyRecipes.Services.Recipes
             if (existing == null)
                 return false;
 
-            existing.Restore(); // use the bellow instead of this maybe?
+            //existing.Restore(); // use the bellow instead of this maybe?
             /*
             existing.Deleted = false;
             existing.DeletedAt = null;
@@ -107,6 +107,10 @@ namespace HealthyRecipes.Services.Recipes
         {
             return await Task.FromResult(_context.Recipes.Where(predicate).ToList()); //not sure
         }
-        
+
+        public Task<bool> RecalculateRecipeNutritionAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

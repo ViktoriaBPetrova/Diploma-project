@@ -48,10 +48,10 @@ namespace HealthyRecipes.Data.Entities
         public string? Description { get; set; }
 
         // Cached nutrition totals (private set)
-        public float Calories { get; private set; }
-        public float Protein { get; private set; }
-        public float Carbs { get; private set; }
-        public float Fat { get; private set; }
+        public float Calories { get; set; }
+        public float Protein { get; set; }
+        public float Carbs { get; set; }
+        public float Fat { get; set; }
 
 
         // ---------- Navigation Collections ----------

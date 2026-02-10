@@ -54,39 +54,5 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Metadata ----------
         public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; set; }
-
-        // ---------- Methods ----------
-
-        /*
-        /// <summary>
-        /// Updates the name of the category.
-        /// </summary>
-        public void UpdateName(string newName)
-        {
-            if (string.IsNullOrWhiteSpace(newName))
-                throw new ArgumentException("Name cannot be empty.");
-
-            Name = newName.Trim();
-            UpdatedAt = DateTime.UtcNow;
-        }*/
-
-        /// <summary>
-        /// Soft-deletes the ingredient.
-        /// </summary>
-        public void SoftDelete()
-        {
-            Deleted = true;
-            DeletedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Restores a previously soft-deleted ingredient.
-        /// </summary>
-        public void Restore()
-        {
-            Deleted = false;
-            DeletedAt = null;
-        }
-
     }
 }

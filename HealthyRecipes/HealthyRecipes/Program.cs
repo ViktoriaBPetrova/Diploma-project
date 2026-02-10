@@ -1,5 +1,7 @@
 using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Api;
+using HealthyRecipes.Services.Ingredients;
 using HealthyRecipes.Services.Recipes;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +17,7 @@ builder.Services.AddDbContext<HealthyRecipesDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+/*builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.Password.RequireDigit = false;
@@ -24,11 +26,32 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
     options.Password.RequireNonAlphanumeric = false;
 })
 .AddRoles<IdentityRole<Guid>>()
-.AddEntityFrameworkStores<HealthyRecipesDbContext>();
+.AddEntityFrameworkStores<HealthyRecipesDbContext>();*/
+
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = false;
+    options.Password.RequireDigit = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+})
+.AddEntityFrameworkStores<HealthyRecipesDbContext>()
+.AddDefaultUI()//should i keep there ***
+.AddDefaultTokenProviders();//***
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddScoped<IRecipe, RecipeService>(); // new line
+//new SERVICES
+builder.Services.AddHttpClient<IApi, ApiService>(client => //A bIg pROBlEM ask MISTUR
+{
+    client.BaseAddress = new Uri("https://world.openfoodfacts.org/");
+    client.DefaultRequestHeaders.Add("User-Agent", "HealthyRecipesApp"); // Optional but recommended
+    client.Timeout = TimeSpan.FromSeconds(30); // Optional
+});
 
+builder.Services.AddScoped<IIngredient, IngredientService>(); //HERE SAME
+//builder.Services.AddScoped<IRecipe, RecipeService>(); // new line
+//new SERVICES
 
 var app = builder.Build();
 
