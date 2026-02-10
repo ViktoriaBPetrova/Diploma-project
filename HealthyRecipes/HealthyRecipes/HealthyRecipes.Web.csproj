@@ -6,23 +6,22 @@
 		<UserSecretsId>aspnet-HealthyRecipes-07e3f41a-4604-4a6e-92db-8e5b23670008</UserSecretsId>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.0" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
+		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.22" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.22" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.22" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HealthyRecipes.Data\HealthyRecipes.Data.csproj" />
 		<ProjectReference Include="..\HealthyRecipes.Services\HealthyRecipes.Services.csproj" />
 	</ItemGroup>
-
 </Project>
