@@ -75,23 +75,7 @@ namespace HealthyRecipes.Data.Entities
         public DateTime UpdatedAt { get; set; } 
 
 
-        // ---------- Methods ----------
-        /*
-        /// <summary>
-        /// Recalculates the nutritional values based on IngredientsRecipes.
-        /// Call this before saving the Recipe whenever ingredients change.
-        /// </summary>
-        public void RecalculateNutrition()
-        {
-            Calories = RecipeIngredients.Sum(ir => ir.Ingredient.CaloriesPer100g * ir.QuantityInGrams);
-            Protein = RecipeIngredients.Sum(ir => ir.Ingredient.ProteinPer100g * ir.QuantityInGrams);
-            Carbs = RecipeIngredients.Sum(ir => ir.Ingredient.CarbsPer100g * ir.QuantityInGrams);
-            Fat = RecipeIngredients.Sum(ir => ir.Ingredient.FatPer100g * ir.QuantityInGrams);
-        }
-
-        
-
-        */
+     
 
         
     }

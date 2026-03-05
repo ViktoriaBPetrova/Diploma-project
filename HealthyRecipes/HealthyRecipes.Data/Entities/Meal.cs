@@ -47,9 +47,9 @@ namespace HealthyRecipes.Data.Entities
 
         // macronutrients
         public float Calories { get; set; }
-        public float Protein { get; private set; }
-        public float Carbs { get; private set; }
-        public float Fat { get; private set; }
+        public float Protein { get; set; }
+        public float Carbs { get; set; }
+        public float Fat { get; set; }
 
         // Navigation to mapping table (meal → recipes)
         public IEnumerable<RecipeMeal> RecipeMeals { get; set; }
@@ -63,74 +63,6 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Metadata ----------
         public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; set; }
-
-
-        // ---------- Methods ----------
-
-        /*
-        /// <summary>
-        /// Recalculates the cached nutrition using MealRecipes → Recipes.
-        /// </summary>
-        public void RecalculateNutrition()
-        {
-            float calories = 0f;
-            float protein = 0f;
-            float carbs = 0f;
-            float fat = 0f;
-
-            foreach (RecipeMeal mealRecipe in RecipeMeals)
-            {
-                if (mealRecipe?.Recipe != null)
-                {
-                    calories += mealRecipe.Recipe.Calories;
-                    protein += mealRecipe.Recipe.Protein;
-                    carbs += mealRecipe.Recipe.Carbs;
-                    fat += mealRecipe.Recipe.Fat;
-                }
-            }
-
-            Calories = calories;
-            Protein = protein;
-            Carbs = carbs;
-            Fat = fat;
-
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Changes the type of the meal (Breakfast, Lunch, Dinner, Snack).
-        /// </summary>
-        public void ChangeType(MealType newType)
-        {
-            if (!Enum.IsDefined(typeof(MealType), newType))
-                throw new ArgumentException("Invalid meal type.");
-
-            Type = newType;
-            UpdatedAt = DateTime.UtcNow;
-        }
-        */
-
-        /// <summary>
-        /// Soft deletes the meal.
-        /// </summary>
-        public void SoftDelete()
-        {
-            //if (Deleted) return;
-
-            Deleted = true;
-            DeletedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Restores the meal from soft delete.
-        /// </summary>
-        public void Restore()
-        {
-            //if (!Deleted) return;
-
-            Deleted = false;
-            DeletedAt = null;
-        }
 
     }
 }

@@ -70,72 +70,7 @@ namespace HealthyRecipes.Data.Entities
         public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; set; } 
 
-        // ---------- Methods ----------
 
-        ///NOT READY
-        /// <summary>
-        /// Updates the name of the meal plan safely.
-        /// Ignores empty or whitespace input.
-        /// Updates the UpdatedAt timestamp automatically.
-        /*public void UpdateName(string? newFirstName = null, string? newLastName = null)
-        {
-            if (string.IsNullOrWhiteSpace(newName))
-                throw new ArgumentException("Name cannot be empty.");
-
-            FirstName = newFirstName.Trim();
-            FirstName = newFirstName.Trim();
-
-            if (newFirstName != null)
-            {
-                if (calories.Value >= 0)
-                {
-                    CaloriesPer100g = calories.Value;
-                }
-                else
-                {
-                    throw new ArgumentException("Calories cannot be negative.");
-                }
-            }
-
-            UpdatedAt = DateTime.UtcNow;
-
-        }
-
-        /// <summary>
-        /// Updates the description of the meal plan safely.
-        /// can set null.
-        /// Updates the UpdatedAt timestamp automatically.
-        public void UpdateBio(string? newBio)
-        {
-
-            if (string.IsNullOrWhiteSpace(newBio))
-            {
-                Bio = null;
-            }
-            else
-            {
-                Bio = Bio;
-            }
-            
-            UpdatedAt = DateTime.UtcNow;
-        }*/
-
-        /// <summary>
-        /// Soft-deletes the ingredient.
-        /// </summary>
-        public void SoftDelete()
-        {
-            Deleted = true;
-            DeletedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Restores a previously soft-deleted ingredient.
-        /// </summary>
-        public void Restore()
-        {
-            Deleted = false;
-            DeletedAt = null;
-        }
+        
     }
 }

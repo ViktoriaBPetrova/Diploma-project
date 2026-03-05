@@ -41,10 +41,10 @@ namespace HealthyRecipes.Data.Entities
         public string? Brand { get; set; }         // optional - if not store-bought // private set?
 
         // ---------- Nutritional Values ----------
-        public float CaloriesPer100g { get; private set; }
-        public float ProteinPer100g { get; private set; }
-        public float CarbsPer100g { get; private set; }
-        public float FatPer100g { get; private set; }
+        public float CaloriesPer100g { get; set; }
+        public float ProteinPer100g { get; set; }
+        public float CarbsPer100g { get; set; }
+        public float FatPer100g { get; set; }
 
         // ---------- Source & Ownership ----------
         public Source Source { get; init; } = Source.Global;
@@ -65,119 +65,6 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Metadata ----------
         public DateTime CreatedAt { get; init; }
         public DateTime UpdatedAt { get; set; }
-
-
-        // ---------- Methods ----------
-        /*
-        /// <summary>
-        /// Private set for changing nutri-values for ingredients.
-        /// </summary>
-        public void UpdateNutrition(
-            float? calories = null,
-            float? protein = null,
-            float? carbs = null,
-            float? fat = null)
-        {
-
-            if (calories != null)
-            {
-                if (calories.Value >= 0)
-                {
-                    CaloriesPer100g = calories.Value;
-                }
-                else
-                {
-                    throw new ArgumentException("Calories cannot be negative.");
-                }
-            }
-
-            if (protein != null)
-            {
-                if (protein.Value >= 0)
-                {
-                    ProteinPer100g = protein.Value;
-                }
-                else
-                {
-                    throw new ArgumentException("Protein cannot be negative.");
-                }
-            }
-
-            if (carbs != null)
-            {
-                if (carbs.Value >= 0)
-                {
-                    CarbsPer100g = carbs.Value;
-                }
-                else
-                {
-                    throw new ArgumentException("Carbs cannot be negative.");
-                }
-            }
-
-            if (fat != null)
-            {
-                if (fat.Value >= 0)
-                {
-                    FatPer100g = fat.Value;
-                }
-                else
-                {
-                    throw new ArgumentException("Fat cannot be negative.");
-                }
-            }
-
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Updates the name of the ingredient.
-        /// </summary>
-        public void UpdateName(string newName)
-        {
-            if (string.IsNullOrWhiteSpace(newName))
-                throw new ArgumentException("Name cannot be empty.");
-
-            Name = newName.Trim();
-            UpdatedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Updates the brand of the ingredient.
-        /// </summary>
-        public void UpdateBrand(string? newBrand)
-        {
-            // Brand can be null or empty for generic ingredients
-            
-            if (string.IsNullOrWhiteSpace(newBrand))
-            {
-                Brand = null;
-            }
-            else
-            {
-                Brand = newBrand.Trim();
-            }
-            UpdatedAt = DateTime.UtcNow;
-        }
-        */
-
-        /// <summary>
-        /// Soft-deletes the ingredient.
-        /// </summary>
-        public void SoftDelete()
-        {
-            Deleted = true;
-            DeletedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Restores a previously soft-deleted ingredient.
-        /// </summary>
-        public void Restore()
-        {
-            Deleted = false;
-            DeletedAt = null;
-        }
 
     }
 }

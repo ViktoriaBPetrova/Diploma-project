@@ -44,10 +44,10 @@ namespace HealthyRecipes.Data.Entities
         public DayOfWeek DayOfWeek { get; /*private*/ set; } = DayOfWeek.Monday; // change back later
 
         // nutrition totals (private set)
-        public float Calories { get; private set; }
-        public float Protein { get; private set; }
-        public float Carbs { get; private set; }
-        public float Fat { get; private set; }
+        public float Calories { get; set; }
+        public float Protein { get; set; }
+        public float Carbs { get; set; }
+        public float Fat { get; set; }
 
         // List of meals for this day
         public IEnumerable<Meal> Meals { get; set; }
@@ -63,54 +63,6 @@ namespace HealthyRecipes.Data.Entities
         public DateTime CreatedAt { get; init; } 
         public DateTime UpdatedAt { get; set; }
 
-        // ---------- Methods ----------
-
-        /*
-        /// <summary>
-        /// Recalculates the total macronutrients based on the meals.
-        /// Updates Calories, Protein, Carbs, and Fat.
-        /// </summary>
-        public void RecalculateNutrition()
-        {
-            float totalCalories = 0;
-            float totalProtein = 0;
-            float totalCarbs = 0;
-            float totalFat = 0;
-
-            foreach (Meal meal in Meals)
-            {
-                
-                totalCalories += meal.Calories;
-                totalProtein += meal.Protein;
-                totalCarbs += meal.Carbs;
-                totalFat += meal.Fat;         
-            }
-
-            Calories = totalCalories;
-            Protein = totalProtein;
-            Carbs = totalCarbs;
-            Fat = totalFat;
-
-            UpdatedAt = DateTime.UtcNow;
-        }
-        */
-
-        /// <summary>
-        /// Soft deletes the day from the meal plan.
-        /// </summary>
-        public void SoftDelete()
-        {
-            Deleted = true;
-            DeletedAt = DateTime.UtcNow;
-        }
-
-        /// <summary>
-        /// Restores a previously soft deleted day.
-        /// </summary>
-        public void Restore()
-        {
-            Deleted = false;
-            DeletedAt = null;
-        }
+        
     }
 }

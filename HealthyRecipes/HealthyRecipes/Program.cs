@@ -1,10 +1,23 @@
 using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Api;
+using HealthyRecipes.Services.Categories;
+using HealthyRecipes.Services.CommentRatings;
 using HealthyRecipes.Services.Ingredients;
+using HealthyRecipes.Services.MealPlanDays;
+using HealthyRecipes.Services.MealPlans;
+using HealthyRecipes.Services.Meals;
+using HealthyRecipes.Services.RecipeCategories;
+using HealthyRecipes.Services.RecipeIngredients;
+using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.Recipes;
+using HealthyRecipes.Services.SavedMealPlans;
+using HealthyRecipes.Services.SavedRecipes;
+using HealthyRecipes.Services.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -49,9 +62,20 @@ builder.Services.AddHttpClient<IApi, ApiService>(client => //A bIg pROBlEM ask M
     client.Timeout = TimeSpan.FromSeconds(30); // Optional
 });
 
-builder.Services.AddScoped<IIngredient, IngredientService>(); //HERE SAME
-//builder.Services.AddScoped<IRecipe, RecipeService>(); // new line
-//new SERVICES
+builder.Services.AddScoped<IUser, UserService>(); 
+builder.Services.AddScoped<IRecipe, RecipeService>(); 
+builder.Services.AddScoped<ICategory, CategoryService>(); 
+builder.Services.AddScoped<IIngredient, IngredientService>();
+builder.Services.AddScoped<IMeal, MealService>();
+builder.Services.AddScoped<IMealPlan, MealPlanService>();
+builder.Services.AddScoped<IMealPlanDay, MealPlanDayService>();
+builder.Services.AddScoped<IAllergy, AllergyService>();
+builder.Services.AddScoped<ICommentRating, CommentRatingService>();
+builder.Services.AddScoped<ISavedRecipe, SavedRecipeService>();
+builder.Services.AddScoped<ISavedMealPlan, SavedMealPlanService>();
+builder.Services.AddScoped<IRecipeIngredient, RecipeIngredientService>();
+builder.Services.AddScoped<IRecipeCategory, RecipeCategoryService>();
+builder.Services.AddScoped<IRecipeMeal, RecipeMealService>();
 
 var app = builder.Build();
 
