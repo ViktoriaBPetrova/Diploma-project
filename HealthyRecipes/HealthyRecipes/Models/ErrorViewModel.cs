@@ -1,4 +1,4 @@
-namespace HealthyRecipes.Models
+namespace HealthyRecipes.Web.Models
 {
     public class ErrorViewModel
     {
