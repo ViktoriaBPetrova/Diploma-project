@@ -1,4 +1,4 @@
-using HealthyRecipes.Data;
+﻿using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Api;
@@ -22,7 +22,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ─── Database ────────────────────────────────────────────────────────────────
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
 builder.Services.AddDbContext<HealthyRecipesDbContext>(options =>
@@ -30,6 +30,7 @@ builder.Services.AddDbContext<HealthyRecipesDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// ─── Identity ────────────────────────────────────────────────────────────────
 /*builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
@@ -53,8 +54,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 .AddDefaultUI()//should i keep there ***
 .AddDefaultTokenProviders();//***
 
+// ─── MVC ─────────────────────────────────────────────────────────────────────
 builder.Services.AddControllersWithViews();
-//new SERVICES
+
+// ─── External API ─────────────────────────────────────────────────────────────
 builder.Services.AddHttpClient<IApi, ApiService>(client => //A bIg pROBlEM ask MISTUR
 {
     client.BaseAddress = new Uri("https://world.openfoodfacts.org/");
@@ -62,13 +65,14 @@ builder.Services.AddHttpClient<IApi, ApiService>(client => //A bIg pROBlEM ask M
     client.Timeout = TimeSpan.FromSeconds(30); // Optional
 });
 
-builder.Services.AddScoped<IUser, UserService>(); 
-builder.Services.AddScoped<IRecipe, RecipeService>(); 
-builder.Services.AddScoped<ICategory, CategoryService>(); 
+// ─── Application Services ─────────────────────────────────────────────────────
+builder.Services.AddScoped<IRecipe, RecipeService>();
 builder.Services.AddScoped<IIngredient, IngredientService>();
-builder.Services.AddScoped<IMeal, MealService>();
+builder.Services.AddScoped<ICategory, CategoryService>();
 builder.Services.AddScoped<IMealPlan, MealPlanService>();
 builder.Services.AddScoped<IMealPlanDay, MealPlanDayService>();
+builder.Services.AddScoped<IMeal, MealService>();
+builder.Services.AddScoped<IUser, UserService>();
 builder.Services.AddScoped<IAllergy, AllergyService>();
 builder.Services.AddScoped<ICommentRating, CommentRatingService>();
 builder.Services.AddScoped<ISavedRecipe, SavedRecipeService>();
@@ -77,6 +81,7 @@ builder.Services.AddScoped<IRecipeIngredient, RecipeIngredientService>();
 builder.Services.AddScoped<IRecipeCategory, RecipeCategoryService>();
 builder.Services.AddScoped<IRecipeMeal, RecipeMealService>();
 
+// ─── Pipeline ─────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -106,3 +111,5 @@ app.MapControllerRoute(
 app.MapRazorPages();
 
 app.Run();
+
+
