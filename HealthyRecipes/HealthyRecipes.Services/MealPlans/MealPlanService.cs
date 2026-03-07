@@ -1,11 +1,6 @@
-﻿using HealthyRecipes.Data;
+using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HealthyRecipes.Services.MealPlans
 {
@@ -25,7 +20,7 @@ namespace HealthyRecipes.Services.MealPlans
                 .FirstOrDefaultAsync(m => m.Id == id && !m.Deleted);
         }
 
-        public async Task<IEnumerable<MealPlan>> GetUserMealPlansAsync(Guid userId)
+        public async Task<IEnumerable<MealPlan>> GetMealPlansByUserAsync(Guid userId)
         {
             return await _context.MealPlans
                 .Where(m => m.UserId == userId && !m.Deleted)
@@ -42,10 +37,12 @@ namespace HealthyRecipes.Services.MealPlans
 
         public async Task<bool> UpdateMealPlanAsync(MealPlan mealPlan)
         {
-            var existing = await _context.MealPlans.FindAsync(mealPlan.Id);
-            if (existing == null || existing.Deleted) return false;
+            var existing = await _context.MealPlans
+                .FirstOrDefaultAsync(m => m.Id == mealPlan.Id && !m.Deleted);
 
-            // Update properties
+            if (existing == null)
+                return false;
+
             existing.Name = mealPlan.Name;
             existing.Description = mealPlan.Description;
             existing.UpdatedAt = DateTime.UtcNow;
@@ -56,38 +53,54 @@ namespace HealthyRecipes.Services.MealPlans
 
         public async Task<bool> SoftDeleteAsync(Guid id)
         {
-            var mealPlan = await _context.MealPlans.FirstOrDefaultAsync(r => r.Id == id && !r.Deleted);
-            if (mealPlan == null) return false;
+            var existing = await _context.MealPlans
+                .FirstOrDefaultAsync(m => m.Id == id && !m.Deleted);
 
-            mealPlan.Deleted = true;
-            mealPlan.DeletedAt = DateTime.UtcNow;
+            if (existing == null)
+                return false;
 
-            _context.MealPlans.Update(mealPlan);//?
+            existing.Deleted = true;
+            existing.DeletedAt = DateTime.UtcNow;
+            existing.UpdatedAt = DateTime.UtcNow;
+
             await _context.SaveChangesAsync();
             return true;
         }
 
-        // Logic to handle your 'private set' nutrition totals
+        public async Task<bool> RestoreMealPlanAsync(Guid id)
+        {
+            var existing = await _context.MealPlans
+                .FirstOrDefaultAsync(m => m.Id == id && m.Deleted);
+
+            if (existing == null)
+                return false;
+
+            existing.Deleted = false;
+            existing.DeletedAt = null;
+            existing.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task RecalculateNutritionalTotalsAsync(Guid mealPlanId)
         {
             var mealPlan = await _context.MealPlans
                 .Include(m => m.MealPlanDays)
-                .FirstOrDefaultAsync(m => m.Id == mealPlanId);
+                .FirstOrDefaultAsync(m => m.Id == mealPlanId && !m.Deleted);
 
-            if (mealPlan != null)
-            {
-                // You would sum up the nutrients from all MealPlanDays here
-                // Example:
-                // mealPlan.Calories = mealPlan.MealPlanDays.Sum(d => d.TotalCalories);
+            if (mealPlan == null)
+                return;
 
-                mealPlan.UpdatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-            }
-        }
+            var activeDays = mealPlan.MealPlanDays.Where(d => !d.Deleted).ToList();
 
-        public Task<IEnumerable<MealPlan>> GetAllMealPlansAsync(Guid userId)
-        {
-            throw new NotImplementedException();
+            mealPlan.Calories = activeDays.Sum(d => d.Calories);
+            mealPlan.Protein  = activeDays.Sum(d => d.Protein);
+            mealPlan.Carbs    = activeDays.Sum(d => d.Carbs);
+            mealPlan.Fat      = activeDays.Sum(d => d.Fat);
+            mealPlan.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
         }
     }
 }

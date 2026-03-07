@@ -1,22 +1,13 @@
-﻿using HealthyRecipes.Data.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HealthyRecipes.Data.Entities;
 
 namespace HealthyRecipes.Services.Users
 {
     public interface IUser
     {
-        Task<Guid> CreateUserAsync(ApplicationUser user); // c
-        Task<ApplicationUser?> GetUserByIdAsync(Guid id); // r
-        Task<bool> UpdateUserAsync(ApplicationUser user); // u
-        Task<bool> SoftDeleteUserAsync(Guid id); // d
+        Task<ApplicationUser?> GetUserByIdAsync(Guid id);
         Task<IEnumerable<ApplicationUser>> GetAllUsersAsync(bool includeDeleted = false);
+        Task<bool> UpdateUserAsync(ApplicationUser user);
+        Task<bool> SoftDeleteUserAsync(Guid id);
         Task<bool> RestoreUserAsync(Guid id);
-        
-
-        //Task<IEnumerable<Recipe>> GetRecipeAsync(Func<Recipe, bool> predicate);
     }
 }
