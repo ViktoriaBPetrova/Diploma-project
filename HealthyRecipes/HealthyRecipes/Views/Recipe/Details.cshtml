@@ -1,0 +1,200 @@
+@model HealthyRecipes.Web.ViewModels.Recipe.RecipeDetailsViewModel
+@{ ViewData["Title"] = "Recipe Details"; }
+
+<div class="container" style="padding-top:40px; padding-bottom:60px;">
+
+    @if (Model.HasAllergyConflict)
+    {
+        <div class="allergy-banner">
+            <span class="icon">⚠️</span>
+            <div>
+                <strong>Allergy alert!</strong> This recipe contains ingredients you are allergic to:
+                <strong>@string.Join(", ", Model.ConflictingIngredients)</strong>
+            </div>
+        </div>
+    }
+
+    <div class="recipe-hero">
+        @if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
+            <img src="@Model.ImageUrl" alt="Recipe" class="recipe-hero-img" />
+        }
+        else
+        {
+            <div class="recipe-hero-placeholder">🥘</div>
+        }
+    </div>
+
+    <div class="recipe-layout">
+        <!-- Main Content -->
+        <div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
+                <div>
+                    <div class="tags" style="margin-bottom:10px;">
+                        @foreach (var cat in Model.CategoryNames)
+                        {
+                            <span class="tag tag-forest">@cat</span>
+                        }
+                        @if (Model.Difficulty.HasValue)
+                        {
+                            <span class="diff-@Model.Difficulty.ToString()!.ToLower()">@Model.Difficulty</span>
+                        }
+                    </div>
+                    <div style="display:flex; gap:20px; color:var(--muted); font-size:0.875rem; flex-wrap:wrap;">
+                        <span>👤 @Model.AuthorName</span>
+                        @if (Model.PrepTime.HasValue) { <span>⏱ @Model.PrepTime min prep</span> }
+                        @if (Model.Servings.HasValue) { <span>🍽 @Model.Servings servings</span> }
+                        <span>📅 @Model.CreatedAt.ToString("MMM d, yyyy")</span>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; align-items:center;">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
+                                @(Model.IsSaved ? "♥ Saved" : "♡ Save")
+                            </button>
+                        </form>
+                    }
+                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || Model.AuthorId.ToString() == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value))
+                    {
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Delete this recipe?')">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-danger">Delete</button>
+                        </form>
+                    }
+                </div>
+            </div>
+
+            <p style="font-size:1.0625rem; line-height:1.7; color:var(--mid); margin-bottom:32px;">@Model.Info</p>
+
+            <!-- Ingredients -->
+            <h3 style="margin-bottom:16px;">Ingredients</h3>
+            <table class="ingredients-table" style="margin-bottom:40px;">
+                <thead>
+                    <tr><th>Ingredient</th><th>Amount</th><th>Calories</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var ing in Model.Ingredients)
+                    {
+                        <tr class="@(ing.IsAllergen ? "allergen-row" : "")">
+                            <td>@ing.IngredientName @(ing.IsAllergen ? "⚠️" : "")</td>
+                            <td>@ing.QuantityInGrams g</td>
+                            <td>@ing.Calories.ToString("F0") kcal</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            @if (!string.IsNullOrEmpty(Model.VideoUrl))
+            {
+                <h3 style="margin-bottom:16px;">Video</h3>
+                <div style="margin-bottom:40px;">
+                    <a href="@Model.VideoUrl" target="_blank" class="btn-ghost">▶ Watch video tutorial</a>
+                </div>
+            }
+
+            <!-- Comments -->
+            <div style="margin-top:8px;">
+                <h3 style="margin-bottom:20px;">Reviews & Comments</h3>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <div class="card" style="padding:24px; margin-bottom:28px;">
+                        <h4 style="margin-bottom:16px;">@(Model.CurrentUserComment != null ? "Edit your review" : "Leave a review")</h4>
+                        <form asp-action="Rate" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="RecipeId" value="@Model.Id" />
+                            <div class="form-group">
+                                <label>Rating</label>
+                                <div class="rating-select">
+                                    @for (int i = 5; i >= 1; i--)
+                                    {
+                                        var rating = (HealthyRecipes.Data.Enums.Rating)i;
+                                        var isChecked = Model.CurrentUserComment?.Rating == rating;
+                                        <input type="radio" name="Rating" id="star@(i)" value="@i" @(isChecked ? "checked" : "") />
+                                        <label for="star@(i)">★</label>
+                                    }
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Comment (optional)</label>
+                                <textarea name="Comment" class="form-control" rows="3" placeholder="Share your thoughts…">@Model.CurrentUserComment?.Comment</textarea>
+                            </div>
+                            <div style="display:flex; gap:10px;">
+                                <button type="submit" class="btn-primary">Submit</button>
+                                @if (Model.CurrentUserComment != null)
+                                {
+                                    <form asp-action="DeleteComment" method="post" style="display:inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="recipeId" value="@Model.Id" />
+                                        <button type="submit" class="btn-ghost">Remove review</button>
+                                    </form>
+                                }
+                            </div>
+                        </form>
+                    </div>
+                }
+
+                @if (Model.Comments.Any())
+                {
+                    @foreach (var comment in Model.Comments)
+                    {
+                        <div class="comment-card">
+                            <div class="comment-header">
+                                <div>
+                                    <span class="comment-author">@comment.UserName</span>
+                                    <span class="stars" style="margin-left:8px;">@string.Concat(Enumerable.Repeat("★", (int)comment.Rating))</span>
+                                </div>
+                                <span class="comment-date">@comment.CreatedAt.ToString("MMM d, yyyy")</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(comment.Comment))
+                            {
+                                <p class="comment-text">@comment.Comment</p>
+                            }
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p style="color:var(--muted); font-style:italic;">No reviews yet. Be the first!</p>
+                }
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="recipe-sidebar">
+            <div class="sticky-box">
+                <div class="nutrition-card">
+                    <div class="nutrition-title">Nutrition Info</div>
+                    <div style="text-align:center; margin-bottom:16px;">
+                        <span class="stars">@string.Concat(Enumerable.Repeat("★", (int)Math.Round(Model.AverageRating)))</span>
+                        <span style="font-size:0.875rem; color:var(--muted);"> (@Model.AverageRating.ToString("F1"))</span>
+                    </div>
+                    <div class="nutrition-grid">
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" style="color:var(--forest);">@Model.Calories.ToString("F0")</div>
+                            <div class="nutrition-label">Calories</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" style="color:#3B82F6;">@Model.Protein.ToString("F1")g</div>
+                            <div class="nutrition-label">Protein</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" style="color:#F59E0B;">@Model.Carbs.ToString("F1")g</div>
+                            <div class="nutrition-label">Carbs</div>
+                        </div>
+                        <div class="nutrition-item">
+                            <div class="nutrition-value" style="color:#EF4444;">@Model.Fat.ToString("F1")g</div>
+                            <div class="nutrition-label">Fat</div>
+                        </div>
+                    </div>
+                </div>
+
+                <a asp-controller="Recipe" asp-action="Index" class="btn-ghost" style="width:100%; justify-content:center;">← Back to recipes</a>
+            </div>
+        </div>
+    </div>
+</div>

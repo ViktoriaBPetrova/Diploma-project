@@ -7,7 +7,8 @@ using HealthyRecipes.Services.RecipeCategories;
 using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.SavedRecipes;
-using HealthyRecipes.Web.Models.Recipe;
+using HealthyRecipes.Web.ViewModels.Recipe;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

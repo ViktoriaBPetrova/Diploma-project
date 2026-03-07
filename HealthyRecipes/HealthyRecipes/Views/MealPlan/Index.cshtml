@@ -1,0 +1,45 @@
+@model HealthyRecipes.Web.ViewModels.MealPlan.MealPlanIndexViewModel
+@{ ViewData["Title"] = "My Meal Plans"; }
+
+<div class="container">
+    <div class="page-header">
+        <div class="page-header-row">
+            <div>
+                <h1>Meal Plans</h1>
+                <p class="page-subtitle">Plan your week, hit your macros</p>
+            </div>
+            <a asp-action="Create" class="btn-primary">+ New Plan</a>
+        </div>
+    </div>
+
+    @if (Model.MyMealPlans.Any())
+    {
+        <h2 class="section-title">My Plans</h2>
+        <div class="grid-2" style="margin-bottom:48px;">
+            @foreach (var plan in Model.MyMealPlans)
+            {
+                <partial name="_MealPlanCard" model="plan" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state" style="padding:48px 0;">
+            <div class="empty-state-icon">📋</div>
+            <h3>No meal plans yet</h3>
+            <p>Create your first plan to start tracking your weekly nutrition.</p>
+            <a asp-action="Create" class="btn-primary" style="margin-top:8px;">Create a plan</a>
+        </div>
+    }
+
+    @if (Model.SavedMealPlans.Any())
+    {
+        <h2 class="section-title">Saved Plans</h2>
+        <div class="grid-2">
+            @foreach (var plan in Model.SavedMealPlans)
+            {
+                <partial name="_MealPlanCard" model="plan" />
+            }
+        </div>
+    }
+</div>

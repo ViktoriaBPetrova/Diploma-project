@@ -4,7 +4,7 @@ using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.Meals;
 using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.SavedMealPlans;
-using HealthyRecipes.Web.Models.MealPlan;
+using HealthyRecipes.Web.ViewModels.MealPlan;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;

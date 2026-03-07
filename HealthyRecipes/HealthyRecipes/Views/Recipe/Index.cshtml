@@ -1,0 +1,78 @@
+@model HealthyRecipes.Web.ViewModels.Recipe.RecipeIndexViewModel
+@{ ViewData["Title"] = "Recipes"; }
+
+<div class="container">
+    <div class="page-header">
+        <div class="page-header-row">
+            <div>
+                <h1>Recipes</h1>
+                <p class="page-subtitle">Discover, save, and cook healthy meals</p>
+            </div>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-action="Create" class="btn-primary">+ New Recipe</a>
+            }
+        </div>
+    </div>
+
+    <div style="display:flex; gap:16px; margin-bottom:28px; flex-wrap:wrap;">
+        <form method="get" asp-action="Index" style="flex:1; min-width:260px;">
+            @if (Model.SelectedCategoryId.HasValue)
+            {
+                <input type="hidden" name="categoryId" value="@Model.SelectedCategoryId" />
+            }
+            <div class="search-bar">
+                <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search recipes…" />
+                <button type="submit">🔍</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="filter-row">
+        <a asp-action="Index" asp-route-search="@Model.SearchQuery"
+           class="filter-pill @(Model.SelectedCategoryId == null ? "active" : "")">All</a>
+        @foreach (var cat in Model.Categories)
+        {
+            <a asp-action="Index" asp-route-search="@Model.SearchQuery" asp-route-categoryId="@cat.Id"
+               class="filter-pill @(Model.SelectedCategoryId == cat.Id ? "active" : "")">@cat.Name</a>
+        }
+    </div>
+
+    @if (Model.Recipes.Any())
+    {
+        <div class="grid-3">
+            @foreach (var recipe in Model.Recipes)
+            {
+                <partial name="_RecipeCard" model="recipe" />
+            }
+        </div>
+
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    @if (i == Model.CurrentPage)
+                    {
+                        <span class="active">@i</span>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" asp-route-search="@Model.SearchQuery"
+                           asp-route-categoryId="@Model.SelectedCategoryId"
+                           asp-route-page="@i">@i</a>
+                    }
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🥦</div>
+            <h3>No recipes found</h3>
+            <p>Try a different search or category.</p>
+            <a asp-action="Index" class="btn-ghost">Clear filters</a>
+        </div>
+    }
+</div>

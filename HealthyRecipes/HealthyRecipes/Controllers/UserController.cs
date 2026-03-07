@@ -1,7 +1,7 @@
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Users;
-using HealthyRecipes.Web.Models.User;
+using HealthyRecipes.Web.ViewModels.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
