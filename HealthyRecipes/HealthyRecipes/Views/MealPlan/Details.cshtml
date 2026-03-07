@@ -1,0 +1,118 @@
+@model HealthyRecipes.Web.Models.MealPlan.MealPlanDetailsViewModel
+@{ ViewData["Title"] = Model.Name; }
+
+<div class="container" style="padding-top:40px; padding-bottom:60px;">
+
+    <a asp-action="Index" style="color:var(--muted); font-size:0.875rem;">← My Meal Plans</a>
+
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin: 20px 0 32px;">
+        <div>
+            <h1 style="margin-bottom:8px;">@Model.Name</h1>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p style="color:var(--mid);">@Model.Description</p>
+            }
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
+                    @(Model.IsSaved ? "♥ Saved" : "♡ Save Plan")
+                </button>
+            </form>
+            @if (Model.IsOwner)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
+                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Delete this plan?')">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-danger">Delete</button>
+                </form>
+            }
+        </div>
+    </div>
+
+    <!-- Weekly Totals -->
+    <div style="background:var(--forest); color:white; border-radius:var(--radius-lg); padding:28px; display:flex; gap:32px; flex-wrap:wrap; margin-bottom:36px;">
+        <div>
+            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Weekly avg calories</div>
+            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Calories.ToString("F0")</div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Protein</div>
+            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Protein.ToString("F0")<span style="font-size:1rem;">g</span></div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Carbs</div>
+            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Carbs.ToString("F0")<span style="font-size:1rem;">g</span></div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Fat</div>
+            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Fat.ToString("F0")<span style="font-size:1rem;">g</span></div>
+        </div>
+        <div>
+            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Days planned</div>
+            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Days.Count()</div>
+        </div>
+    </div>
+
+    @if (Model.Days.Any())
+    {
+        @foreach (var day in Model.Days)
+        {
+            <div class="day-card">
+                <div class="day-header">
+                    <span class="day-title">Day @day.DayNumber — @day.DayOfWeek</span>
+                    <div class="macro-row">
+                        <span class="macro-pill cal" style="background:rgba(255,255,255,0.15); color:white;">🔥 @day.Calories.ToString("F0")</span>
+                    </div>
+                </div>
+                <div class="day-body">
+                    @if (day.Meals.Any())
+                    {
+                        @foreach (var meal in day.Meals)
+                        {
+                            <div class="meal-item">
+                                <div class="meal-type-label">@meal.Type</div>
+                                <div class="macro-row" style="margin-bottom:10px;">
+                                    <span class="macro-pill cal">@meal.Calories.ToString("F0") kcal</span>
+                                    <span class="macro-pill protein">P @meal.Protein.ToString("F0")g</span>
+                                    <span class="macro-pill carbs">C @meal.Carbs.ToString("F0")g</span>
+                                    <span class="macro-pill fat">F @meal.Fat.ToString("F0")g</span>
+                                </div>
+                                @if (meal.Recipes.Any())
+                                {
+                                    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+                                        @foreach (var recipe in meal.Recipes)
+                                        {
+                                            <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId"
+                                               style="background:white; border-radius:var(--radius-sm); padding:8px 12px; font-size:0.875rem; border:1px solid var(--border); color:var(--forest); text-decoration:none; display:flex; align-items:center; gap:6px;">
+                                                @(recipe.Info.Length > 50 ? recipe.Info[..50] + "…" : recipe.Info)
+                                                <span style="color:var(--muted); font-size:0.78rem;">@recipe.Calories.ToString("F0") kcal</span>
+                                            </a>
+                                        }
+                                    </div>
+                                }
+                                else
+                                {
+                                    <p style="font-size:0.875rem; color:var(--muted); font-style:italic;">No recipes added to this meal.</p>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p style="color:var(--muted); font-style:italic;">No meals for this day.</p>
+                    }
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">📅</div>
+            <h3>No days added yet</h3>
+            <p>This meal plan doesn't have any days configured.</p>
+        </div>
+    }
+</div>

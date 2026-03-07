@@ -1,8 +1,90 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
+    var recipes = ViewBag.FeaturedRecipes as IEnumerable<HealthyRecipes.Web.Models.Recipe.RecipeCardViewModel> ?? Enumerable.Empty<HealthyRecipes.Web.Models.Recipe.RecipeCardViewModel>();
+    var categories = ViewBag.Categories as IEnumerable<HealthyRecipes.Web.Models.Recipe.CategoryFilterViewModel> ?? Enumerable.Empty<HealthyRecipes.Web.Models.Recipe.CategoryFilterViewModel>();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero">
+    <div class="container">
+        <div class="hero-eyebrow">🌿 Track · Plan · Thrive</div>
+        <h1>Fuel your body<br /><em>the smart way</em></h1>
+        <p>Discover healthy recipes, build personalised meal plans, and track your nutrition goals — all in one place.</p>
+        <div class="hero-btns">
+            <a asp-controller="Recipe" asp-action="Index" class="btn-primary">Browse recipes</a>
+            @if (!User.Identity!.IsAuthenticated)
+            {
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn-ghost">Create account</a>
+            }
+            else
+            {
+                <a asp-controller="MealPlan" asp-action="Index" class="btn-ghost">My meal plans</a>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section" style="background:var(--parchment); border-radius: 24px; margin: 0 24px 48px;">
+    <div class="container">
+        <div style="display:flex; gap:48px; flex-wrap:wrap; justify-content:center; text-align:center; padding: 24px 0;">
+            <div>
+                <div style="font-family: var(--font-display); font-size:2.5rem; color:var(--forest);">150+</div>
+                <div style="font-size:0.875rem; color:var(--muted);">Healthy recipes</div>
+            </div>
+            <div>
+                <div style="font-family: var(--font-display); font-size:2.5rem; color:var(--forest);">5</div>
+                <div style="font-size:0.875rem; color:var(--muted);">Categories</div>
+            </div>
+            <div>
+                <div style="font-family: var(--font-display); font-size:2.5rem; color:var(--forest);">100%</div>
+                <div style="font-size:0.875rem; color:var(--muted);">Macro tracked</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@if (categories.Any())
+{
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">Browse by category</h2>
+            <div class="filter-row">
+                @foreach (var cat in categories)
+                {
+                    <a asp-controller="Recipe" asp-action="Index" asp-route-categoryId="@cat.Id" class="filter-pill">@cat.Name</a>
+                }
+                <a asp-controller="Recipe" asp-action="Index" class="filter-pill">All recipes →</a>
+            </div>
+        </div>
+    </section>
+}
+
+<section class="section">
+    <div class="container">
+        <div class="page-header-row" style="margin-bottom:28px;">
+            <h2 class="section-title" style="margin-bottom:0">Featured Recipes</h2>
+            <a asp-controller="Recipe" asp-action="Index" class="btn-ghost" style="font-size:0.875rem;">View all →</a>
+        </div>
+
+        @if (recipes.Any())
+        {
+            <div class="grid-3">
+                @foreach (var recipe in recipes)
+                {
+                    <partial name="_RecipeCard" model="recipe" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">🍽️</div>
+                <h3>No recipes yet</h3>
+                <p>Be the first to share a healthy recipe!</p>
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Recipe" asp-action="Create" class="btn-primary">Create recipe</a>
+                }
+            </div>
+        }
+    </div>
+</section>

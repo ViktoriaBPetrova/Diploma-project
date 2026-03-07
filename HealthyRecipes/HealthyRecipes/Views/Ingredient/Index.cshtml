@@ -1,0 +1,84 @@
+@model HealthyRecipes.Web.Models.Ingredient.IngredientIndexViewModel
+@{ ViewData["Title"] = "Ingredients"; }
+
+<div class="container">
+    <div class="page-header">
+        <div class="page-header-row">
+            <div>
+                <h1>Ingredients</h1>
+                <p class="page-subtitle">Browse and manage your allergy list</p>
+            </div>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-action="Create" class="btn-primary">+ Add ingredient</a>
+            }
+        </div>
+    </div>
+
+    <form method="get" asp-action="Index" style="margin-bottom:28px;">
+        <div class="search-bar">
+            <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search ingredients…" />
+            <button type="submit">🔍</button>
+        </div>
+    </form>
+
+    @if (Model.Ingredients.Any())
+    {
+        <div style="overflow-x:auto;">
+            <table class="ingredient-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Brand</th>
+                        <th>Calories / 100g</th>
+                        <th>Protein</th>
+                        <th>Carbs</th>
+                        <th>Fat</th>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <th>Allergy</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ing in Model.Ingredients)
+                    {
+                        <tr>
+                            <td>
+                                @ing.Name
+                                @if (ing.IsAllergen)
+                                {
+                                    <span class="allergen-mark"> ⚠️</span>
+                                }
+                            </td>
+                            <td>@(ing.Brand ?? "—")</td>
+                            <td>@ing.CaloriesPer100g.ToString("F0") kcal</td>
+                            <td>@ing.ProteinPer100g.ToString("F1")g</td>
+                            <td>@ing.CarbsPer100g.ToString("F1")g</td>
+                            <td>@ing.FatPer100g.ToString("F1")g</td>
+                            @if (User.Identity?.IsAuthenticated == true)
+                            {
+                                <td>
+                                    <form asp-action="ToggleAllergy" asp-route-id="@ing.Id" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn-@(ing.IsAllergen ? "danger" : "ghost")" style="font-size:0.78rem; padding:5px 12px;">
+                                            @(ing.IsAllergen ? "Remove" : "Mark")
+                                        </button>
+                                    </form>
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🥕</div>
+            <h3>No ingredients found</h3>
+            <p>@(string.IsNullOrEmpty(Model.SearchQuery) ? "No ingredients yet. Add the first one!" : "Try a different search.")</p>
+        </div>
+    }
+</div>

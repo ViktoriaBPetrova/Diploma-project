@@ -1,0 +1,37 @@
+@model HealthyRecipes.Web.Models.MealPlan.MealPlanCardViewModel
+
+<div class="card" style="padding:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+        <div>
+            <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.Id" style="text-decoration:none;">
+                <div class="card-title">@Model.Name</div>
+            </a>
+            @if (!string.IsNullOrEmpty(Model.Description))
+            {
+                <p style="font-size:0.875rem; color:var(--muted); margin-top:4px;">@(Model.Description.Length > 80 ? Model.Description[..80] + "…" : Model.Description)</p>
+            }
+        </div>
+        <span style="font-size:0.78rem; color:var(--muted);">@Model.DayCount days</span>
+    </div>
+
+    <div class="macro-row" style="margin-bottom:16px;">
+        <span class="macro-pill cal">🔥 @Model.Calories.ToString("F0")</span>
+        <span class="macro-pill protein">P @Model.Protein.ToString("F0")g</span>
+        <span class="macro-pill carbs">C @Model.Carbs.ToString("F0")g</span>
+        <span class="macro-pill fat">F @Model.Fat.ToString("F0")g</span>
+    </div>
+
+    <div style="display:flex; gap:8px; align-items:center;">
+        <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost" style="font-size:0.875rem;">View plan</a>
+        @if (Model.IsOwner)
+        {
+            <a asp-controller="MealPlan" asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost" style="font-size:0.875rem;">Edit</a>
+        }
+        <form asp-controller="MealPlan" asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" style="margin-left:auto;">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
+                @(Model.IsSaved ? "♥ Saved" : "♡ Save")
+            </button>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,70 @@
+@model HealthyRecipes.Web.Models.Recipe.EditRecipeViewModel
+@{ ViewData["Title"] = "Edit Recipe"; }
+
+<div class="container" style="padding-top:48px; padding-bottom:64px;">
+    <div style="max-width:720px; margin:0 auto;">
+        <a asp-action="Details" asp-route-id="@Model.Id" style="color:var(--muted); font-size:0.875rem;">← Back to recipe</a>
+        <h1 style="margin:16px 0 8px;">Edit Recipe</h1>
+        <p class="page-subtitle" style="margin-bottom:36px;">Update your recipe details</p>
+
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" style="margin-bottom:16px;"></div>
+
+            <div style="background:white; border-radius:var(--radius-lg); padding:36px; border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:24px;">
+                <h3 style="margin-bottom:20px;">Basic Info</h3>
+                <div class="form-group">
+                    <label asp-for="Info">Description *</label>
+                    <textarea asp-for="Info" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Info" class="field-validation-error"></span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="PrepTime">Prep time (minutes)</label>
+                        <input asp-for="PrepTime" type="number" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Servings">Servings</label>
+                        <input asp-for="Servings" type="number" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label asp-for="Difficulty">Difficulty</label>
+                        <select asp-for="Difficulty" class="form-control" asp-items="Html.GetEnumSelectList<HealthyRecipes.Data.Enums.Difficulty>()">
+                            <option value="">— Select —</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="ImageUrl">Image URL</label>
+                        <input asp-for="ImageUrl" class="form-control" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label asp-for="VideoUrl">Video URL</label>
+                    <input asp-for="VideoUrl" class="form-control" />
+                </div>
+            </div>
+
+            <div style="background:white; border-radius:var(--radius-lg); padding:36px; border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:24px;">
+                <h3 style="margin-bottom:20px;">Categories</h3>
+                <div style="display:flex; flex-wrap:wrap; gap:10px;">
+                    @foreach (var cat in Model.AvailableCategories)
+                    {
+                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; background:var(--parchment); padding:8px 14px; border-radius:20px; border:1.5px solid var(--border); font-size:0.9rem;">
+                            <input type="checkbox" name="SelectedCategoryIds" value="@cat.Id"
+                                   @(Model.SelectedCategoryIds.Contains(cat.Id) ? "checked" : "")
+                                   style="accent-color:var(--forest);" />
+                            @cat.Name
+                        </label>
+                    }
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px;">
+                <button type="submit" class="btn-primary">Save changes</button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
