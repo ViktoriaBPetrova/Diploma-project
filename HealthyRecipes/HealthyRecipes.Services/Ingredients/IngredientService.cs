@@ -3,159 +3,196 @@ using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Enums;
 using HealthyRecipes.Services.Api;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Services.Ingredients
 {
+    /// <summary>
+    /// Service for managing Ingredient entities with CRUD operations and API integration.
+    /// </summary>
     public class IngredientService : IIngredient
     {
         private readonly HealthyRecipesDbContext _context;
         private readonly IApi _apiService;
+        private readonly ILogger<IngredientService> _logger;
 
-        public IngredientService(HealthyRecipesDbContext context, IApi apiService)
+        public IngredientService(
+            HealthyRecipesDbContext context,
+            IApi apiService,
+            ILogger<IngredientService> logger)
         {
-            _context = context;
-            _apiService = apiService;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _apiService = apiService ?? throw new ArgumentNullException(nameof(apiService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Guid> CreateIngredientAsync(Ingredient ingredient)
         {
-            _context.Ingredients.Add(ingredient);
-            await _context.SaveChangesAsync();
-            return ingredient.Id;
+            if (ingredient == null)
+                throw new ArgumentNullException(nameof(ingredient));
+
+            try
+            {
+                _context.Ingredients.Add(ingredient);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Ingredient created: {IngredientName} (ID: {IngredientId})", 
+                    ingredient.Name, ingredient.Id);
+                return ingredient.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating ingredient: {IngredientName}", ingredient.Name);
+                throw;
+            }
         }
 
         public async Task<Ingredient?> GetIngredientByIdAsync(Guid id)
         {
-            return await _context.Ingredients
-                .Include(i => i.RecipeIngredients)
-                .Include(i => i.Allergies)
-                .FirstOrDefaultAsync(i => i.Id == id && !i.Deleted);
+            try
+            {
+                return await _context.Ingredients
+                    .Include(i => i.RecipeIngredients)
+                    .Include(i => i.Allergies)
+                    .Include(i => i.User)
+                    .FirstOrDefaultAsync(i => i.Id == id && !i.Deleted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving ingredient with ID: {IngredientId}", id);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(bool includeDeleted = false)
         {
-            return await _context.Ingredients
-                .Include(i => i.RecipeIngredients)
-                .Where(i => includeDeleted || !i.Deleted)
-                .OrderBy(i => i.Name)
-                .ToListAsync();
+            try
+            {
+                return await _context.Ingredients
+                    .Include(i => i.RecipeIngredients)
+                    .Include(i => i.User)
+                    .Where(i => includeDeleted || !i.Deleted)
+                    .OrderBy(i => i.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all ingredients");
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Ingredient>> GetIngredientsBySourceAsync(Source source)
         {
-            return await _context.Ingredients
-                .Where(i => i.Source == source && !i.Deleted)
-                .OrderBy(i => i.Name)
-                .ToListAsync();
+            try
+            {
+                return await _context.Ingredients
+                    .Where(i => i.Source == source && !i.Deleted)
+                    .OrderBy(i => i.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving ingredients by source: {Source}", source);
+                throw;
+            }
         }
 
         public async Task<bool> UpdateIngredientAsync(Ingredient ingredient)
         {
-            var existing = await _context.Ingredients
-                .FirstOrDefaultAsync(i => i.Id == ingredient.Id && !i.Deleted);
+            if (ingredient == null)
+                throw new ArgumentNullException(nameof(ingredient));
 
-            if (existing == null)
-                return false;
+            try
+            {
+                var existing = await _context.Ingredients
+                    .FirstOrDefaultAsync(i => i.Id == ingredient.Id && !i.Deleted);
 
-            existing.Name = ingredient.Name;
-            existing.Brand = ingredient.Brand;
-            existing.CaloriesPer100g = ingredient.CaloriesPer100g;
-            existing.ProteinPer100g = ingredient.ProteinPer100g;
-            existing.CarbsPer100g = ingredient.CarbsPer100g;
-            existing.FatPer100g = ingredient.FatPer100g;
-            existing.UpdatedAt = DateTime.UtcNow;
+                if (existing == null)
+                {
+                    _logger.LogWarning("Ingredient with ID {IngredientId} not found for update", ingredient.Id);
+                    return false;
+                }
 
-            _context.Ingredients.Update(existing);
-            await _context.SaveChangesAsync();
-            return true;
+                existing.Name = ingredient.Name;
+                existing.Brand = ingredient.Brand;
+                existing.CaloriesPer100g = ingredient.CaloriesPer100g;
+                existing.ProteinPer100g = ingredient.ProteinPer100g;
+                existing.CarbsPer100g = ingredient.CarbsPer100g;
+                existing.FatPer100g = ingredient.FatPer100g;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                _context.Ingredients.Update(existing);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Ingredient {IngredientId} updated successfully", ingredient.Id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating ingredient with ID: {IngredientId}", ingredient.Id);
+                throw;
+            }
         }
 
         public async Task<bool> SoftDeleteIngredientAsync(Guid id)
         {
-            var existing = await _context.Ingredients
-                .FirstOrDefaultAsync(i => i.Id == id && !i.Deleted);
+            try
+            {
+                var existing = await _context.Ingredients
+                    .FirstOrDefaultAsync(i => i.Id == id && !i.Deleted);
 
-            if (existing == null)
-                return false;
+                if (existing == null)
+                {
+                    _logger.LogWarning("Ingredient with ID {IngredientId} not found for deletion", id);
+                    return false;
+                }
 
-            existing.Deleted = true;
-            existing.DeletedAt = DateTime.UtcNow;
-            existing.UpdatedAt = DateTime.UtcNow;
+                existing.Deleted = true;
+                existing.DeletedAt = DateTime.UtcNow;
+                existing.UpdatedAt = DateTime.UtcNow;
 
-            _context.Ingredients.Update(existing);
-            await _context.SaveChangesAsync();
-            return true;
+                _context.Ingredients.Update(existing);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Ingredient {IngredientId} soft deleted successfully", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error soft deleting ingredient with ID: {IngredientId}", id);
+                throw;
+            }
         }
 
         public async Task<bool> RestoreIngredientAsync(Guid id)
         {
-            var existing = await _context.Ingredients
-                .FirstOrDefaultAsync(i => i.Id == id && i.Deleted);
+            try
+            {
+                var existing = await _context.Ingredients
+                    .FirstOrDefaultAsync(i => i.Id == id && i.Deleted);
 
-            if (existing == null)
-                return false;
+                if (existing == null)
+                {
+                    _logger.LogWarning("Deleted ingredient with ID {IngredientId} not found for restoration", id);
+                    return false;
+                }
 
-            existing.Deleted = false;
-            existing.DeletedAt = null;
-            existing.UpdatedAt = DateTime.UtcNow;
+                existing.Deleted = false;
+                existing.DeletedAt = null;
+                existing.UpdatedAt = DateTime.UtcNow;
 
-            _context.Ingredients.Update(existing);
-            await _context.SaveChangesAsync();
-            return true;
+                _context.Ingredients.Update(existing);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Ingredient {IngredientId} restored successfully", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error restoring ingredient with ID: {IngredientId}", id);
+                throw;
+            }
         }
-
-        /*private readonly HealthyRecipesDbContext _context;
-private readonly IApi _apiService;
-
-public IngredientService(
-    HealthyRecipesDbContext context,
-    IApi apiService)
-{
-    _context = context;
-    _apiService = apiService;
-}
-
-public async Task<Ingredient> GetOrFetchIngredientAsync(string name)
-{
-    // 1. Check YOUR database first
-    var ingredient = await _context.Ingredients
-        .FirstOrDefaultAsync(i => i.Name == name);
-
-    if (ingredient != null)
-        return ingredient; // Already in DB
-
-    // 2. Not in DB? Fetch from external API
-    var apiIngredient = await _apiService.GetIngredientDataAsync(name);
-
-    if (apiIngredient == null)
-        throw new NotFoundException($"Ingredient '{name}' not found");
-
-    // 3. Save to YOUR database
-    _context.Ingredients.Add(apiIngredient);
-    await _context.SaveChangesAsync();
-
-    return apiIngredient;
-}
-
-// Get from DB only (no API call)
-public async Task<List<Ingredient>> GetAllIngredientsAsync()
-{
-    return await _context.Ingredients.ToListAsync();
-}
-
-// Update existing ingredient
-public async Task UpdateIngredientAsync(int id, Ingredient ingredient)
-{
-    var existing = await _context.Ingredients.FindAsync(id);
-
-    if (existing == null)
-        throw new NotFoundException("Ingredient not found");
-
-    existing.Name = ingredient.Name;
-    existing.Calories = ingredient.Calories;
-    // ... update other properties
-
-    await _context.SaveChangesAsync();
-}*/
     }
 }

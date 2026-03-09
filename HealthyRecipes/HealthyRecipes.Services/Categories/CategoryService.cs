@@ -1,71 +1,172 @@
-﻿using HealthyRecipes.Data;
+using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Services.Categories
 {
+    /// <summary>
+    /// Service for managing Category entities.
+    /// </summary>
     public class CategoryService : ICategory
     {
         private readonly HealthyRecipesDbContext _context;
+        private readonly ILogger<CategoryService> _logger;
 
-        public CategoryService(HealthyRecipesDbContext context)
+        public CategoryService(
+            HealthyRecipesDbContext context,
+            ILogger<CategoryService> logger)
         {
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Guid> CreateCategoryAsync(Category category)
         {
-            _context.Categories.Add(category);
-            await _context.SaveChangesAsync();
-            return category.Id;
+            if (category == null)
+                throw new ArgumentNullException(nameof(category));
+
+            try
+            {
+                _context.Categories.Add(category);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Category created: {CategoryName} (ID: {CategoryId})", 
+                    category.Name, category.Id);
+                return category.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating category: {CategoryName}", category.Name);
+                throw;
+            }
         }
 
         public async Task<Category?> GetCategoryByIdAsync(Guid id)
         {
-            return await _context.Categories
-                .Include(c => c.RecipeCategories) //idk
-                .FirstOrDefaultAsync(c => c.Id == id && !c.Deleted);
+            try
+            {
+                return await _context.Categories
+                    .Include(c => c.RecipeCategories)
+                        .ThenInclude(rc => rc.Recipe)
+                    .Include(c => c.User)
+                    .FirstOrDefaultAsync(c => c.Id == id && !c.Deleted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving category with ID: {CategoryId}", id);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync(bool includeDeleted = false)
         {
-            return await _context.Categories
-                .Include(c => c.RecipeCategories)
-                .Where(c => includeDeleted || !c.Deleted) //idk
-                .ToListAsync();
+            try
+            {
+                return await _context.Categories
+                    .Include(c => c.RecipeCategories)
+                    .Include(c => c.User)
+                    .Where(c => includeDeleted || !c.Deleted)
+                    .OrderBy(c => c.Name)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all categories");
+                throw;
+            }
         }
 
         public async Task<bool> UpdateCategoryAsync(Category category)
         {
-            Category existing = await _context.Categories.FirstOrDefaultAsync(c => c.Id == category.Id && !c.Deleted);
-            if (existing == null)
-                return false;
+            if (category == null)
+                throw new ArgumentNullException(nameof(category));
 
-            existing.UpdatedAt = DateTime.UtcNow;
-            existing.Name = category.Name;
+            try
+            {
+                var existing = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Id == category.Id && !c.Deleted);
 
-            _context.Categories.Update(existing);
-            await _context.SaveChangesAsync();
-            return true;
+                if (existing == null)
+                {
+                    _logger.LogWarning("Category with ID {CategoryId} not found for update", category.Id);
+                    return false;
+                }
+
+                existing.Name = category.Name;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                _context.Categories.Update(existing);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Category {CategoryId} updated successfully", category.Id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating category with ID: {CategoryId}", category.Id);
+                throw;
+            }
         }
 
         public async Task<bool> SoftDeleteCategoryAsync(Guid id)
         {
-            Category existing = await _context.Categories.FirstOrDefaultAsync(c => c.Id == id && !c.Deleted);
-            if (existing == null)
-                return false;
+            try
+            {
+                var existing = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Id == id && !c.Deleted);
 
-            existing.Deleted = true;
-            existing.DeletedAt = DateTime.UtcNow;
+                if (existing == null)
+                {
+                    _logger.LogWarning("Category with ID {CategoryId} not found for deletion", id);
+                    return false;
+                }
 
-            _context.Categories.Update(existing);
-            await _context.SaveChangesAsync();
-            return true;
+                existing.Deleted = true;
+                existing.DeletedAt = DateTime.UtcNow;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                _context.Categories.Update(existing);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Category {CategoryId} soft deleted successfully", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error soft deleting category with ID: {CategoryId}", id);
+                throw;
+            }
+        }
+
+        public async Task<bool> RestoreCategoryAsync(Guid id)
+        {
+            try
+            {
+                var existing = await _context.Categories
+                    .FirstOrDefaultAsync(c => c.Id == id && c.Deleted);
+
+                if (existing == null)
+                {
+                    _logger.LogWarning("Deleted category with ID {CategoryId} not found for restoration", id);
+                    return false;
+                }
+
+                existing.Deleted = false;
+                existing.DeletedAt = null;
+                existing.UpdatedAt = DateTime.UtcNow;
+
+                _context.Categories.Update(existing);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Category {CategoryId} restored successfully", id);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error restoring category with ID: {CategoryId}", id);
+                throw;
+            }
         }
     }
 }

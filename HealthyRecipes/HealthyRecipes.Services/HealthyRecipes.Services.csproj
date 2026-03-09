@@ -8,17 +8,11 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.22" />
 		<PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
 		<PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.15.0" />
 		<PackageReference Include="System.Formats.Asn1" Version="8.0.2" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Text.Json" Version="8.0.5" />
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Categories\Models\" />
-		<Folder Include="Ingredients\Models\" />
-		<Folder Include="MealPlans\Models\" />
-		<Folder Include="Recipes\Models\" />
-		<Folder Include="Users\Models\" />
 	</ItemGroup>
 	<ItemGroup>
 		<ProjectReference Include="..\HealthyRecipes.Data\HealthyRecipes.Data.csproj" />

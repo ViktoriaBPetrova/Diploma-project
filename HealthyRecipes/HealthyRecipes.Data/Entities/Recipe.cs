@@ -73,10 +73,6 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Metadata ----------
         public DateTime CreatedAt { get; init; } 
         public DateTime UpdatedAt { get; set; } 
-
-
-     
-
         
     }
 }
