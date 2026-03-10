@@ -14,6 +14,11 @@
             <div style="background:white; border-radius:var(--radius-lg); padding:36px; border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:24px;">
                 <h3 style="margin-bottom:20px;">Basic Info</h3>
                 <div class="form-group">
+                    <label asp-for="Title">Recipe Title *</label>
+                    <input asp-for="Title" class="form-control" placeholder="e.g., Healthy Chicken & Rice Bowl" />
+                    <span asp-validation-for="Title" class="field-validation-error"></span>
+                </div>
+                <div class="form-group">
                     <label asp-for="Info">Description *</label>
                     <textarea asp-for="Info" class="form-control" rows="4" placeholder="Describe your recipe, cooking method, and what makes it special…"></textarea>
                     <span asp-validation-for="Info" class="field-validation-error"></span>

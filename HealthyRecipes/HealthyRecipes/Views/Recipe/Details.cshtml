@@ -28,6 +28,9 @@
     <div class="recipe-layout">
         <!-- Main Content -->
         <div>
+            <h1 style="margin:0 0 16px; font-size:2rem; line-height:1.2;">
+                @(Model.Title ?? "Untitled Recipe")
+            </h1>
             <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:20px;">
                 <div>
                     <div class="tags" style="margin-bottom:10px;">
@@ -68,7 +71,10 @@
                 </div>
             </div>
 
-            <p style="font-size:1.0625rem; line-height:1.7; color:var(--mid); margin-bottom:32px;">@Model.Info</p>
+            <div style="margin-bottom:32px;">
+                <h3 style="margin-bottom:12px;">Description</h3>
+                <p style="font-size:1.0625rem; line-height:1.7; color:var(--mid);">@Model.Info</p>
+            </div>
 
             <!-- Ingredients -->
             <h3 style="margin-bottom:16px;">Ingredients</h3>

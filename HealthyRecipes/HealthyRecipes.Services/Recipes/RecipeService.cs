@@ -5,10 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Services.Recipes
 {
-    /// <summary>
-    /// Service for managing Recipe entities with full CRUD operations,
-    /// soft delete support, and nutrition calculation.
-    /// </summary>
+
     public class RecipeService : IRecipe
     {
         private readonly HealthyRecipesDbContext _context;
@@ -22,12 +19,6 @@ namespace HealthyRecipes.Services.Recipes
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        /// <summary>
-        /// Creates a new recipe in the database.
-        /// </summary>
-        /// <param name="recipe">The recipe entity to create</param>
-        /// <returns>The ID of the newly created recipe</returns>
-        /// <exception cref="ArgumentNullException">Thrown when recipe is null</exception>
         public async Task<Guid> CreateRecipeAsync(Recipe recipe)
         {
             if (recipe == null)
@@ -47,12 +38,6 @@ namespace HealthyRecipes.Services.Recipes
                 throw;
             }
         }
-
-        /// <summary>
-        /// Retrieves a single recipe by ID with all related entities.
-        /// </summary>
-        /// <param name="id">The recipe ID</param>
-        /// <returns>The recipe if found and not deleted, otherwise null</returns>
         public async Task<Recipe?> GetRecipeByIdAsync(Guid id)
         {
             try
@@ -76,11 +61,6 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        /// <summary>
-        /// Retrieves all recipes with optional inclusion of soft-deleted records.
-        /// </summary>
-        /// <param name="includeDeleted">Whether to include soft-deleted recipes</param>
-        /// <returns>Collection of all recipes</returns>
         public async Task<IEnumerable<Recipe>> GetAllRecipesAsync(bool includeDeleted = false)
         {
             try
@@ -105,12 +85,6 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        /// <summary>
-        /// Retrieves recipes matching a predicate (in-memory filtering).
-        /// Note: For production with large datasets, consider using Expression<Func<Recipe, bool>>.
-        /// </summary>
-        /// <param name="predicate">The filter predicate</param>
-        /// <returns>Filtered collection of recipes</returns>
         public async Task<IEnumerable<Recipe>> GetRecipeAsync(Func<Recipe, bool> predicate)
         {
             if (predicate == null)
@@ -137,11 +111,6 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        /// <summary>
-        /// Updates an existing recipe.
-        /// </summary>
-        /// <param name="recipe">The recipe with updated values</param>
-        /// <returns>True if update succeeded, false if recipe not found</returns>
         public async Task<bool> UpdateRecipeAsync(Recipe recipe)
         {
             if (recipe == null)
@@ -182,11 +151,6 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        /// <summary>
-        /// Soft deletes a recipe by setting the Deleted flag.
-        /// </summary>
-        /// <param name="id">The recipe ID to delete</param>
-        /// <returns>True if deletion succeeded, false if recipe not found</returns>
         public async Task<bool> SoftDeleteRecipeAsync(Guid id)
         {
             try
@@ -216,11 +180,6 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        /// <summary>
-        /// Restores a soft-deleted recipe.
-        /// </summary>
-        /// <param name="id">The recipe ID to restore</param>
-        /// <returns>True if restoration succeeded, false if recipe not found</returns>
         public async Task<bool> RestoreRecipeAsync(Guid id)
         {
             try
@@ -250,11 +209,6 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        /// <summary>
-        /// Recalculates the nutritional totals for a recipe based on its ingredients.
-        /// </summary>
-        /// <param name="id">The recipe ID</param>
-        /// <returns>True if recalculation succeeded, false if recipe not found</returns>
         public async Task<bool> RecalculateRecipeNutritionAsync(Guid id)
         {
             try

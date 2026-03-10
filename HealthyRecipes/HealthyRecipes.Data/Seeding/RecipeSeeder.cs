@@ -24,6 +24,7 @@ namespace HealthyRecipes.Data.Seeding
                 RecipeConstants.ChickenRiceBowlCarbs,
                 RecipeConstants.ChickenRiceBowlProtein*/)
             {
+                Title = RecipeConstants.ChickenRiceBowlTitle,
                 Info = RecipeConstants.ChickenRiceBowlInfo,
                 PrepTime = RecipeConstants.ChickenRiceBowlPrepTime,
                 Difficulty = RecipeConstants.ChickenRiceBowlDifficulty,

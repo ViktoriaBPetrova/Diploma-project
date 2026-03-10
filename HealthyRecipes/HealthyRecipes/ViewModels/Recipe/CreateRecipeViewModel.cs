@@ -6,6 +6,11 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
 {
     public class CreateRecipeViewModel
     {
+        [Required(ErrorMessage = "Recipe title is required")]
+        [StringLength(200, ErrorMessage = "Title cannot exceed 200 characters")]
+        [Display(Name = "Recipe Title")]
+        public string Title { get; set; } = string.Empty;
+
         [Required, MaxLength(2000)]
         public string Info { get; set; } = null!;
 

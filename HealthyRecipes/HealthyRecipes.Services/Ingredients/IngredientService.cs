@@ -7,9 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Services.Ingredients
 {
-    /// <summary>
-    /// Service for managing Ingredient entities with CRUD operations and API integration.
-    /// </summary>
     public class IngredientService : IIngredient
     {
         private readonly HealthyRecipesDbContext _context;

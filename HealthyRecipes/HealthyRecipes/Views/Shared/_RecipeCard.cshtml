@@ -22,8 +22,11 @@
         </div>
 
         <a asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.Id">
-            <div class="card-title">@(Model.Info.Length > 80 ? Model.Info[..80] + "…" : Model.Info)</div>
+            <div class="card-title">@(Model.Title ?? "Untitled Recipe")</div>
         </a>
+        <p style="font-size:0.875rem; color:var(--muted); margin:6px 0 0; line-height:1.4;">
+            @(Model.Info.Length > 60 ? Model.Info[..60] + "…" : Model.Info)
+        </p>
 
         <div class="macro-row" style="margin: 10px 0;">
             <span class="macro-pill cal">🔥 @Model.Calories.ToString("F0") kcal</span>

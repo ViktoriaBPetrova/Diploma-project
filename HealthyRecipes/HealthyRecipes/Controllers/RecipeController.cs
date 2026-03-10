@@ -97,6 +97,7 @@ namespace HealthyRecipes.Web.Controllers
                 cards.Add(new RecipeCardViewModel
                 {
                     Id = recipe.Id,
+                    Title = recipe.Title,
                     Info = recipe.Info,
                     Calories = recipe.Calories,
                     Protein = recipe.Protein,
@@ -183,6 +184,7 @@ namespace HealthyRecipes.Web.Controllers
             var vm = new RecipeDetailsViewModel
             {
                 Id = recipe.Id,
+                Title = recipe.Title,
                 Info = recipe.Info,
                 Calories = recipe.Calories,
                 Protein = recipe.Protein,
@@ -244,6 +246,7 @@ namespace HealthyRecipes.Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             var recipe = new Data.Entities.Recipe
             {
+                Title = vm.Title,
                 Info = vm.Info,
                 PrepTime = vm.PrepTime,
                 Difficulty = vm.Difficulty,
@@ -284,6 +287,7 @@ namespace HealthyRecipes.Web.Controllers
             var vm = new EditRecipeViewModel
             {
                 Id = id,
+                Title = recipe.Title,
                 Info = recipe.Info,
                 PrepTime = recipe.PrepTime,
                 Difficulty = recipe.Difficulty,
@@ -321,6 +325,7 @@ namespace HealthyRecipes.Web.Controllers
             if (recipe.UserId != user!.Id && !User.IsInRole("Admin"))
                 return Forbid();
 
+            recipe.Title = vm.Title;
             recipe.Info = vm.Info;
             recipe.PrepTime = vm.PrepTime;
             recipe.Difficulty = vm.Difficulty;

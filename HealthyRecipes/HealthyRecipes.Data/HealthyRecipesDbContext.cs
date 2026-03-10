@@ -55,11 +55,10 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new MealPlanDayConfig());
             builder.ApplyConfiguration(new MealConfig());
 
-            /* supposedly a problem...should not be seeded like this
+
             // USER SEEDING
             var users = UserSeeder.GenerateUsers().ToArray();
             builder.Entity<ApplicationUser>().HasData(users);
-            */
 
             // INGREDIENT SEEDING
             var ingredients = IngredientSeeder.GenerateIngredients().ToArray();

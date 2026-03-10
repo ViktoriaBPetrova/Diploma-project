@@ -6,6 +6,7 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
     public class RecipeDetailsViewModel
     {
         public Guid Id { get; set; }
+        public string? Title { get; set; }
         public string Info { get; set; } = null!;
         public float Calories { get; set; }
         public float Protein { get; set; }

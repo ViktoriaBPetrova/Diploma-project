@@ -29,6 +29,14 @@ namespace HealthyRecipes.Data.Seeding.Constants
         // ---------- Password ---------- // same for both
         public const string Password = "123456";
 
+        // ---------- PasswordHash ---------- // 
+        public const string AdminPasswordHash = "AQAAAAIAAYagAAAAEDZoKDzNOFTI2VDaWN/Fs6od0Ie+BN4qIF2V4oopqWQRBgA56Rs8YTIG2uZISte5aw==";
+        public const string UserPasswordHash = "AQAAAAIAAYagAAAAENN8Osd/COD+BNhPiVwcSRWSVLp2nqpbYCazhXnuqSertPmq3ikXhCj0IhLt1DfEVg==";
+
+        // ---------- Concurrencystamp ---------- // 
+        public const string UserConcurrencyStamp = "67a287df-fd85-4a1c-8603-fb50a54ca624";
+        public const string AdminConcurrencyStamp = "e4a36463-b39d-4ac6-b748-4d81e8e7e8e9";
+
         // ---------- Names ----------
         public const string UserFirstName = "John";
         public const string UserLastName = "Doe";

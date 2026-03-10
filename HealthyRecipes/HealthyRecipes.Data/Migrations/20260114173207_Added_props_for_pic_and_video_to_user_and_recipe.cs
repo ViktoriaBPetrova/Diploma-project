@@ -34,14 +34,14 @@ namespace HealthyRecipes.Data.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("b4f6d2c1-3a8e-4b9c-9d0f-5a6b7c8d9e02"),
                 columns: new[] { "ConcurrencyStamp", "ImageUrl", "PasswordHash" },
-                values: new object[] { "5c35805f-f24e-4e07-aa66-21fd492a9776", null, "AQAAAAIAAYagAAAAEMml0QVdaSEEpJHh5gZE/iI9pmB5N0L7VdcBTiE5weYGgmhqQfGhxwMuMuj7qyBSfA==" });
+                values: new object[] { "e4a36463-b39d-4ac6-b748-4d81e8e7e8e9", null, "AQAAAAIAAYagAAAAEDZoKDzNOFTI2VDaWN/Fs6od0Ie+BN4qIF2V4oopqWQRBgA56Rs8YTIG2uZISte5aw==" });
 
             migrationBuilder.UpdateData(
                 table: "AspNetUsers",
                 keyColumn: "Id",
                 keyValue: new Guid("e8a7c3b4-1f5d-4a6c-9b2e-7c3d5f8a9b01"),
                 columns: new[] { "ConcurrencyStamp", "ImageUrl", "PasswordHash" },
-                values: new object[] { "82542edf-b545-49a4-bbc2-a47c5edf2e5e", null, "AQAAAAIAAYagAAAAENyYRxcUxN0lRZpiYL/S2VEAKA+C98egtSvAeyhJ3vpfcpOwEC1rvgV41vXmpuiWcw==" });
+                values: new object[] { "67a287df-fd85-4a1c-8603-fb50a54ca624", null, "AQAAAAIAAYagAAAAENN8Osd/COD+BNhPiVwcSRWSVLp2nqpbYCazhXnuqSertPmq3ikXhCj0IhLt1DfEVg==" });
 
             migrationBuilder.UpdateData(
                 table: "Recipes",
@@ -71,14 +71,14 @@ namespace HealthyRecipes.Data.Migrations
                 keyColumn: "Id",
                 keyValue: new Guid("b4f6d2c1-3a8e-4b9c-9d0f-5a6b7c8d9e02"),
                 columns: new[] { "ConcurrencyStamp", "PasswordHash" },
-                values: new object[] { "43b9fcd1-5bde-4848-aacb-59d8b3ca80d0", "AQAAAAIAAYagAAAAENpfAEZCOAiaN8Uyuugs2FFoWUANb9P3dGCgOD3bnfKxLfNPjfaqzo4zuaGRXmVc4g==" });
+                values: new object[] { "e4a36463-b39d-4ac6-b748-4d81e8e7e8e9", "AQAAAAIAAYagAAAAEDZoKDzNOFTI2VDaWN/Fs6od0Ie+BN4qIF2V4oopqWQRBgA56Rs8YTIG2uZISte5aw==" });
 
             migrationBuilder.UpdateData(
                 table: "AspNetUsers",
                 keyColumn: "Id",
                 keyValue: new Guid("e8a7c3b4-1f5d-4a6c-9b2e-7c3d5f8a9b01"),
                 columns: new[] { "ConcurrencyStamp", "PasswordHash" },
-                values: new object[] { "21629e20-4bd6-4212-94a4-2279d0068102", "AQAAAAIAAYagAAAAEFrIDCf7GJMWujVwG6dvRq5bmdjZ4L+6qvizLsO7xQ9HJ1i79QFs36SSBITWVV6kig==" });
+                values: new object[] { "67a287df-fd85-4a1c-8603-fb50a54ca624", "AQAAAAIAAYagAAAAENN8Osd/COD+BNhPiVwcSRWSVLp2nqpbYCazhXnuqSertPmq3ikXhCj0IhLt1DfEVg==" });
         }
     }
 }

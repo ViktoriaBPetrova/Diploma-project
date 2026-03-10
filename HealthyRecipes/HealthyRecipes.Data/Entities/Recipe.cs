@@ -43,6 +43,7 @@ namespace HealthyRecipes.Data.Entities
         public ApplicationUser User { get; set; } = null!; // required nav property
 
         // ---------- Core Data ----------
+        public string? Title { get; set; }
         public string Info { get; set; } = null!; // description, max length attribute can be added
         public float Calories { get; set; }
         public float Protein { get; set; }

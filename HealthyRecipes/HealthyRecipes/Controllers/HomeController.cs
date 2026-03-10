@@ -60,6 +60,7 @@ namespace HealthyRecipes.Web.Controllers
                 cards.Add(new RecipeCardViewModel
                 {
                     Id = r.Id,
+                    Title = r.Title,
                     Info = r.Info,
                     Calories = r.Calories,
                     Protein = r.Protein,

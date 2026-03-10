@@ -12,6 +12,8 @@ namespace HealthyRecipes.Data.Seeding.Constants
         // ---------- Chicken & Rice Bowl ----------
         public const string ChickenRiceBowlId = "f2d6e3b9-9d5a-4b28-9c6f-8e0f3a7b6101";
 
+        public const string ChickenRiceBowlTitle = "Healthy Chicken & Rice Bowl";
+
         public const string ChickenRiceBowlInfo =
             "A healthy and high-protein chicken and rice bowl with sautéed onion and garlic. " +
             "Perfect for meal prep and quick lunches.";

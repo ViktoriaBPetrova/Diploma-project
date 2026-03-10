@@ -44,7 +44,10 @@ namespace HealthyRecipes.Data.Seeding
                 SecurityStamp = UserConstants.UserSecurityStamp,
 
                 PhoneNumber = UserConstants.PhoneNumber,
-                PhoneNumberConfirmed = true
+                PhoneNumberConfirmed = true,
+
+                PasswordHash = UserConstants.UserPasswordHash,
+                ConcurrencyStamp = UserConstants.UserConcurrencyStamp
             },
 
             new ApplicationUser(seedingDate) // Admin user
@@ -74,16 +77,14 @@ namespace HealthyRecipes.Data.Seeding
                 SecurityStamp = UserConstants.AdminSecurityStamp,
 
                 PhoneNumber = UserConstants.PhoneNumber,
-                PhoneNumberConfirmed = true
+                PhoneNumberConfirmed = true,
+
+                PasswordHash = UserConstants.AdminPasswordHash,
+                ConcurrencyStamp = UserConstants.AdminConcurrencyStamp
             }
             };
 
-            // Set password for all users (development only)
-            var hasher = new PasswordHasher<ApplicationUser>();
-            foreach (var user in users)
-            {
-                user.PasswordHash = hasher.HashPassword(user, UserConstants.Password);
-            }
+           
 
             return users;
         }

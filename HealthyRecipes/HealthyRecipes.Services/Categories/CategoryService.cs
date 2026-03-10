@@ -5,9 +5,6 @@ using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Services.Categories
 {
-    /// <summary>
-    /// Service for managing Category entities.
-    /// </summary>
     public class CategoryService : ICategory
     {
         private readonly HealthyRecipesDbContext _context;
