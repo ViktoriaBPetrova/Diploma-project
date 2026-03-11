@@ -17,4 +17,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\HealthyRecipes.Data\HealthyRecipes.Data.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Users\Models\" />
+	</ItemGroup>
 </Project>

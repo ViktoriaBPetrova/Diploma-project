@@ -17,6 +17,7 @@
                 <span class="brand-text">NutriTrack</span>
             </a>
             <div class="nav-links">
+                <a asp-controller="Statistics" asp-action="Dashboard" class="nav-link">My Statistics</a>
                 <a asp-controller="Recipe" asp-action="Index">Recipes</a>
                 <a asp-controller="MealPlan" asp-action="Index">Meal Plans</a>
                 <a asp-controller="Ingredient" asp-action="Index">Ingredients</a>
@@ -58,6 +59,7 @@
         </div>
     </footer>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

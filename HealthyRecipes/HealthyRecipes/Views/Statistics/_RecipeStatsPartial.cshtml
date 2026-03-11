@@ -1,0 +1,63 @@
+@model HealthyRecipes.Web.ViewModels.Statistics.RecipeStatisticsViewModel
+
+@if (Model != null)
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📊 Recipe Statistics</h5>
+            
+            <div class="row g-3">
+                <!-- Save Count -->
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-success">@Model.SaveCount</div>
+                        <small class="text-muted">Saves</small>
+                    </div>
+                </div>
+
+                <!-- Average Rating -->
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-warning" title="@Model.AverageRatingDisplay">
+                            @Model.RatingStars
+                        </div>
+                        <small class="text-muted">@Model.RatingCount ratings</small>
+                    </div>
+                </div>
+
+                <!-- Comments -->
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-info">@Model.CommentCount</div>
+                        <small class="text-muted">Comments</small>
+                    </div>
+                </div>
+
+                <!-- Meal Plan Usage -->
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-primary">@Model.MealPlanUsageCount</div>
+                        <small class="text-muted">In Meal Plans</small>
+                    </div>
+                </div>
+            </div>
+
+            @if (Model.AverageRating > 0)
+            {
+                <div class="mt-3 text-center">
+                    <small class="text-muted">
+                        Average rating: <strong>@Model.AverageRatingDisplay</strong> / 5.0
+                    </small>
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body text-center text-muted">
+            <p class="mb-0">Statistics unavailable</p>
+        </div>
+    </div>
+}

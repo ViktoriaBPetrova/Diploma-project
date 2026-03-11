@@ -1,0 +1,48 @@
+@model HealthyRecipes.Web.ViewModels.Statistics.MealPlanStatisticsViewModel
+
+@if (Model != null)
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">📊 Meal Plan Statistics</h5>
+            
+            <div class="row g-3">
+                <!-- Save Count -->
+                <div class="col-6 col-md-4">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-success">@Model.SaveCount</div>
+                        <small class="text-muted">Saves</small>
+                    </div>
+                </div>
+
+                <!-- Active Followers -->
+                <div class="col-6 col-md-4">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-primary">@Model.ActiveFollowerCount</div>
+                        <small class="text-muted">Active Followers</small>
+                    </div>
+                </div>
+
+                <!-- Completion Rate -->
+                <div class="col-12 col-md-4">
+                    <div class="text-center p-2 bg-light rounded">
+                        <div class="fs-5 fw-bold text-info">@Model.CompletionRateDisplay</div>
+                        <small class="text-muted">Completion Rate</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 text-center">
+                <span class="badge bg-primary">@Model.PopularityLevel</span>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body text-center text-muted">
+            <p class="mb-0">Statistics unavailable</p>
+        </div>
+    </div>
+}

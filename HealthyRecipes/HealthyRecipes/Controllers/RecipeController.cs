@@ -8,6 +8,8 @@ using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.Recipes.Models;
 using HealthyRecipes.Services.SavedRecipes;
+using HealthyRecipes.Services.Statistics.Interfaces;
+using HealthyRecipes.Services.Statistics.Services;
 using HealthyRecipes.Web.ViewModels.Recipe;
 
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +28,7 @@ namespace HealthyRecipes.Web.Controllers
         private readonly ICommentRating _commentRatingService;
         private readonly ISavedRecipe _savedRecipeService;
         private readonly IAllergy _allergyService;
+        private readonly IRecipeStatistics _recipeStatisticsService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public RecipeController(
@@ -37,6 +40,7 @@ namespace HealthyRecipes.Web.Controllers
             ICommentRating commentRatingService,
             ISavedRecipe savedRecipeService,
             IAllergy allergyService,
+            IRecipeStatistics recipeStatisticsService,
             UserManager<ApplicationUser> userManager)
         {
             _recipeService = recipeService;
@@ -47,6 +51,7 @@ namespace HealthyRecipes.Web.Controllers
             _commentRatingService = commentRatingService;
             _savedRecipeService = savedRecipeService;
             _allergyService = allergyService;
+            _recipeStatisticsService = recipeStatisticsService;
             _userManager = userManager;
         }
 
@@ -211,6 +216,8 @@ namespace HealthyRecipes.Web.Controllers
 
             var conflictingIngredients = ingredientVms.Where(i => i.IsAllergen).Select(i => i.IngredientName).ToList();
 
+            //var stats = await _recipeStatisticsService.GetRecipeStatisticsAsync(id);
+
             var vm = new RecipeDetailsViewModel
             {
                 Id = recipe.Id,
@@ -243,7 +250,8 @@ namespace HealthyRecipes.Web.Controllers
                 }),
                 CurrentUserComment = currentUserComment,
                 HasAllergyConflict = conflictingIngredients.Any(),
-                ConflictingIngredients = conflictingIngredients
+                ConflictingIngredients = conflictingIngredients,
+
             };
 
             return View(vm);

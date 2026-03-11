@@ -14,6 +14,9 @@ using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.SavedMealPlans;
 using HealthyRecipes.Services.SavedRecipes;
+using HealthyRecipes.Services.Statistics;
+using HealthyRecipes.Services.Statistics.Interfaces;
+using HealthyRecipes.Services.Statistics.Services;
 using HealthyRecipes.Services.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -80,6 +83,9 @@ builder.Services.AddScoped<ISavedMealPlan, SavedMealPlanService>();
 builder.Services.AddScoped<IRecipeIngredient, RecipeIngredientService>();
 builder.Services.AddScoped<IRecipeCategory, RecipeCategoryService>();
 builder.Services.AddScoped<IRecipeMeal, RecipeMealService>();
+builder.Services.AddScoped<IRecipeStatistics, RecipeStatisticsService>();
+builder.Services.AddScoped<IMealPlanStatistics, MealPlanStatisticsService>();
+builder.Services.AddScoped<IUserStatistics, UserStatisticsService>();
 
 // ─── Pipeline ─────────────────────────────────────────────────────────────────
 var app = builder.Build();
