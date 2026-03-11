@@ -3,6 +3,7 @@ using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Data.Seeding;
 using HealthyRecipes.Data.Seeding.MappingSeeders.RecipeMappingSeeders;
+using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanMappingSeeders;
 using HealthyRecipes.Data.Seeding.MappingSeeders.SavedSeeders;
 using HealthyRecipes.Data.Seeding.MappingSeeders.UserInfoSeedes;
 using HealthyRecipes.Data.Seeding.MealPlanSeeders;
@@ -34,6 +35,7 @@ namespace HealthyRecipes.Data
         public DbSet<RecipeMeal> RecipeMeals { get; init; } = null!;
         public DbSet<RecipeIngredient> RecipeIngredients { get; init; } = null!;
         public DbSet<RecipeCategory> RecipeCategories { get; init; } = null!;
+        public DbSet<MealPlanCategory> MealPlanCategories { get; init; } = null!;
 
         public DbSet<SavedMealPlan> SavedMealPlans { get; init; } = null!;
         public DbSet<SavedRecipe> SavedRecipes { get; init; } = null!;
@@ -46,6 +48,7 @@ namespace HealthyRecipes.Data
             
             builder.ApplyConfiguration(new ApplicationUserConfig());
             builder.ApplyConfiguration(new RecipeCategoryConfig());
+            builder.ApplyConfiguration(new MealPlanCategoryConfig());
             builder.ApplyConfiguration(new RecipeIngredientConfig());
             builder.ApplyConfiguration(new RecipeMealConfig());
             builder.ApplyConfiguration(new SavedRecipeConfig());
@@ -88,6 +91,7 @@ namespace HealthyRecipes.Data
             builder.Entity<RecipeIngredient>().HasData(RecipeIngredientSeeder.GenerateRecipeIngredients().ToArray());
             builder.Entity<RecipeMeal>().HasData(RecipeMealSeeder.GenerateRecipeMeals().ToArray());
             builder.Entity<RecipeCategory>().HasData(RecipeCategorySeeder.GenerateRecipeCategory().ToArray());
+            builder.Entity<MealPlanCategory>().HasData(MealPlanCategorySeeder.GenerateMealPlanCategory().ToArray());
             builder.Entity<SavedRecipe>().HasData(SavedRecipeSeeder.GenerateSavedRecipe().ToArray());
             builder.Entity<SavedMealPlan>().HasData(SavedMealPlanSeeder.GenerateSavedRecipe().ToArray());
             builder.Entity<Allergy>().HasData(AllergySeeder.GenerateAllergies().ToArray());

@@ -17,7 +17,7 @@ namespace HealthyRecipes.Data.Entities
             UpdatedAt = DateTime.UtcNow;
             MealPlanDays = new List<MealPlanDay>();
             SavedMealPlans = new List<SavedMealPlan>();
-
+            MealPlanCategories = new List<MealPlanCategory>();
         }
         public MealPlan(DateTime createdAt, Guid id) : this()
         {
@@ -60,6 +60,7 @@ namespace HealthyRecipes.Data.Entities
         //(Many-to-Many)
         public IEnumerable<SavedMealPlan> SavedMealPlans { get; set; }
 
+        public IEnumerable<MealPlanCategory> MealPlanCategories { get; set; }
 
 
         // ---------- Soft Delete ----------
