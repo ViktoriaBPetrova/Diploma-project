@@ -10,6 +10,7 @@ using HealthyRecipes.Data.Seeding.MealPlanSeeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders;
 using Microsoft.Identity.Client;
 
 namespace HealthyRecipes.Data
@@ -35,7 +36,9 @@ namespace HealthyRecipes.Data
         public DbSet<RecipeMeal> RecipeMeals { get; init; } = null!;
         public DbSet<RecipeIngredient> RecipeIngredients { get; init; } = null!;
         public DbSet<RecipeCategory> RecipeCategories { get; init; } = null!;
+
         public DbSet<MealPlanCategory> MealPlanCategories { get; init; } = null!;
+        public DbSet<MealPlanFollower> MealPlanFollowers { get; init; } = null!;
 
         public DbSet<SavedMealPlan> SavedMealPlans { get; init; } = null!;
         public DbSet<SavedRecipe> SavedRecipes { get; init; } = null!;
@@ -57,7 +60,7 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new CommentRatingConfig());
             builder.ApplyConfiguration(new MealPlanDayConfig());
             builder.ApplyConfiguration(new MealConfig());
-
+            builder.ApplyConfiguration(new MealPlanFollowerConfig());
 
             // USER SEEDING
             var users = UserSeeder.GenerateUsers().ToArray();
@@ -96,6 +99,7 @@ namespace HealthyRecipes.Data
             builder.Entity<SavedMealPlan>().HasData(SavedMealPlanSeeder.GenerateSavedRecipe().ToArray());
             builder.Entity<Allergy>().HasData(AllergySeeder.GenerateAllergies().ToArray());
             builder.Entity<CommentRating>().HasData(CommentRatingSeeder.GenerateCommentRatings().ToArray());
+            builder.Entity<MealPlanFollower>().HasData(MealPlanFollowerSeeder.GenerateMealPlanFollowers().ToArray());
 
             base.OnModelCreating(builder);
 

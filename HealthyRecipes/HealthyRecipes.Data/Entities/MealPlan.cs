@@ -18,6 +18,7 @@ namespace HealthyRecipes.Data.Entities
             MealPlanDays = new List<MealPlanDay>();
             SavedMealPlans = new List<SavedMealPlan>();
             MealPlanCategories = new List<MealPlanCategory>();
+            MealPlanFollowers = new List<MealPlanFollower>();
         }
         public MealPlan(DateTime createdAt, Guid id) : this()
         {
@@ -61,6 +62,8 @@ namespace HealthyRecipes.Data.Entities
         public IEnumerable<SavedMealPlan> SavedMealPlans { get; set; }
 
         public IEnumerable<MealPlanCategory> MealPlanCategories { get; set; }
+
+        public IEnumerable<MealPlanFollower> MealPlanFollowers { get; set; }
 
 
         // ---------- Soft Delete ----------
