@@ -1,4 +1,5 @@
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Recipes.Models;
 
 namespace HealthyRecipes.Services.Recipes
 {
@@ -21,6 +22,7 @@ namespace HealthyRecipes.Services.Recipes
 
         Task<IEnumerable<Recipe>> GetRecipeAsync(Func<Recipe, bool> predicate);
 
+        Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(RecipeFilterDto filter);
 
         Task<bool> SoftDeleteRecipeAsync(Guid id);
 

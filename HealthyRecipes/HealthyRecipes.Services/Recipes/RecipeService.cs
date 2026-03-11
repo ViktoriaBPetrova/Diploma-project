@@ -1,5 +1,6 @@
 using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Recipes.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -249,5 +250,138 @@ namespace HealthyRecipes.Services.Recipes
                 throw;
             }
         }
+
+        public async Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(RecipeFilterDto filter)
+        {
+            if (filter == null)
+                throw new ArgumentNullException(nameof(filter));
+
+            try
+            {
+                var query = _context.Recipes
+                    .Include(r => r.RecipeCategories)
+                        .ThenInclude(rc => rc.Category)
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.Ingredient)
+                    .Include(r => r.CommentRatings)
+                    .Include(r => r.User)
+                    .Where(r => !r.Deleted)
+                    .AsQueryable();
+
+                // Search term
+                if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
+                {
+                    var searchLower = filter.SearchTerm.ToLower();
+                    query = query.Where(r => r.Info.ToLower().Contains(searchLower));
+                }
+
+                // Macronutrient filters
+                if (filter.MinCalories.HasValue)
+                    query = query.Where(r => r.Calories >= filter.MinCalories.Value);
+                if (filter.MaxCalories.HasValue)
+                    query = query.Where(r => r.Calories <= filter.MaxCalories.Value);
+
+                if (filter.MinProtein.HasValue)
+                    query = query.Where(r => r.Protein >= filter.MinProtein.Value);
+                if (filter.MaxProtein.HasValue)
+                    query = query.Where(r => r.Protein <= filter.MaxProtein.Value);
+
+                if (filter.MinCarbs.HasValue)
+                    query = query.Where(r => r.Carbs >= filter.MinCarbs.Value);
+                if (filter.MaxCarbs.HasValue)
+                    query = query.Where(r => r.Carbs <= filter.MaxCarbs.Value);
+
+                if (filter.MinFat.HasValue)
+                    query = query.Where(r => r.Fat >= filter.MinFat.Value);
+                if (filter.MaxFat.HasValue)
+                    query = query.Where(r => r.Fat <= filter.MaxFat.Value);
+
+                // Preparation time
+                if (filter.MaxPreparationTime.HasValue)
+                    query = query.Where(r => r.PrepTime.HasValue && r.PrepTime.Value <= filter.MaxPreparationTime.Value);
+
+                // Difficulty level
+                if (!string.IsNullOrWhiteSpace(filter.DifficultyLevel))
+                {
+                    if (Enum.TryParse<Data.Enums.Difficulty>(filter.DifficultyLevel, true, out var difficulty))
+                    {
+                        query = query.Where(r => r.Difficulty == difficulty);
+                    }
+                }
+
+                // Include ingredients - recipe must contain ALL
+                if (filter.IncludeIngredients?.Any() == true)
+                {
+                    foreach (var ingredientName in filter.IncludeIngredients)
+                    {
+                        var ingredient = ingredientName.ToLower();
+                        query = query.Where(r => r.RecipeIngredients
+                            .Any(ri => ri.Ingredient.Name.ToLower().Contains(ingredient)));
+                    }
+                }
+
+                // Exclude ingredients - recipe must NOT contain ANY
+                if (filter.ExcludeIngredients?.Any() == true)
+                {
+                    foreach (var ingredientName in filter.ExcludeIngredients)
+                    {
+                        var ingredient = ingredientName.ToLower();
+                        query = query.Where(r => !r.RecipeIngredients
+                            .Any(ri => ri.Ingredient.Name.ToLower().Contains(ingredient)));
+                    }
+                }
+
+                // Categories
+                if (filter.CategoryIds?.Any() == true)
+                {
+                    query = query.Where(r => r.RecipeCategories
+                        .Any(rc => filter.CategoryIds.Contains(rc.CategoryId) && !rc.Deleted));
+                }
+
+                // Total count before pagination
+                var totalCount = await query.CountAsync();
+
+                // Sorting
+                query = filter.SortBy?.ToLower() switch
+                {
+                    "calories" => filter.SortOrder?.ToLower() == "asc"
+                        ? query.OrderBy(r => r.Calories)
+                        : query.OrderByDescending(r => r.Calories),
+                    "protein" => filter.SortOrder?.ToLower() == "asc"
+                        ? query.OrderBy(r => r.Protein)
+                        : query.OrderByDescending(r => r.Protein),
+                    "carbs" => filter.SortOrder?.ToLower() == "asc"
+                        ? query.OrderBy(r => r.Carbs)
+                        : query.OrderByDescending(r => r.Carbs),
+                    "fat" => filter.SortOrder?.ToLower() == "asc"
+                        ? query.OrderBy(r => r.Fat)
+                        : query.OrderByDescending(r => r.Fat),
+                    "preptime" => filter.SortOrder?.ToLower() == "asc"
+                        ? query.OrderBy(r => r.PrepTime)
+                        : query.OrderByDescending(r => r.PrepTime),
+                    _ => filter.SortOrder?.ToLower() == "asc"
+                        ? query.OrderBy(r => r.CreatedAt)
+                        : query.OrderByDescending(r => r.CreatedAt)
+                };
+
+                // Pagination
+                var recipes = await query
+                    .Skip((filter.PageNumber - 1) * filter.PageSize)
+                    .Take(filter.PageSize)
+                    .ToListAsync();
+
+                _logger.LogInformation("Retrieved {Count} recipes out of {Total} with filters", recipes.Count, totalCount);
+
+                return (recipes, totalCount);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting filtered recipes");
+                throw;
+            }
+        }
+
+
+
     }
 }

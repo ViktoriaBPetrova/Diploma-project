@@ -6,6 +6,7 @@ using HealthyRecipes.Services.Ingredients;
 using HealthyRecipes.Services.RecipeCategories;
 using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.Recipes;
+using HealthyRecipes.Services.Recipes.Models;
 using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Web.ViewModels.Recipe;
 
@@ -50,85 +51,114 @@ namespace HealthyRecipes.Web.Controllers
         }
 
         // GET: /Recipe
-        public async Task<IActionResult> Index(string? search, Guid? categoryId, int page = 1)
+        public async Task<IActionResult> Index([FromQuery] RecipeFilterViewModel filter)
         {
-            const int pageSize = 12;
-            var allRecipes = await _recipeService.GetAllRecipesAsync();
-            var categories = await _categoryService.GetAllCategoriesAsync();
-
-            if (!string.IsNullOrWhiteSpace(search))
-                allRecipes = allRecipes.Where(r => r.Info.Contains(search, StringComparison.OrdinalIgnoreCase));
-
-            if (categoryId.HasValue)
+            try
             {
-                var categoryRecipes = await _recipeCategoryService.GetRecipesByCategoryAsync(categoryId.Value);
-                var categoryRecipeIds = categoryRecipes.Select(cr => cr.RecipeId).ToHashSet();
-                allRecipes = allRecipes.Where(r => categoryRecipeIds.Contains(r.Id));
-            }
-
-            var recipeList = allRecipes.ToList();
-            var totalPages = (int)Math.Ceiling(recipeList.Count / (double)pageSize);
-            var paged = recipeList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-            Guid? currentUserId = null;
-            HashSet<Guid> savedIds = new();
-            HashSet<Guid> allergyIngredientIds = new();
-
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null)
+                // Map ViewModel to DTO
+                var filterDto = new RecipeFilterDto
                 {
-                    currentUserId = user.Id;
-                    var saved = await _savedRecipeService.GetSavedRecipesByUserAsync(user.Id);
-                    savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
-                    var allergies = await _allergyService.GetAllergiesByUserAsync(user.Id);
-                    allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
+                    SearchTerm = filter.SearchTerm,
+                    MinCalories = filter.MinCalories,
+                    MaxCalories = filter.MaxCalories,
+                    MinProtein = filter.MinProtein,
+                    MaxProtein = filter.MaxProtein,
+                    MinCarbs = filter.MinCarbs,
+                    MaxCarbs = filter.MaxCarbs,
+                    MinFat = filter.MinFat,
+                    MaxFat = filter.MaxFat,
+                    MaxPreparationTime = filter.MaxPreparationTime,
+                    DifficultyLevel = filter.DifficultyLevel,
+                    IncludeIngredients = filter.IncludeIngredients,
+                    ExcludeIngredients = filter.ExcludeIngredients,
+                    CategoryIds = filter.CategoryIds,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    SortBy = filter.SortBy,
+                    SortOrder = filter.SortOrder
+                };
+
+                // Get filtered recipes from service (this does all the heavy lifting)
+                var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto);
+
+                // Get all categories for filter UI
+                var categories = await _categoryService.GetAllCategoriesAsync();
+
+                // Get saved recipe IDs and allergies for current user
+                HashSet<Guid> savedIds = new();
+                HashSet<Guid> allergyIngredientIds = new();
+
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
+                    {
+                        var saved = await _savedRecipeService.GetSavedRecipesByUserAsync(user.Id);
+                        savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
+
+                        var allergies = await _allergyService.GetAllergiesByUserAsync(user.Id);
+                        allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
+                    }
                 }
-            }
 
-            var cards = new List<RecipeCardViewModel>();
-            foreach (var recipe in paged)
-            {
-                var avgRating = await _commentRatingService.GetAverageRatingAsync(recipe.Id);
-                var ratings = await _commentRatingService.GetRatingsByRecipeAsync(recipe.Id);
-                var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(recipe.Id);
-
-                cards.Add(new RecipeCardViewModel
+                // Map to RecipeCardViewModel
+                var cards = new List<RecipeCardViewModel>();
+                foreach (var recipe in recipes)
                 {
-                    Id = recipe.Id,
-                    Title = recipe.Title,
-                    Info = recipe.Info,
-                    Calories = recipe.Calories,
-                    Protein = recipe.Protein,
-                    Carbs = recipe.Carbs,
-                    Fat = recipe.Fat,
-                    PrepTime = recipe.PrepTime,
-                    Difficulty = recipe.Difficulty,
-                    ImageUrl = recipe.ImageUrl,
-                    AverageRating = avgRating,
-                    RatingCount = ratings.Count(),
-                    CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
-                    IsSaved = savedIds.Contains(recipe.Id),
-                    AuthorName = recipe.User?.UserName ?? "Unknown"
+                    var avgRating = await _commentRatingService.GetAverageRatingAsync(recipe.Id);
+                    var ratings = await _commentRatingService.GetRatingsByRecipeAsync(recipe.Id);
+                    var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(recipe.Id);
+
+                    cards.Add(new RecipeCardViewModel
+                    {
+                        Id = recipe.Id,
+                        Title = recipe.Title,
+                        Info = recipe.Info,
+                        Calories = recipe.Calories,
+                        Protein = recipe.Protein,
+                        Carbs = recipe.Carbs,
+                        Fat = recipe.Fat,
+                        PrepTime = recipe.PrepTime,
+                        Difficulty = recipe.Difficulty,
+                        ImageUrl = recipe.ImageUrl,
+                        AverageRating = avgRating,
+                        RatingCount = ratings.Count(),
+                        CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
+                        IsSaved = savedIds.Contains(recipe.Id),
+                        AuthorName = recipe.User?.UserName ?? "Unknown"
+                    });
+                }
+
+                // Create view model
+                var vm = new RecipeIndexViewModel
+                {
+                    Recipes = cards,
+                    SearchQuery = filter.SearchTerm,
+                    SelectedCategoryId = filter.CategoryIds.FirstOrDefault(),
+                    CurrentPage = filter.PageNumber,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / filter.PageSize),
+                    Categories = categories.Select(c => new CategoryFilterViewModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name
+                    }),
+                    Filter = filter,
+                    TotalCount = totalCount
+                };
+
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                
+                TempData["Error"] = "An error occurred while loading recipes.";
+
+                return View(new RecipeIndexViewModel
+                {
+                    Filter = filter ?? new RecipeFilterViewModel(),
+                    Categories = new List<CategoryFilterViewModel>()
                 });
             }
-
-            var vm = new RecipeIndexViewModel
-            {
-                Recipes = cards,
-                SearchQuery = search,
-                SelectedCategoryId = categoryId,
-                CurrentPage = page,
-                TotalPages = totalPages,
-                Categories = categories.Select(c => new CategoryFilterViewModel
-                {
-                    Id = c.Id,
-                    Name = c.Name
-                })
-            };
-
-            return View(vm);
         }
 
         // GET: /Recipe/Details/{id}

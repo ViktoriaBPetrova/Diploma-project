@@ -1,5 +1,5 @@
 @model HealthyRecipes.Web.ViewModels.MealPlan.MealPlanIndexViewModel
-@{ ViewData["Title"] = "My Meal Plans"; }
+@{ ViewData["Title"] = "Meal Plans"; }
 
 <div class="container">
     <div class="page-header">
@@ -12,6 +12,153 @@
         </div>
     </div>
 
+    <!-- Advanced Filter Panel -->
+    <div class="filter-panel">
+        <form method="get" asp-action="Index" id="filterForm">
+            <div class="filter-header" onclick="toggleFilters()">
+                <h3>🔍 Advanced Filters</h3>
+                <button type="button" class="btn-ghost" id="toggleBtn">Show Filters</button>
+            </div>
+
+            <div class="filter-content" id="filterContent" style="display: none;">
+                
+                <!-- Search Bar -->
+                <div class="filter-section">
+                    <label>Search</label>
+                    <input type="text" name="SearchTerm" value="@Model.Filter.SearchTerm" 
+                           placeholder="Search meal plans…" class="form-control" />
+                </div>
+
+                <!-- Daily Macronutrients -->
+                <div class="filter-section">
+                    <h4>Daily Macronutrients (per day)</h4>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Calories / Day</label>
+                            <div class="range-inputs">
+                                <input type="number" name="MinCaloriesPerDay" value="@Model.Filter.MinCaloriesPerDay" 
+                                       placeholder="Min" min="0" class="form-control" />
+                                <span>-</span>
+                                <input type="number" name="MaxCaloriesPerDay" value="@Model.Filter.MaxCaloriesPerDay" 
+                                       placeholder="Max" min="0" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Protein (g) / Day</label>
+                            <div class="range-inputs">
+                                <input type="number" name="MinProteinPerDay" value="@Model.Filter.MinProteinPerDay" 
+                                       placeholder="Min" min="0" class="form-control" />
+                                <span>-</span>
+                                <input type="number" name="MaxProteinPerDay" value="@Model.Filter.MaxProteinPerDay" 
+                                       placeholder="Max" min="0" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Carbs (g) / Day</label>
+                            <div class="range-inputs">
+                                <input type="number" name="MinCarbsPerDay" value="@Model.Filter.MinCarbsPerDay" 
+                                       placeholder="Min" min="0" class="form-control" />
+                                <span>-</span>
+                                <input type="number" name="MaxCarbsPerDay" value="@Model.Filter.MaxCarbsPerDay" 
+                                       placeholder="Max" min="0" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Fat (g) / Day</label>
+                            <div class="range-inputs">
+                                <input type="number" name="MinFatPerDay" value="@Model.Filter.MinFatPerDay" 
+                                       placeholder="Min" min="0" class="form-control" />
+                                <span>-</span>
+                                <input type="number" name="MaxFatPerDay" value="@Model.Filter.MaxFatPerDay" 
+                                       placeholder="Max" min="0" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Details -->
+                <div class="filter-section">
+                    <h4>Plan Details</h4>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Number of Days</label>
+                            <div class="range-inputs">
+                                <input type="number" name="MinDays" value="@Model.Filter.MinDays" 
+                                       placeholder="Min" min="1" class="form-control" />
+                                <span>-</span>
+                                <input type="number" name="MaxDays" value="@Model.Filter.MaxDays" 
+                                       placeholder="Max" min="1" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label>Max Prep Time / Day (minutes)</label>
+                            <input type="number" name="MaxPreparationTimePerDay" 
+                                   value="@Model.Filter.MaxPreparationTimePerDay" 
+                                   placeholder="e.g., 60" min="0" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Categories -->
+                <div class="filter-section">
+                    <h4>Categories</h4>
+                    <div class="category-checkboxes">
+                        @foreach (var category in Model.Categories)
+                        {
+                            var isChecked = Model.Filter.CategoryIds?.Contains(category.Id) == true;
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="CategoryIds" value="@category.Id" 
+                                       @(isChecked ? "checked" : "") />
+                                <span>@category.Name</span>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <!-- Sorting -->
+                <div class="filter-section">
+                    <h4>Sort Results</h4>
+                    <div class="filter-grid">
+                        <div class="filter-group">
+                            <label>Sort By</label>
+                            <select name="SortBy" class="form-control">
+                                <option value="CreatedAt" selected="@(Model.Filter.SortBy == "CreatedAt" ? "selected" : null)">Newest First</option>
+                            <option value="Calories" selected="@(Model.Filter.SortBy == "Calories" ? "selected" : null)">Calories</option>
+                            <option value="Protein" selected="@(Model.Filter.SortBy == "Protein" ? "selected" : null)">Protein</option>
+                            <option value="Carbs" selected="@(Model.Filter.SortBy == "Carbs" ? "selected" : null)">Carbs</option>
+                            <option value="Fat" selected="@(Model.Filter.SortBy == "Fat" ? "selected" : null)">Fat</option>
+                            <option value="Days" selected="@(Model.Filter.SortBy == "Days" ? "selected" : null)">Number of Days</option>
+                            <option value="Name" selected="@(Model.Filter.SortBy == "Name" ? "selected" : null)">Name</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            
+                            <label>Order</label>
+                            <select name="SortOrder" class="form-control">
+                                <option value="asc" selected="@(Model.Filter.SortOrder == "asc" ? "selected" : null)">Low to High</option>
+                                <option value="desc" selected="@(Model.Filter.SortOrder == "desc" ? "selected" : null)">High to Low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+               
+                <!-- Actions -->
+                <div class="filter-actions">
+                    <button type="submit" class="btn-primary">Apply Filters</button>
+                    <a asp-action="Index" class="btn-ghost">Reset All</a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+
+    <!-- My Plans Section -->
     @if (Model.MyMealPlans.Any())
     {
         <h2 class="section-title">My Plans</h2>
@@ -22,24 +169,268 @@
             }
         </div>
     }
-    else
-    {
-        <div class="empty-state" style="padding:48px 0;">
-            <div class="empty-state-icon">📋</div>
-            <h3>No meal plans yet</h3>
-            <p>Create your first plan to start tracking your weekly nutrition.</p>
-            <a asp-action="Create" class="btn-primary" style="margin-top:8px;">Create a plan</a>
-        </div>
-    }
 
+    <!-- Saved Plans Section -->
     @if (Model.SavedMealPlans.Any())
     {
         <h2 class="section-title">Saved Plans</h2>
-        <div class="grid-2">
+        <div class="grid-2" style="margin-bottom:48px;">
             @foreach (var plan in Model.SavedMealPlans)
             {
                 <partial name="_MealPlanCard" model="plan" />
             }
         </div>
     }
+
+    <!-- Browse All Plans Section (with filters) -->
+    <h2 class="section-title">Browse All Plans</h2>
+    
+    @if (Model.TotalCount > 0)
+    {
+        <div style="margin-bottom: 16px; color: #666;">
+            <p>Showing @Model.BrowseAllMealPlans.Count() of @Model.TotalCount meal plans</p>
+        </div>
+    }
+
+    @if (Model.BrowseAllMealPlans.Any())
+    {
+        <div class="grid-2">
+            @foreach (var plan in Model.BrowseAllMealPlans)
+            {
+                <partial name="_MealPlanCard" model="plan" />
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (Model.TotalPages > 1)
+        {
+            <div class="pagination">
+                @if (Model.PageNumber > 1)
+                {
+                    <a asp-action="Index" 
+                       asp-all-route-data="@GetCurrentFilters(Model.Filter, Model.PageNumber - 1)"
+                       class="btn-ghost">← Previous</a>
+                }
+
+                @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
+                {
+                    @if (i == Model.PageNumber)
+                    {
+                        <span class="active">@i</span>
+                    }
+                    else
+                    {
+                        <a asp-action="Index" 
+                           asp-all-route-data="@GetCurrentFilters(Model.Filter, i)">@i</a>
+                    }
+                }
+
+                @if (Model.PageNumber < Model.TotalPages)
+                {
+                    <a asp-action="Index" 
+                       asp-all-route-data="@GetCurrentFilters(Model.Filter, Model.PageNumber + 1)"
+                       class="btn-ghost">Next →</a>
+                }
+            </div>
+        }
+    }
+    else if (!Model.MyMealPlans.Any() && !Model.SavedMealPlans.Any())
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No meal plans found</h3>
+            <p>Try adjusting your filters or create your first meal plan.</p>
+            <a asp-action="Create" class="btn-primary">Create a plan</a>
+        </div>
+    }
 </div>
+
+@functions {
+    Dictionary<string, string> GetCurrentFilters(HealthyRecipes.Web.ViewModels.MealPlan.MealPlanFilterViewModel filter, int page)
+    {
+        var dict = new Dictionary<string, string>();
+        
+        if (!string.IsNullOrEmpty(filter.SearchTerm)) dict["SearchTerm"] = filter.SearchTerm;
+        if (filter.MinCaloriesPerDay.HasValue) dict["MinCaloriesPerDay"] = filter.MinCaloriesPerDay.ToString();
+        if (filter.MaxCaloriesPerDay.HasValue) dict["MaxCaloriesPerDay"] = filter.MaxCaloriesPerDay.ToString();
+        if (filter.MinProteinPerDay.HasValue) dict["MinProteinPerDay"] = filter.MinProteinPerDay.ToString();
+        if (filter.MaxProteinPerDay.HasValue) dict["MaxProteinPerDay"] = filter.MaxProteinPerDay.ToString();
+        if (filter.MinCarbsPerDay.HasValue) dict["MinCarbsPerDay"] = filter.MinCarbsPerDay.ToString();
+        if (filter.MaxCarbsPerDay.HasValue) dict["MaxCarbsPerDay"] = filter.MaxCarbsPerDay.ToString();
+        if (filter.MinFatPerDay.HasValue) dict["MinFatPerDay"] = filter.MinFatPerDay.ToString();
+        if (filter.MaxFatPerDay.HasValue) dict["MaxFatPerDay"] = filter.MaxFatPerDay.ToString();
+        if (filter.MinDays.HasValue) dict["MinDays"] = filter.MinDays.ToString();
+        if (filter.MaxDays.HasValue) dict["MaxDays"] = filter.MaxDays.ToString();
+        if (filter.MaxPreparationTimePerDay.HasValue) dict["MaxPreparationTimePerDay"] = filter.MaxPreparationTimePerDay.ToString();
+        if (!string.IsNullOrEmpty(filter.SortBy)) dict["SortBy"] = filter.SortBy;
+        if (!string.IsNullOrEmpty(filter.SortOrder)) dict["SortOrder"] = filter.SortOrder;
+        
+        dict["PageNumber"] = page.ToString();
+        
+        return dict;
+    }
+}
+
+@section Scripts {
+    <script>
+        function toggleFilters() {
+            const content = document.getElementById('filterContent');
+            const btn = document.getElementById('toggleBtn');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                btn.textContent = 'Hide Filters';
+            } else {
+                content.style.display = 'none';
+                btn.textContent = 'Show Filters';
+            }
+        }
+    </script>
+
+    <style>
+        .filter-panel {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .filter-header h3 {
+            margin: 0;
+            font-size: 1.125rem;
+        }
+
+        .filter-content {
+            padding-top: 16px;
+        }
+
+        .filter-section {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .filter-section:last-of-type {
+            border-bottom: none;
+        }
+
+        .filter-section h4 {
+            margin: 0 0 12px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #555;
+        }
+
+        .range-inputs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .range-inputs input {
+            flex: 1;
+        }
+
+        .range-inputs span {
+            color: #999;
+        }
+
+        .category-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 10px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-label:hover {
+            background-color: #f5f5f5;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 16px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--forest, #4CAF50);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin-top: 32px;
+        }
+
+        .pagination a, .pagination span {
+            padding: 8px 12px;
+            border-radius: 6px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .pagination a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination .active {
+            background-color: var(--forest, #4CAF50);
+            color: white;
+            font-weight: 600;
+        }
+
+        .section-title {
+            margin: 32px 0 16px 0;
+            font-size: 1.5rem;
+        }
+    </style>
+}

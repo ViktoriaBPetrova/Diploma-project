@@ -1,6 +1,8 @@
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.MealPlanDays;
 using HealthyRecipes.Services.MealPlans;
+using HealthyRecipes.Services.MealPlans.Models;
 using HealthyRecipes.Services.Meals;
 using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.SavedMealPlans;
@@ -18,11 +20,13 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IMealPlanDay _mealPlanDayService;
         private readonly IMeal _mealService;
         private readonly IRecipeMeal _recipeMealService;
+        private readonly ICategory _categoryService;
         private readonly ISavedMealPlan _savedMealPlanService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public MealPlanController(
             IMealPlan mealPlanService,
+            ICategory categoryService,
             IMealPlanDay mealPlanDayService,
             IMeal mealService,
             IRecipeMeal recipeMealService,
@@ -33,21 +37,61 @@ namespace HealthyRecipes.Web.Controllers
             _mealPlanDayService = mealPlanDayService;
             _mealService = mealService;
             _recipeMealService = recipeMealService;
+            _categoryService = categoryService;
             _savedMealPlanService = savedMealPlanService;
             _userManager = userManager;
         }
 
         // GET: /MealPlan
-        public async Task<IActionResult> Index()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var myPlans = await _mealPlanService.GetMealPlansByUserAsync(user!.Id);
-            var savedPlans = await _savedMealPlanService.GetSavedMealPlansByUserAsync(user.Id);
-            var savedPlanIds = savedPlans.Select(s => s.MealPlanId).ToHashSet();
 
-            var vm = new MealPlanIndexViewModel
+        public async Task<IActionResult> Index([FromQuery] MealPlanFilterViewModel filter)
+        {
+            try
             {
-                MyMealPlans = myPlans.Select(mp => new MealPlanCardViewModel
+                var user = await _userManager.GetUserAsync(User);
+
+                if (user == null)
+                {
+                    return RedirectToAction("Login", "Account");
+                }
+
+                // Map ViewModel to DTO
+                var filterDto = new MealPlanFilterDto
+                {
+                    SearchTerm = filter.SearchTerm,
+                    MinCaloriesPerDay = filter.MinCaloriesPerDay,
+                    MaxCaloriesPerDay = filter.MaxCaloriesPerDay,
+                    MinProteinPerDay = filter.MinProteinPerDay,
+                    MaxProteinPerDay = filter.MaxProteinPerDay,
+                    MinCarbsPerDay = filter.MinCarbsPerDay,
+                    MaxCarbsPerDay = filter.MaxCarbsPerDay,
+                    MinFatPerDay = filter.MinFatPerDay,
+                    MaxFatPerDay = filter.MaxFatPerDay,
+                    MinDays = filter.MinDays,
+                    MaxDays = filter.MaxDays,
+                    MaxPreparationTimePerDay = filter.MaxPreparationTimePerDay,
+                    CategoryIds = filter.CategoryIds,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    SortBy = filter.SortBy,
+                    SortOrder = filter.SortOrder
+                };
+
+                // Get filtered meal plans (for Browse All section)
+                var (allMealPlans, totalCount) = await _mealPlanService.GetFilteredMealPlansAsync(filterDto);
+
+                // Get user's own meal plans
+                var myPlans = await _mealPlanService.GetMealPlansByUserAsync(user.Id);
+
+                // Get saved meal plans
+                var savedPlans = await _savedMealPlanService.GetSavedMealPlansByUserAsync(user.Id);
+                var savedPlanIds = savedPlans.Select(s => s.MealPlanId).ToHashSet();
+
+                // Get all categories for filter UI
+                var categories = await _categoryService.GetAllCategoriesAsync();
+
+                // Map My Plans
+                var myPlanCards = myPlans.Select(mp => new MealPlanCardViewModel
                 {
                     Id = mp.Id,
                     Name = mp.Name,
@@ -59,9 +103,14 @@ namespace HealthyRecipes.Web.Controllers
                     DayCount = mp.MealPlanDays?.Count() ?? 0,
                     IsSaved = savedPlanIds.Contains(mp.Id),
                     IsOwner = true,
-                    CreatedAt = mp.CreatedAt
-                }),
-                SavedMealPlans = savedPlans.Select(smp => new MealPlanCardViewModel
+                    CreatedAt = mp.CreatedAt,
+                    CategoryNames = mp.MealPlanCategories?
+                        .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
+                        .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
+                }).ToList();
+
+                // Map Saved Plans
+                var savedPlanCards = savedPlans.Select(smp => new MealPlanCardViewModel
                 {
                     Id = smp.MealPlan.Id,
                     Name = smp.MealPlan.Name,
@@ -73,11 +122,62 @@ namespace HealthyRecipes.Web.Controllers
                     DayCount = smp.MealPlan.MealPlanDays?.Count() ?? 0,
                     IsSaved = true,
                     IsOwner = smp.MealPlan.UserId == user.Id,
-                    CreatedAt = smp.MealPlan.CreatedAt
-                })
-            };
+                    CreatedAt = smp.MealPlan.CreatedAt,
+                    CategoryNames = smp.MealPlan.MealPlanCategories?
+                        .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
+                        .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
+                }).ToList();
 
-            return View(vm);
+                // Map Browse All (filtered results, excluding user's own plans)
+                var browseCards = allMealPlans
+                    .Where(mp => mp.UserId != user.Id)
+                    .Select(mp => new MealPlanCardViewModel
+                    {
+                        Id = mp.Id,
+                        Name = mp.Name,
+                        Description = mp.Description,
+                        Calories = mp.Calories,
+                        Protein = mp.Protein,
+                        Carbs = mp.Carbs,
+                        Fat = mp.Fat,
+                        DayCount = mp.MealPlanDays?.Count() ?? 0,
+                        IsSaved = savedPlanIds.Contains(mp.Id),
+                        IsOwner = false,
+                        CreatedAt = mp.CreatedAt,
+                        CategoryNames = mp.MealPlanCategories?
+                            .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
+                            .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
+                    }).ToList();
+
+                var vm = new MealPlanIndexViewModel
+                {
+                    MyMealPlans = myPlanCards,
+                    SavedMealPlans = savedPlanCards,
+                    BrowseAllMealPlans = browseCards,
+                    Categories = categories.Select(c => new MealPlanCategoryViewModel
+                    {
+                        Id = c.Id,
+                        Name = c.Name
+                    }).ToList(),
+                    Filter = filter,
+                    TotalCount = totalCount,
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize,
+                    TotalPages = (int)Math.Ceiling((double)totalCount / filter.PageSize)
+                };
+
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred while loading meal plans.";
+
+                return View(new MealPlanIndexViewModel
+                {
+                    Filter = filter ?? new MealPlanFilterViewModel(),
+                    Categories = new List<MealPlanCategoryViewModel>()
+                });
+            }
         }
 
         // GET: /MealPlan/Details/{id}

@@ -1,4 +1,5 @@
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.MealPlans.Models;
 
 namespace HealthyRecipes.Services.MealPlans
 {
@@ -11,5 +12,6 @@ namespace HealthyRecipes.Services.MealPlans
         Task<bool> SoftDeleteAsync(Guid id);
         Task<bool> RestoreMealPlanAsync(Guid id);
         Task RecalculateNutritionalTotalsAsync(Guid mealPlanId);
+        Task<(List<MealPlan> MealPlans, int TotalCount)> GetFilteredMealPlansAsync(MealPlanFilterDto filter);
     }
 }

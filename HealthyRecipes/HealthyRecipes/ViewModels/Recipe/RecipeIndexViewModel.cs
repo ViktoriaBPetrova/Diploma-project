@@ -10,5 +10,7 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         public IEnumerable<CategoryFilterViewModel> Categories { get; set; } = new List<CategoryFilterViewModel>();
         public int CurrentPage { get; set; } = 1;
         public int TotalPages { get; set; } = 1;
+        public RecipeFilterViewModel Filter { get; set; } = new();
+        public int TotalCount { get; set; }
     }
 }
