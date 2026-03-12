@@ -12,6 +12,7 @@ namespace HealthyRecipes.Web.ViewModels.MealPlan
         public int DayCount { get; set; }
         public bool IsSaved { get; set; }
         public bool IsOwner { get; set; }
+        public int FollowerCount { get; set; }
         public DateTime CreatedAt { get; set; }
         public IEnumerable<string> CategoryNames { get; set; } = new List<string>();
     }

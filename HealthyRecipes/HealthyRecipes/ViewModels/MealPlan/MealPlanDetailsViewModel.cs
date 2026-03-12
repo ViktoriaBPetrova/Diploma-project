@@ -11,6 +11,7 @@ namespace HealthyRecipes.Web.ViewModels.MealPlan
         public float Fat { get; set; }
         public bool IsSaved { get; set; }
         public bool IsOwner { get; set; }
+        public bool IsFollowing { get; set; }
         public IEnumerable<MealPlanDayViewModel> Days { get; set; } = new List<MealPlanDayViewModel>();
     }
 }

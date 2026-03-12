@@ -1,0 +1,115 @@
+@model HealthyRecipes.Web.ViewModels.MealPlanFollower.StartFollowingViewModel
+@{
+    ViewData["Title"] = "Start Following Meal Plan";
+}
+
+<div class="container">
+    <div class="page-header">
+        <h1>Start Following Meal Plan</h1>
+        <p class="subtitle">Begin tracking your progress with this meal plan</p>
+    </div>
+
+    <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <div class="card-header">
+            <h2>@Model.MealPlanName</h2>
+        </div>
+
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.MealPlanDescription))
+            {
+                <p class="description">@Model.MealPlanDescription</p>
+            }
+
+            <div class="nutrition-summary" style="margin: 24px 0;">
+                <div class="stat-grid">
+                    <div class="stat-item">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value">@Model.DaysCount days</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Daily Calories</span>
+                        <span class="stat-value">@Math.Round(Model.Calories / Model.DaysCount, 0) kcal</span>
+                    </div>
+                </div>
+
+                <div class="macros-grid" style="margin-top: 16px;">
+                    <div class="macro-pill">
+                        <span class="macro-label">Protein</span>
+                        <span class="macro-value">@Math.Round(Model.Protein / Model.DaysCount, 1)g</span>
+                    </div>
+                    <div class="macro-pill">
+                        <span class="macro-label">Carbs</span>
+                        <span class="macro-value">@Math.Round(Model.Carbs / Model.DaysCount, 1)g</span>
+                    </div>
+                    <div class="macro-pill">
+                        <span class="macro-label">Fat</span>
+                        <span class="macro-value">@Math.Round(Model.Fat / Model.DaysCount, 1)g</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box" style="margin: 24px 0; padding: 16px; background: var(--parchment); border-left: 4px solid var(--forest);">
+                <h4 style="margin-top: 0;">What happens when you follow a meal plan?</h4>
+                <ul style="margin-bottom: 0;">
+                    <li>Track your daily progress through the plan</li>
+                    <li>Get nutrition insights and meal reminders</li>
+                    <li>Mark the plan as completed when done</li>
+                    <li>View your meal plan history</li>
+                </ul>
+            </div>
+
+            <form asp-action="StartFollowing" asp-route-id="@Model.MealPlanId" method="post">
+                @Html.AntiForgeryToken()
+                
+                <div class="form-actions" style="margin-top: 24px;">
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        Start Following This Plan
+                    </button>
+                    <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.MealPlanId" class="btn-ghost" style="width: 100%; text-align: center; margin-top: 12px;">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .stat-label {
+        font-size: 14px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--forest);
+    }
+
+    .macros-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .info-box ul {
+        padding-left: 20px;
+    }
+
+    .info-box li {
+        margin-bottom: 8px;
+    }
+</style>

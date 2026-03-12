@@ -20,6 +20,18 @@
                     @(Model.IsSaved ? "♥ Saved" : "♡ Save Plan")
                 </button>
             </form>
+            @if (!Model.IsFollowing)
+            {
+                <a asp-controller="MealPlanFollower" asp-action="StartFollowing" asp-route-id="@Model.Id" class="btn-primary">
+                    📋 Start Following This Plan
+                </a>
+            }
+            else
+            {
+                <a asp-controller="MealPlanFollower" asp-action="MyActivePlans" class="btn-ghost">
+                    ✓ Already Following - View My Plans
+                </a>
+            }
             @if (Model.IsOwner)
             {
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>

@@ -6,6 +6,7 @@ using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.CommentRatings;
 using HealthyRecipes.Services.Ingredients;
 using HealthyRecipes.Services.MealPlanDays;
+using HealthyRecipes.Services.MealPlanFollowers;
 using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.Meals;
 using HealthyRecipes.Services.RecipeCategories;
@@ -86,6 +87,7 @@ builder.Services.AddScoped<IRecipeMeal, RecipeMealService>();
 builder.Services.AddScoped<IRecipeStatistics, RecipeStatisticsService>();
 builder.Services.AddScoped<IMealPlanStatistics, MealPlanStatisticsService>();
 builder.Services.AddScoped<IUserStatistics, UserStatisticsService>();
+builder.Services.AddScoped<IMealPlanFollower, MealPlanFollowerService>();
 
 // ─── Pipeline ─────────────────────────────────────────────────────────────────
 var app = builder.Build();

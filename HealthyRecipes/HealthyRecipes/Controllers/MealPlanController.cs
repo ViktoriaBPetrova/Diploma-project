@@ -1,6 +1,7 @@
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.MealPlanDays;
+using HealthyRecipes.Services.MealPlanFollowers;
 using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.MealPlans.Models;
 using HealthyRecipes.Services.Meals;
@@ -8,6 +9,7 @@ using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.SavedMealPlans;
 using HealthyRecipes.Web.ViewModels.MealPlan;
 using Microsoft.AspNetCore.Authorization;
+using HealthyRecipes.Services.MealPlanFollowers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +24,7 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IRecipeMeal _recipeMealService;
         private readonly ICategory _categoryService;
         private readonly ISavedMealPlan _savedMealPlanService;
+        private readonly IMealPlanFollower _mealPlanFollowerService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public MealPlanController(
@@ -31,6 +34,7 @@ namespace HealthyRecipes.Web.Controllers
             IMeal mealService,
             IRecipeMeal recipeMealService,
             ISavedMealPlan savedMealPlanService,
+            IMealPlanFollower mealPlanFollowerService,
             UserManager<ApplicationUser> userManager)
         {
             _mealPlanService = mealPlanService;
@@ -39,6 +43,7 @@ namespace HealthyRecipes.Web.Controllers
             _recipeMealService = recipeMealService;
             _categoryService = categoryService;
             _savedMealPlanService = savedMealPlanService;
+            _mealPlanFollowerService = mealPlanFollowerService;
             _userManager = userManager;
         }
 
@@ -90,48 +95,65 @@ namespace HealthyRecipes.Web.Controllers
                 // Get all categories for filter UI
                 var categories = await _categoryService.GetAllCategoriesAsync();
 
-                // Map My Plans
-                var myPlanCards = myPlans.Select(mp => new MealPlanCardViewModel
+                // Map My Plans 
+                var myPlanCards = new List<MealPlanCardViewModel>();
+                foreach (var mp in myPlans)
                 {
-                    Id = mp.Id,
-                    Name = mp.Name,
-                    Description = mp.Description,
-                    Calories = mp.Calories,
-                    Protein = mp.Protein,
-                    Carbs = mp.Carbs,
-                    Fat = mp.Fat,
-                    DayCount = mp.MealPlanDays?.Count() ?? 0,
-                    IsSaved = savedPlanIds.Contains(mp.Id),
-                    IsOwner = true,
-                    CreatedAt = mp.CreatedAt,
-                    CategoryNames = mp.MealPlanCategories?
-                        .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
-                        .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
-                }).ToList();
+                    var followerCount = await _mealPlanFollowerService.GetFollowerCountAsync(mp.Id);
 
-                // Map Saved Plans
-                var savedPlanCards = savedPlans.Select(smp => new MealPlanCardViewModel
+                    myPlanCards.Add(new MealPlanCardViewModel
+                    {
+                        Id = mp.Id,
+                        Name = mp.Name,
+                        Description = mp.Description,
+                        Calories = mp.Calories,
+                        Protein = mp.Protein,
+                        Carbs = mp.Carbs,
+                        Fat = mp.Fat,
+                        DayCount = mp.MealPlanDays?.Count() ?? 0,
+                        IsSaved = savedPlanIds.Contains(mp.Id),
+                        IsOwner = true,
+                        CreatedAt = mp.CreatedAt,
+                        FollowerCount = followerCount,  // ADD THIS
+                        CategoryNames = mp.MealPlanCategories?
+                            .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
+                            .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
+                    });
+                }
+
+                // Map Saved Plans 
+                var savedPlanCards = new List<MealPlanCardViewModel>();
+                foreach (var smp in savedPlans)
                 {
-                    Id = smp.MealPlan.Id,
-                    Name = smp.MealPlan.Name,
-                    Description = smp.MealPlan.Description,
-                    Calories = smp.MealPlan.Calories,
-                    Protein = smp.MealPlan.Protein,
-                    Carbs = smp.MealPlan.Carbs,
-                    Fat = smp.MealPlan.Fat,
-                    DayCount = smp.MealPlan.MealPlanDays?.Count() ?? 0,
-                    IsSaved = true,
-                    IsOwner = smp.MealPlan.UserId == user.Id,
-                    CreatedAt = smp.MealPlan.CreatedAt,
-                    CategoryNames = smp.MealPlan.MealPlanCategories?
-                        .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
-                        .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
-                }).ToList();
+                    var followerCount = await _mealPlanFollowerService.GetFollowerCountAsync(smp.MealPlan.Id);
 
-                // Map Browse All (filtered results, excluding user's own plans)
-                var browseCards = allMealPlans
-                    .Where(mp => mp.UserId != user.Id)
-                    .Select(mp => new MealPlanCardViewModel
+                    savedPlanCards.Add(new MealPlanCardViewModel
+                    {
+                        Id = smp.MealPlan.Id,
+                        Name = smp.MealPlan.Name,
+                        Description = smp.MealPlan.Description,
+                        Calories = smp.MealPlan.Calories,
+                        Protein = smp.MealPlan.Protein,
+                        Carbs = smp.MealPlan.Carbs,
+                        Fat = smp.MealPlan.Fat,
+                        DayCount = smp.MealPlan.MealPlanDays?.Count() ?? 0,
+                        IsSaved = true,
+                        IsOwner = smp.MealPlan.UserId == user.Id,
+                        CreatedAt = smp.MealPlan.CreatedAt,
+                        FollowerCount = followerCount,  // ADD THIS
+                        CategoryNames = smp.MealPlan.MealPlanCategories?
+                            .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
+                            .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
+                    });
+                }
+
+                // Map Browse All 
+                var browseCards = new List<MealPlanCardViewModel>();
+                foreach (var mp in allMealPlans.Where(mp => mp.UserId != user.Id))
+                {
+                    var followerCount = await _mealPlanFollowerService.GetFollowerCountAsync(mp.Id);
+
+                    browseCards.Add(new MealPlanCardViewModel
                     {
                         Id = mp.Id,
                         Name = mp.Name,
@@ -144,10 +166,12 @@ namespace HealthyRecipes.Web.Controllers
                         IsSaved = savedPlanIds.Contains(mp.Id),
                         IsOwner = false,
                         CreatedAt = mp.CreatedAt,
+                        FollowerCount = followerCount,  // ADD THIS
                         CategoryNames = mp.MealPlanCategories?
                             .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
                             .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
-                    }).ToList();
+                    });
+                }
 
                 var vm = new MealPlanIndexViewModel
                 {
@@ -188,6 +212,7 @@ namespace HealthyRecipes.Web.Controllers
 
             var user = await _userManager.GetUserAsync(User);
             bool isSaved = await _savedMealPlanService.IsMealPlanSavedAsync(user!.Id, id);
+            bool isFollowing = await _mealPlanFollowerService.IsFollowingAsync(user.Id, id);
             var days = await _mealPlanDayService.GetDaysByMealPlanAsync(id);
 
             var dayVms = new List<MealPlanDayViewModel>();
@@ -243,6 +268,7 @@ namespace HealthyRecipes.Web.Controllers
                 Fat = mealPlan.Fat,
                 IsSaved = isSaved,
                 IsOwner = mealPlan.UserId == user.Id,
+                IsFollowing = isFollowing,
                 Days = dayVms
             };
 

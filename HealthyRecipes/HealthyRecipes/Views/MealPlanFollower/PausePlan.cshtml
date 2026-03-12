@@ -1,0 +1,55 @@
+@model HealthyRecipes.Web.ViewModels.MealPlanFollower.ReasonMealPlanViewModel
+@{
+    ViewData["Title"] = "Pause Meal Plan";
+}
+
+<div class="container">
+    <div class="page-header">
+        <h1>Pause Meal Plan</h1>
+        <p class="subtitle">Tell us why you're pausing</p>
+    </div>
+
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-header">
+            <h2>@Model.MealPlanName</h2>
+        </div>
+
+        <div class="card-body">
+            <form asp-action="PausePlan" asp-route-id="@Model.MealPlanId" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="MealPlanId" />
+                <input type="hidden" asp-for="MealPlanName" />
+
+                <div class="form-group">
+                    <label asp-for="Reason">Reason (Optional)</label>
+                    <textarea asp-for="Reason" 
+                              class="form-control" 
+                              rows="4" 
+                              placeholder="Let us know why you're pausing this meal plan..."></textarea>
+                    <span asp-validation-for="Reason" class="text-danger"></span>
+                    <small>This helps us improve meal plan recommendations</small>
+                </div>
+
+                <div class="warning-box" style="margin: 24px 0; padding: 16px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                    <strong>⚠️ Are you sure?</strong>
+                    <p style="margin: 8px 0 0 0;">
+                        You can always resume this meal plan later and your current progress will be saved.
+                    </p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-danger" style="width: 100%;">
+                        Pause for some time
+                    </button>
+                    <a asp-action="MyActivePlans" class="btn-ghost" style="width: 100%; text-align: center; margin-top: 12px;">
+                        Keep actively Following
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
