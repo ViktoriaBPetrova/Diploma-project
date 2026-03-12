@@ -32,6 +32,7 @@ namespace HealthyRecipes.Data.Entities.MappingEntities
         public bool IsActive { get; set; }
         public MealPlanFollowerStatus Status { get; set; }
         public string? DropoutReason { get; set; }
+        public string? PauseReason { get; set; }
 
         // ---------- Metadata ----------
         public DateTime UpdatedAt { get; set; }
