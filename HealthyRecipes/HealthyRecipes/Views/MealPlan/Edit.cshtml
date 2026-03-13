@@ -1,10 +1,10 @@
 @model HealthyRecipes.Web.ViewModels.MealPlan.EditMealPlanViewModel
 @{ ViewData["Title"] = "Edit Meal Plan"; }
 
-<div class="container inline-style-1">
-    <div class="inline-style-2">
-        <a asp-action="Details" asp-route-id="@Model.Id" class="inline-style-3">← Back to plan</a>
-        <h1 class="inline-style-4">Edit Meal Plan</h1>
+<div class="container meal-plan-form-container">
+    <div class="meal-plan-form-wrapper">
+        <a asp-action="Details" asp-route-id="@Model.Id" class="meal-plan-form-hint">← Back to plan</a>
+        <h1 class="meal-plan-form-label">Edit Meal Plan</h1>
 
         <div class="form-card">
             <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
@@ -22,7 +22,7 @@
                     <textarea asp-for="Description" class="form-control" rows="3"></textarea>
                 </div>
 
-                <div class="inline-style-5">
+                <div class="meal-plan-form-actions">
                     <button type="submit" class="btn-primary">Save changes</button>
                     <a asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">Cancel</a>
                 </div>
@@ -31,28 +31,3 @@
     </div>
 </div>
 
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        padding-top:48px;
-        padding-bottom:64px;
-    }
-    .inline-style-2 {
-        max-width:560px;
-        margin:0 auto;
-    }
-    .inline-style-3 {
-        color:var(--muted);
-        font-size:0.875rem;
-    }
-    .inline-style-4 {
-        margin:16px 0 8px;
-    }
-    .inline-style-5 {
-        display:flex;
-        gap:12px;
-        margin-top:8px;
-    }
-    </style>
-}
