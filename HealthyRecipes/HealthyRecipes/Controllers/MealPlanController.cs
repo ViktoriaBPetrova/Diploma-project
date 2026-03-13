@@ -114,7 +114,7 @@ namespace HealthyRecipes.Web.Controllers
                         IsSaved = savedPlanIds.Contains(mp.Id),
                         IsOwner = true,
                         CreatedAt = mp.CreatedAt,
-                        FollowerCount = followerCount,  // ADD THIS
+                        FollowerCount = followerCount,  
                         CategoryNames = mp.MealPlanCategories?
                             .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
                             .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
@@ -140,7 +140,7 @@ namespace HealthyRecipes.Web.Controllers
                         IsSaved = true,
                         IsOwner = smp.MealPlan.UserId == user.Id,
                         CreatedAt = smp.MealPlan.CreatedAt,
-                        FollowerCount = followerCount,  // ADD THIS
+                        FollowerCount = followerCount, 
                         CategoryNames = smp.MealPlan.MealPlanCategories?
                             .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
                             .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
@@ -166,7 +166,7 @@ namespace HealthyRecipes.Web.Controllers
                         IsSaved = savedPlanIds.Contains(mp.Id),
                         IsOwner = false,
                         CreatedAt = mp.CreatedAt,
-                        FollowerCount = followerCount,  // ADD THIS
+                        FollowerCount = followerCount, 
                         CategoryNames = mp.MealPlanCategories?
                             .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
                             .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()

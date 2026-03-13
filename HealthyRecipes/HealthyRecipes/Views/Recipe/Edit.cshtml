@@ -1,18 +1,18 @@
 @model HealthyRecipes.Web.ViewModels.Recipe.EditRecipeViewModel
 @{ ViewData["Title"] = "Edit Recipe"; }
 
-<div class="container" style="padding-top:48px; padding-bottom:64px;">
-    <div style="max-width:720px; margin:0 auto;">
-        <a asp-action="Details" asp-route-id="@Model.Id" style="color:var(--muted); font-size:0.875rem;">← Back to recipe</a>
-        <h1 style="margin:16px 0 8px;">Edit Recipe</h1>
-        <p class="page-subtitle" style="margin-bottom:36px;">Update your recipe details</p>
+<div class="container inline-style-1">
+    <div class="inline-style-2">
+        <a asp-action="Details" asp-route-id="@Model.Id" class="inline-style-3">← Back to recipe</a>
+        <h1 class="inline-style-4">Edit Recipe</h1>
+        <p class="page-subtitle inline-style-5">Update your recipe details</p>
 
         <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="validation-summary-errors" style="margin-bottom:16px;"></div>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors inline-style-6"></div>
 
-            <div style="background:white; border-radius:var(--radius-lg); padding:36px; border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:24px;">
-                <h3 style="margin-bottom:20px;">Basic Info</h3>
+            <div class="inline-style-7">
+                <h3 class="inline-style-8">Basic Info</h3>
                 <div class="form-group">
                     <label asp-for="Title">Recipe Title *</label>
                     <input asp-for="Title" class="form-control" />
@@ -51,25 +51,97 @@
                 </div>
             </div>
 
-            <div style="background:white; border-radius:var(--radius-lg); padding:36px; border:1px solid var(--border); box-shadow:var(--shadow); margin-bottom:24px;">
-                <h3 style="margin-bottom:20px;">Categories</h3>
-                <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <div class="inline-style-9">
+                <h3 class="inline-style-10">Categories</h3>
+                <div class="inline-style-11">
                     @foreach (var cat in Model.AvailableCategories)
                     {
-                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; background:var(--parchment); padding:8px 14px; border-radius:20px; border:1.5px solid var(--border); font-size:0.9rem;">
+                        <label class="inline-style-12">
                             <input type="checkbox" name="SelectedCategoryIds" value="@cat.Id"
                                    @(Model.SelectedCategoryIds.Contains(cat.Id) ? "checked" : "")
-                                   style="accent-color:var(--forest);" />
+                                   class="inline-style-13" />
                             @cat.Name
                         </label>
                     }
                 </div>
             </div>
 
-            <div style="display:flex; gap:12px;">
+            <div class="inline-style-14">
                 <button type="submit" class="btn-primary">Save changes</button>
                 <a asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">Cancel</a>
             </div>
         </form>
     </div>
 </div>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        padding-top:48px;
+        padding-bottom:64px;
+    }
+    .inline-style-2 {
+        max-width:720px;
+        margin:0 auto;
+    }
+    .inline-style-3 {
+        color:var(--muted);
+        font-size:0.875rem;
+    }
+    .inline-style-4 {
+        margin:16px 0 8px;
+    }
+    .inline-style-5 {
+        margin-bottom:36px;
+    }
+    .inline-style-6 {
+        margin-bottom:16px;
+    }
+    .inline-style-7 {
+        background:white;
+        border-radius:var(--radius-lg);
+        padding:36px;
+        border:1px solid var(--border);
+        box-shadow:var(--shadow);
+        margin-bottom:24px;
+    }
+    .inline-style-8 {
+        margin-bottom:20px;
+    }
+    .inline-style-9 {
+        background:white;
+        border-radius:var(--radius-lg);
+        padding:36px;
+        border:1px solid var(--border);
+        box-shadow:var(--shadow);
+        margin-bottom:24px;
+    }
+    .inline-style-10 {
+        margin-bottom:20px;
+    }
+    .inline-style-11 {
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+    }
+    .inline-style-12 {
+        display:flex;
+        align-items:center;
+        gap:8px;
+        cursor:pointer;
+        background:var(--parchment);
+        padding:8px 14px;
+        border-radius:20px;
+        border:1.5px solid var(--border);
+        font-size:0.9rem;
+    }
+    .inline-style-13 {
+        accent-color:var(--forest);
+    }
+    .inline-style-14 {
+        display:flex;
+        gap:12px;
+    }
+    </style>
+}

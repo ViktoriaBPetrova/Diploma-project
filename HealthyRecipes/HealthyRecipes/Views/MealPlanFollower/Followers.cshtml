@@ -86,7 +86,7 @@
         </div>
     }
 
-    <div class="actions" style="margin-top: 32px;">
+    <div class="actions inline-style-1">
         <a asp-action="Details" asp-route-id="@Model.MealPlanId" class="btn-ghost">Back to Meal Plan</a>
     </div>
 </div>
@@ -259,3 +259,12 @@
         }
     }
 </style>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        margin-top: 32px;
+    }
+    </style>
+}

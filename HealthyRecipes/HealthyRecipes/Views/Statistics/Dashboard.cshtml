@@ -139,9 +139,8 @@
                             <span>Recipe Saves</span>
                             <span class="fw-bold">@Model.TotalRecipeSaves</span>
                         </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-success" role="progressbar" 
-                                 style="width: @(Model.TotalEngagement > 0 ? (Model.TotalRecipeSaves * 100.0 / Model.TotalEngagement) : 0)%"></div>
+                        <div class="progress inline-style-1">
+                            <div class="progress-bar bg-success inline-style-2" role="progressbar"></div>
                         </div>
                     </div>
                     <div class="mb-3">
@@ -149,9 +148,8 @@
                             <span>Meal Plan Saves</span>
                             <span class="fw-bold">@Model.TotalMealPlanSaves</span>
                         </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" role="progressbar" 
-                                 style="width: @(Model.TotalEngagement > 0 ? (Model.TotalMealPlanSaves * 100.0 / Model.TotalEngagement) : 0)%"></div>
+                        <div class="progress inline-style-3">
+                            <div class="progress-bar bg-primary inline-style-4" role="progressbar"></div>
                         </div>
                     </div>
                     <div>
@@ -159,9 +157,8 @@
                             <span>Comments Received</span>
                             <span class="fw-bold">@Model.TotalCommentsReceived</span>
                         </div>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-info" role="progressbar" 
-                                 style="width: @(Model.TotalEngagement > 0 ? (Model.TotalCommentsReceived * 100.0 / Model.TotalEngagement) : 0)%"></div>
+                        <div class="progress inline-style-5">
+                            <div class="progress-bar bg-info inline-style-6" role="progressbar"></div>
                         </div>
                     </div>
                 </div>
@@ -220,3 +217,27 @@
         }
     </div>
 </div>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        height: 8px;
+    }
+    .inline-style-2 {
+        width: @(Model.TotalEngagement > 0 ? (Model.TotalRecipeSaves * 100.0 / Model.TotalEngagement) : 0)%
+    }
+    .inline-style-3 {
+        height: 8px;
+    }
+    .inline-style-4 {
+        width: @(Model.TotalEngagement > 0 ? (Model.TotalMealPlanSaves * 100.0 / Model.TotalEngagement) : 0)%
+    }
+    .inline-style-5 {
+        height: 8px;
+    }
+    .inline-style-6 {
+        width: @(Model.TotalEngagement > 0 ? (Model.TotalCommentsReceived * 100.0 / Model.TotalEngagement) : 0)%
+    }
+    </style>
+}

@@ -23,20 +23,20 @@
     </div>
 </section>
 
-<section class="section" style="background:var(--parchment); border-radius: 24px; margin: 0 24px 48px;">
+<section class="section inline-style-1">
     <div class="container">
-        <div style="display:flex; gap:48px; flex-wrap:wrap; justify-content:center; text-align:center; padding: 24px 0;">
+        <div class="inline-style-2">
             <div>
-                <div style="font-family: var(--font-display); font-size:2.5rem; color:var(--forest);">150+</div>
-                <div style="font-size:0.875rem; color:var(--muted);">Healthy recipes</div>
+                <div class="inline-style-3">150+</div>
+                <div class="inline-style-4">Healthy recipes</div>
             </div>
             <div>
-                <div style="font-family: var(--font-display); font-size:2.5rem; color:var(--forest);">5</div>
-                <div style="font-size:0.875rem; color:var(--muted);">Categories</div>
+                <div class="inline-style-5">5</div>
+                <div class="inline-style-6">Categories</div>
             </div>
             <div>
-                <div style="font-family: var(--font-display); font-size:2.5rem; color:var(--forest);">100%</div>
-                <div style="font-size:0.875rem; color:var(--muted);">Macro tracked</div>
+                <div class="inline-style-7">100%</div>
+                <div class="inline-style-8">Macro tracked</div>
             </div>
         </div>
     </div>
@@ -60,9 +60,9 @@
 
 <section class="section">
     <div class="container">
-        <div class="page-header-row" style="margin-bottom:28px;">
-            <h2 class="section-title" style="margin-bottom:0">Featured Recipes</h2>
-            <a asp-controller="Recipe" asp-action="Index" class="btn-ghost" style="font-size:0.875rem;">View all →</a>
+        <div class="page-header-row inline-style-9">
+            <h2 class="section-title inline-style-10">Featured Recipes</h2>
+            <a asp-controller="Recipe" asp-action="Index" class="btn-ghost inline-style-11">View all →</a>
         </div>
 
         @if (recipes.Any())
@@ -88,3 +88,58 @@
         }
     </div>
 </section>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        background:var(--parchment);
+        border-radius: 24px;
+        margin: 0 24px 48px;
+    }
+    .inline-style-2 {
+        display:flex;
+        gap:48px;
+        flex-wrap:wrap;
+        justify-content:center;
+        text-align:center;
+        padding: 24px 0;
+    }
+    .inline-style-3 {
+        font-family: var(--font-display);
+        font-size:2.5rem;
+        color:var(--forest);
+    }
+    .inline-style-4 {
+        font-size:0.875rem;
+        color:var(--muted);
+    }
+    .inline-style-5 {
+        font-family: var(--font-display);
+        font-size:2.5rem;
+        color:var(--forest);
+    }
+    .inline-style-6 {
+        font-size:0.875rem;
+        color:var(--muted);
+    }
+    .inline-style-7 {
+        font-family: var(--font-display);
+        font-size:2.5rem;
+        color:var(--forest);
+    }
+    .inline-style-8 {
+        font-size:0.875rem;
+        color:var(--muted);
+    }
+    .inline-style-9 {
+        margin-bottom:28px;
+    }
+    .inline-style-10 {
+        margin-bottom:0
+    }
+    .inline-style-11 {
+        font-size:0.875rem;
+    }
+    </style>
+}

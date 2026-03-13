@@ -79,11 +79,11 @@
                             </div>
 
                             <div class="plan-actions">
-                                <form asp-action="CompletePlan" asp-route-id="@plan.MealPlanId" method="post" style="display: inline;">
+                                <form asp-action="CompletePlan" asp-route-id="@plan.MealPlanId" method="post" class="inline-style-1">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn-primary btn-sm">✓ Complete</button>
                                 </form>
-                                <a asp-action="PausePlan" asp-route-id="@plan.MealPlanId" class="btn-sm" style="display: inline;">
+                                <a asp-action="PausePlan" asp-route-id="@plan.MealPlanId" class="btn-sm inline-style-2">
                                     ⏸ Pause
                                 </a>
                                 <a asp-action="DropPlan" asp-route-id="@plan.MealPlanId" class="btn-danger btn-sm">✕ Stop</a>
@@ -134,7 +134,7 @@
                             </div>
 
                             <div class="plan-actions">
-                                <form asp-action="ResumePlan" asp-route-id="@plan.MealPlanId" method="post" style="display: inline;">
+                                <form asp-action="ResumePlan" asp-route-id="@plan.MealPlanId" method="post" class="inline-style-3">
                                     @Html.AntiForgeryToken()
                                     <button type="submit" class="btn-primary btn-sm">▶ Resume</button>
                                 </form>
@@ -388,3 +388,18 @@
         border: 1px solid #f5c6cb;
     }
 </style>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        display: inline;
+    }
+    .inline-style-2 {
+        display: inline;
+    }
+    .inline-style-3 {
+        display: inline;
+    }
+    </style>
+}

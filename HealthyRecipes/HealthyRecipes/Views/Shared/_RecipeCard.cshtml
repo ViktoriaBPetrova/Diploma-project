@@ -10,7 +10,7 @@
         <div class="card-img-placeholder">🥗</div>
     }
     <div class="card-body">
-        <div class="tags" style="margin-bottom:8px;">
+        <div class="tags inline-style-1">
             @foreach (var cat in Model.CategoryNames.Take(2))
             {
                 <span class="tag">@cat</span>
@@ -24,30 +24,30 @@
         <a asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.Id">
             <div class="card-title">@(Model.Title ?? "Untitled Recipe")</div>
         </a>
-        <p style="font-size:0.875rem; color:var(--muted); margin:6px 0 0; line-height:1.4;">
+        <p class="inline-style-2">
             @(Model.Info.Length > 60 ? Model.Info[..60] + "…" : Model.Info)
         </p>
 
-        <div class="macro-row" style="margin: 10px 0;">
+        <div class="macro-row inline-style-3">
             <span class="macro-pill cal">🔥 @Model.Calories.ToString("F0") kcal</span>
             <span class="macro-pill protein">P @Model.Protein.ToString("F0")g</span>
             <span class="macro-pill carbs">C @Model.Carbs.ToString("F0")g</span>
             <span class="macro-pill fat">F @Model.Fat.ToString("F0")g</span>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px;">
+        <div class="inline-style-4">
             <div>
                 <span class="stars">@string.Concat(Enumerable.Repeat("★", (int)Math.Round(Model.AverageRating)))</span>
-                <span style="font-size:0.8rem; color:var(--muted);">(@Model.RatingCount)</span>
+                <span class="inline-style-5">(@Model.RatingCount)</span>
             </div>
-            <div style="display:flex; gap:8px; align-items:center;">
+            <div class="inline-style-6">
                 @if (Model.PrepTime.HasValue)
                 {
-                    <span style="font-size:0.8rem; color:var(--muted);">⏱ @Model.PrepTime min</span>
+                    <span class="inline-style-7">⏱ @Model.PrepTime min</span>
                 }
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <form asp-controller="Recipe" asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" style="display:inline">
+                    <form asp-controller="Recipe" asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" class="inline-style-8">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
                             @(Model.IsSaved ? "♥" : "♡")
@@ -58,3 +58,43 @@
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        margin-bottom:8px;
+    }
+    .inline-style-2 {
+        font-size:0.875rem;
+        color:var(--muted);
+        margin:6px 0 0;
+        line-height:1.4;
+    }
+    .inline-style-3 {
+        margin: 10px 0;
+    }
+    .inline-style-4 {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-top:14px;
+    }
+    .inline-style-5 {
+        font-size:0.8rem;
+        color:var(--muted);
+    }
+    .inline-style-6 {
+        display:flex;
+        gap:8px;
+        align-items:center;
+    }
+    .inline-style-7 {
+        font-size:0.8rem;
+        color:var(--muted);
+    }
+    .inline-style-8 {
+        display:inline
+    }
+    </style>
+}

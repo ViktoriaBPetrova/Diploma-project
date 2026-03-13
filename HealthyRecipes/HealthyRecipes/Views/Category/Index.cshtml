@@ -20,15 +20,15 @@
         <div class="grid-3">
             @foreach (var cat in Model.Categories)
             {
-                <div class="card" style="padding:24px; text-align:center;">
-                    <h3 style="margin-bottom:6px;">@cat.Name</h3>
-                    <p style="color:var(--muted); margin-bottom:16px;">@cat.RecipeCount recipes</p>
-                    <a asp-controller="Recipe" asp-action="Index" asp-route-categoryId="@cat.Id" class="btn-ghost" style="font-size:0.875rem;">Browse →</a>
+                <div class="card inline-style-1">
+                    <h3 class="inline-style-2">@cat.Name</h3>
+                    <p class="inline-style-3">@cat.RecipeCount recipes</p>
+                    <a asp-controller="Recipe" asp-action="Index" asp-route-categoryId="@cat.Id" class="btn-ghost inline-style-4">Browse →</a>
                     @if (User.IsInRole("Admin"))
                     {
-                        <form asp-action="Delete" asp-route-id="@cat.Id" method="post" onsubmit="return confirm('Delete category?')" style="display:inline; margin-left:8px;">
+                        <form asp-action="Delete" asp-route-id="@cat.Id" method="post" onsubmit="return confirm('Delete category?')" class="inline-style-5">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-danger" style="font-size:0.78rem; padding:6px 12px;">Delete</button>
+                            <button type="submit" class="btn-danger inline-style-6">Delete</button>
                         </form>
                     }
                 </div>
@@ -43,3 +43,31 @@
         </div>
     }
 </div>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        padding:24px;
+        text-align:center;
+    }
+    .inline-style-2 {
+        margin-bottom:6px;
+    }
+    .inline-style-3 {
+        color:var(--muted);
+        margin-bottom:16px;
+    }
+    .inline-style-4 {
+        font-size:0.875rem;
+    }
+    .inline-style-5 {
+        display:inline;
+        margin-left:8px;
+    }
+    .inline-style-6 {
+        font-size:0.78rem;
+        padding:6px 12px;
+    }
+    </style>
+}

@@ -31,7 +31,7 @@
                     <a asp-controller="User" asp-action="Profile" class="nav-avatar-link">
                         <span class="nav-username">@User.Identity.Name</span>
                     </a>
-                    <form asp-area="Identity" asp-page="/Account/Logout" method="post" style="display:inline">
+                    <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="inline-style-1">
                         <button type="submit" class="btn-ghost">Log out</button>
                     </form>
                 }
@@ -67,3 +67,12 @@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        display:inline
+    }
+    </style>
+}

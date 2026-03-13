@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <form method="get" asp-action="Index" style="margin-bottom:28px;">
+    <form method="get" asp-action="Index" class="inline-style-1">
         <div class="search-bar">
             <input type="text" name="search" value="@Model.SearchQuery" placeholder="Search ingredients…" />
             <button type="submit">🔍</button>
@@ -24,7 +24,7 @@
 
     @if (Model.Ingredients.Any())
     {
-        <div style="overflow-x:auto;">
+        <div class="inline-style-2">
             <table class="ingredient-table">
                 <thead>
                     <tr>
@@ -61,7 +61,7 @@
                                 <td>
                                     <form asp-action="ToggleAllergy" asp-route-id="@ing.Id" method="post">
                                         @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn-@(ing.IsAllergen ? "danger" : "ghost")" style="font-size:0.78rem; padding:5px 12px;">
+                                        <button type="submit" class="inline-style-3 btn-@(ing.IsAllergen ? "danger" : "ghost")">
                                             @(ing.IsAllergen ? "Remove" : "Mark")
                                         </button>
                                     </form>
@@ -82,3 +82,19 @@
         </div>
     }
 </div>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        margin-bottom:28px;
+    }
+    .inline-style-2 {
+        overflow-x:auto;
+    }
+    .inline-style-3 {
+        font-size:0.78rem;
+        padding:5px 12px;
+    }
+    </style>
+}

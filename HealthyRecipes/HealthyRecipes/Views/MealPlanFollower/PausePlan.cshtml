@@ -9,7 +9,7 @@
         <p class="subtitle">Tell us why you're pausing</p>
     </div>
 
-    <div class="card" style="max-width: 600px; margin: 0 auto;">
+    <div class="card inline-style-1">
         <div class="card-header">
             <h2>@Model.MealPlanName</h2>
         </div>
@@ -30,18 +30,18 @@
                     <small>This helps us improve meal plan recommendations</small>
                 </div>
 
-                <div class="warning-box" style="margin: 24px 0; padding: 16px; background: #fff3cd; border-left: 4px solid #ffc107;">
+                <div class="warning-box inline-style-2">
                     <strong>⚠️ Are you sure?</strong>
-                    <p style="margin: 8px 0 0 0;">
+                    <p class="inline-style-3">
                         You can always resume this meal plan later and your current progress will be saved.
                     </p>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-danger" style="width: 100%;">
+                    <button type="submit" class="btn-danger inline-style-4">
                         Pause for some time
                     </button>
-                    <a asp-action="MyActivePlans" class="btn-ghost" style="width: 100%; text-align: center; margin-top: 12px;">
+                    <a asp-action="MyActivePlans" class="btn-ghost inline-style-5">
                         Keep actively Following
                     </a>
                 </div>
@@ -52,4 +52,28 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <style>
+    .inline-style-1 {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .inline-style-2 {
+        margin: 24px 0;
+        padding: 16px;
+        background: #fff3cd;
+        border-left: 4px solid #ffc107;
+    }
+    .inline-style-3 {
+        margin: 8px 0 0 0;
+    }
+    .inline-style-4 {
+        width: 100%;
+    }
+    .inline-style-5 {
+        width: 100%;
+        text-align: center;
+        margin-top: 12px;
+    }
+    </style>
 }

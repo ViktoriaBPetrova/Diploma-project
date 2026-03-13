@@ -23,7 +23,7 @@
                 <button type="button" class="btn-ghost" id="toggleBtn">Show Filters</button>
             </div>
 
-            <div class="filter-content" id="filterContent" style="display: none;">
+            <div class="filter-content inline-style-1" id="filterContent">
                 
                 <!-- Search Bar -->
                 <div class="filter-section">
@@ -195,7 +195,7 @@
     <!-- Results Info -->
     @if (Model.TotalCount > 0)
     {
-        <div style="margin-bottom: 16px; color: #666;">
+        <div class="inline-style-2">
             <p>Showing @Model.Recipes.Count() of @Model.TotalCount recipes</p>
         </div>
     }
@@ -327,6 +327,14 @@
     </script>
 
     <style>
+    .inline-style-1 {
+        display: none;
+    }
+    .inline-style-2 {
+        margin-bottom: 16px;
+        color: #666;
+    }
+
         .filter-panel {
             background: white;
             border-radius: 8px;

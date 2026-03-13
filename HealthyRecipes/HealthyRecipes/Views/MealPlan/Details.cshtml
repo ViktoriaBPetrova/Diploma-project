@@ -1,19 +1,19 @@
 @model HealthyRecipes.Web.ViewModels.MealPlan.MealPlanDetailsViewModel
 @{ ViewData["Title"] = Model.Name; }
 
-<div class="container" style="padding-top:40px; padding-bottom:60px;">
+<div class="container inline-style-1">
 
-    <a asp-action="Index" style="color:var(--muted); font-size:0.875rem;">← My Meal Plans</a>
+    <a asp-action="Index" class="inline-style-2">← My Meal Plans</a>
 
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin: 20px 0 32px;">
+    <div class="inline-style-3">
         <div>
-            <h1 style="margin-bottom:8px;">@Model.Name</h1>
+            <h1 class="inline-style-4">@Model.Name</h1>
             @if (!string.IsNullOrEmpty(Model.Description))
             {
-                <p style="color:var(--mid);">@Model.Description</p>
+                <p class="inline-style-5">@Model.Description</p>
             }
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="inline-style-6">
             <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
@@ -44,26 +44,26 @@
     </div>
 
     <!-- Weekly Totals -->
-    <div style="background:var(--forest); color:white; border-radius:var(--radius-lg); padding:28px; display:flex; gap:32px; flex-wrap:wrap; margin-bottom:36px;">
+    <div class="inline-style-7">
         <div>
-            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Weekly avg calories</div>
-            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Calories.ToString("F0")</div>
+            <div class="inline-style-8">Weekly avg calories</div>
+            <div class="inline-style-9">@Model.Calories.ToString("F0")</div>
         </div>
         <div>
-            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Protein</div>
-            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Protein.ToString("F0")<span style="font-size:1rem;">g</span></div>
+            <div class="inline-style-10">Protein</div>
+            <div class="inline-style-11">@Model.Protein.ToString("F0")<span class="inline-style-12">g</span></div>
         </div>
         <div>
-            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Carbs</div>
-            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Carbs.ToString("F0")<span style="font-size:1rem;">g</span></div>
+            <div class="inline-style-13">Carbs</div>
+            <div class="inline-style-14">@Model.Carbs.ToString("F0")<span class="inline-style-15">g</span></div>
         </div>
         <div>
-            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Fat</div>
-            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Fat.ToString("F0")<span style="font-size:1rem;">g</span></div>
+            <div class="inline-style-16">Fat</div>
+            <div class="inline-style-17">@Model.Fat.ToString("F0")<span class="inline-style-18">g</span></div>
         </div>
         <div>
-            <div style="font-size:0.75rem; opacity:0.65; text-transform:uppercase; letter-spacing:0.08em;">Days planned</div>
-            <div style="font-family:var(--font-display); font-size:2rem;">@Model.Days.Count()</div>
+            <div class="inline-style-19">Days planned</div>
+            <div class="inline-style-20">@Model.Days.Count()</div>
         </div>
     </div>
 
@@ -75,7 +75,7 @@
                 <div class="day-header">
                     <span class="day-title">Day @day.DayNumber — @day.DayOfWeek</span>
                     <div class="macro-row">
-                        <span class="macro-pill cal" style="background:rgba(255,255,255,0.15); color:white;">🔥 @day.Calories.ToString("F0")</span>
+                        <span class="macro-pill cal inline-style-21">🔥 @day.Calories.ToString("F0")</span>
                     </div>
                 </div>
                 <div class="day-body">
@@ -85,7 +85,7 @@
                         {
                             <div class="meal-item">
                                 <div class="meal-type-label">@meal.Type</div>
-                                <div class="macro-row" style="margin-bottom:10px;">
+                                <div class="macro-row inline-style-22">
                                     <span class="macro-pill cal">@meal.Calories.ToString("F0") kcal</span>
                                     <span class="macro-pill protein">P @meal.Protein.ToString("F0")g</span>
                                     <span class="macro-pill carbs">C @meal.Carbs.ToString("F0")g</span>
@@ -93,27 +93,27 @@
                                 </div>
                                 @if (meal.Recipes.Any())
                                 {
-                                    <div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:8px;">
+                                    <div class="inline-style-23">
                                         @foreach (var recipe in meal.Recipes)
                                         {
                                             <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId"
-                                               style="background:white; border-radius:var(--radius-sm); padding:8px 12px; font-size:0.875rem; border:1px solid var(--border); color:var(--forest); text-decoration:none; display:flex; align-items:center; gap:6px;">
+                                               class="inline-style-24">
                                                 @(recipe.Info.Length > 50 ? recipe.Info[..50] + "…" : recipe.Info)
-                                                <span style="color:var(--muted); font-size:0.78rem;">@recipe.Calories.ToString("F0") kcal</span>
+                                                <span class="inline-style-25">@recipe.Calories.ToString("F0") kcal</span>
                                             </a>
                                         }
                                     </div>
                                 }
                                 else
                                 {
-                                    <p style="font-size:0.875rem; color:var(--muted); font-style:italic;">No recipes added to this meal.</p>
+                                    <p class="inline-style-26">No recipes added to this meal.</p>
                                 }
                             </div>
                         }
                     }
                     else
                     {
-                        <p style="color:var(--muted); font-style:italic;">No meals for this day.</p>
+                        <p class="inline-style-27">No meals for this day.</p>
                     }
                 </div>
             </div>
@@ -128,3 +128,143 @@
         </div>
     }
 </div>
+
+
+@section Scripts {
+    <style>
+    .inline-style-1 {
+        padding-top:40px;
+        padding-bottom:60px;
+    }
+    .inline-style-2 {
+        color:var(--muted);
+        font-size:0.875rem;
+    }
+    .inline-style-3 {
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        flex-wrap:wrap;
+        gap:16px;
+        margin: 20px 0 32px;
+    }
+    .inline-style-4 {
+        margin-bottom:8px;
+    }
+    .inline-style-5 {
+        color:var(--mid);
+    }
+    .inline-style-6 {
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+    .inline-style-7 {
+        background:var(--forest);
+        color:white;
+        border-radius:var(--radius-lg);
+        padding:28px;
+        display:flex;
+        gap:32px;
+        flex-wrap:wrap;
+        margin-bottom:36px;
+    }
+    .inline-style-8 {
+        font-size:0.75rem;
+        opacity:0.65;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+    }
+    .inline-style-9 {
+        font-family:var(--font-display);
+        font-size:2rem;
+    }
+    .inline-style-10 {
+        font-size:0.75rem;
+        opacity:0.65;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+    }
+    .inline-style-11 {
+        font-family:var(--font-display);
+        font-size:2rem;
+    }
+    .inline-style-12 {
+        font-size:1rem;
+    }
+    .inline-style-13 {
+        font-size:0.75rem;
+        opacity:0.65;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+    }
+    .inline-style-14 {
+        font-family:var(--font-display);
+        font-size:2rem;
+    }
+    .inline-style-15 {
+        font-size:1rem;
+    }
+    .inline-style-16 {
+        font-size:0.75rem;
+        opacity:0.65;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+    }
+    .inline-style-17 {
+        font-family:var(--font-display);
+        font-size:2rem;
+    }
+    .inline-style-18 {
+        font-size:1rem;
+    }
+    .inline-style-19 {
+        font-size:0.75rem;
+        opacity:0.65;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+    }
+    .inline-style-20 {
+        font-family:var(--font-display);
+        font-size:2rem;
+    }
+    .inline-style-21 {
+        background:rgba(255,255,255,0.15);
+        color:white;
+    }
+    .inline-style-22 {
+        margin-bottom:10px;
+    }
+    .inline-style-23 {
+        display:flex;
+        flex-wrap:wrap;
+        gap:10px;
+        margin-top:8px;
+    }
+    .inline-style-24 {
+        background:white;
+        border-radius:var(--radius-sm);
+        padding:8px 12px;
+        font-size:0.875rem;
+        border:1px solid var(--border);
+        color:var(--forest);
+        text-decoration:none;
+        display:flex;
+        align-items:center;
+        gap:6px;
+    }
+    .inline-style-25 {
+        color:var(--muted);
+        font-size:0.78rem;
+    }
+    .inline-style-26 {
+        font-size:0.875rem;
+        color:var(--muted);
+        font-style:italic;
+    }
+    .inline-style-27 {
+        color:var(--muted);
+        font-style:italic;
+    }
+    </style>
+}

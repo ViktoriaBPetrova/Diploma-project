@@ -20,7 +20,7 @@
                 <button type="button" class="btn-ghost" id="toggleBtn">Show Filters</button>
             </div>
 
-            <div class="filter-content" id="filterContent" style="display: none;">
+            <div class="filter-content inline-style-1" id="filterContent">
                 
                 <!-- Search Bar -->
                 <div class="filter-section">
@@ -162,7 +162,7 @@
     @if (Model.MyMealPlans.Any())
     {
         <h2 class="section-title">My Plans</h2>
-        <div class="grid-2" style="margin-bottom:48px;">
+        <div class="grid-2 inline-style-2">
             @foreach (var plan in Model.MyMealPlans)
             {
                 <partial name="_MealPlanCard" model="plan" />
@@ -174,7 +174,7 @@
     @if (Model.SavedMealPlans.Any())
     {
         <h2 class="section-title">Saved Plans</h2>
-        <div class="grid-2" style="margin-bottom:48px;">
+        <div class="grid-2 inline-style-3">
             @foreach (var plan in Model.SavedMealPlans)
             {
                 <partial name="_MealPlanCard" model="plan" />
@@ -187,7 +187,7 @@
     
     @if (Model.TotalCount > 0)
     {
-        <div style="margin-bottom: 16px; color: #666;">
+        <div class="inline-style-4">
             <p>Showing @Model.BrowseAllMealPlans.Count() of @Model.TotalCount meal plans</p>
         </div>
     }
@@ -288,6 +288,20 @@
     </script>
 
     <style>
+    .inline-style-1 {
+        display: none;
+    }
+    .inline-style-2 {
+        margin-bottom:48px;
+    }
+    .inline-style-3 {
+        margin-bottom:48px;
+    }
+    .inline-style-4 {
+        margin-bottom: 16px;
+        color: #666;
+    }
+
         .filter-panel {
             background: white;
             border-radius: 8px;
