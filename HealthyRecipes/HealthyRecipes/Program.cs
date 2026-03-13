@@ -20,6 +20,7 @@ using HealthyRecipes.Services.Statistics.Interfaces;
 using HealthyRecipes.Services.Statistics.Services;
 using HealthyRecipes.Services.Users;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -54,6 +55,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
 })
+.AddRoles<IdentityRole<Guid>>()
 .AddEntityFrameworkStores<HealthyRecipesDbContext>()
 .AddDefaultUI()//should i keep there ***
 .AddDefaultTokenProviders();//***
@@ -88,6 +90,19 @@ builder.Services.AddScoped<IRecipeStatistics, RecipeStatisticsService>();
 builder.Services.AddScoped<IMealPlanStatistics, MealPlanStatisticsService>();
 builder.Services.AddScoped<IUserStatistics, UserStatisticsService>();
 builder.Services.AddScoped<IMealPlanFollower, MealPlanFollowerService>();
+
+//Admin
+builder.Services.AddRazorPages(); // Add this if not present
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+});
+
+builder.Services.Configure<RazorPagesOptions>(options =>
+{
+    options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
+});
 
 // ─── Pipeline ─────────────────────────────────────────────────────────────────
 var app = builder.Build();

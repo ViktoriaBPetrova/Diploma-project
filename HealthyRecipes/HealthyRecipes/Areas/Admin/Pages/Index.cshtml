@@ -1,0 +1,101 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.IndexModel
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="page-header" style="margin-bottom: 32px;">
+    <h1 style="font-size: 2rem; color: var(--admin-primary); margin: 0;">Dashboard</h1>
+    <p style="color: #666; margin-top: 8px;">Welcome to the NutriTrack admin panel</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>👥</span>
+            <span>Total Users</span>
+        </div>
+        <div class="stat-value">@Model.TotalUsers</div>
+        <div class="stat-change positive">
+            +@Model.NewUsersThisWeek this week
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>🍳</span>
+            <span>Total Recipes</span>
+        </div>
+        <div class="stat-value">@Model.TotalRecipes</div>
+        <div class="stat-change positive">
+            +@Model.NewRecipesThisWeek this week
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>📅</span>
+            <span>Meal Plans</span>
+        </div>
+        <div class="stat-value">@Model.TotalMealPlans</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">
+            <span>💬</span>
+            <span>Comments & Ratings</span>
+        </div>
+        <div class="stat-value">@Model.TotalComments</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+    <div class="admin-card">
+        <h2 style="font-size: 1.25rem; margin-bottom: 16px; color: var(--admin-primary);">Quick Actions</h2>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a asp-page="/Users/Index" class="admin-action-link">
+                <span>👥</span>
+                <span>Manage Users</span>
+            </a>
+            <a asp-page="/Recipes/Index" class="admin-action-link">
+                <span>🍳</span>
+                <span>Review Recipes</span>
+            </a>
+            <a asp-page="/MealPlans/Index" class="admin-action-link">
+                <span>📅</span>
+                <span>View Meal Plans</span>
+            </a>
+            <a asp-page="/Reports/Index" class="admin-action-link">
+                <span>📈</span>
+                <span>Generate Reports</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <h2 style="font-size: 1.25rem; margin-bottom: 16px; color: var(--admin-primary);">Recent Activity</h2>
+        <p style="color: #666; font-size: 0.9rem;">Activity tracking coming soon...</p>
+    </div>
+</div>
+
+<style>
+    .admin-action-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        color: var(--admin-text);
+        border: 1px solid var(--admin-border);
+        transition: all 0.2s;
+        font-weight: 500;
+    }
+
+    .admin-action-link:hover {
+        background: var(--admin-bg);
+        border-color: var(--admin-primary);
+        color: var(--admin-primary);
+        transform: translateX(4px);
+    }
+</style>

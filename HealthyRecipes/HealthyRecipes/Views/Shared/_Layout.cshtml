@@ -22,6 +22,8 @@
                 <a asp-controller="Recipe" asp-action="Index">Recipes</a>
                 <a asp-controller="MealPlan" asp-action="Index">Meal Plans</a>
                 <a asp-controller="Ingredient" asp-action="Index">Ingredients</a>
+                
+            </div>
             </div>
             <div class="nav-actions">
                 @if (User.Identity?.IsAuthenticated == true)

@@ -1,0 +1,267 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.Users.DetailsModel
+@{
+    ViewData["Title"] = "User Details";
+}
+
+<div style="margin-bottom: 24px;">
+    <a asp-page="/Users/Index" class="btn-ghost-sm">← Back to Users</a>
+</div>
+
+<div class="page-header" style="margin-bottom: 32px;">
+    <div>
+        <h1 style="font-size: 2rem; color: var(--admin-primary); margin: 0;">User Details</h1>
+        <p style="color: #666; margin-top: 8px;">@Model.User.UserName</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+        @if (!Model.User.Deleted)
+        {
+            <form method="post" asp-page-handler="Delete" asp-route-id="@Model.User.Id" style="display: inline;">
+                <button type="submit" class="btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">
+                    Delete User
+                </button>
+            </form>
+        }
+        else
+        {
+            <form method="post" asp-page-handler="Restore" asp-route-id="@Model.User.Id" style="display: inline;">
+                <button type="submit" class="btn-success">
+                    Restore User
+                </button>
+            </form>
+        }
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- User Information -->
+    <div class="admin-card">
+        <h2 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--admin-primary);">User Information</h2>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Username</label>
+                <value>@Model.User.UserName</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Email</label>
+                <value>@Model.User.Email</value>
+            </div>
+            
+            <div class="info-item">
+                <label>First Name</label>
+                <value>@(Model.User.FirstName ?? "N/A")</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Last Name</label>
+                <value>@(Model.User.LastName ?? "N/A")</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Phone</label>
+                <value>@(Model.User.PhoneNumber ?? "N/A")</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Roles</label>
+                <value>
+                    @if (Model.Roles.Any())
+                    {
+                        @string.Join(", ", Model.Roles)
+                    }
+                    else
+                    {
+                        <span>User</span>
+                    }
+                </value>
+            </div>
+            
+            <div class="info-item">
+                <label>Status</label>
+                <value>
+                    @if (Model.User.Deleted)
+                    {
+                        <span class="status-badge status-deleted">Deleted</span>
+                    }
+                    else
+                    {
+                        <span class="status-badge status-active">Active</span>
+                    }
+                </value>
+            </div>
+            
+            <div class="info-item">
+                <label>Email Confirmed</label>
+                <value>@(Model.User.EmailConfirmed ? "Yes" : "No")</value>
+            </div>
+        </div>
+    </div>
+
+    <!-- Physical & Goals -->
+    <div class="admin-card">
+        <h2 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--admin-primary);">Physical & Nutrition Goals</h2>
+        
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Height</label>
+                <value>@(Model.User.Height?.ToString("0.0") ?? "N/A") cm</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Weight</label>
+                <value>@(Model.User.Weight?.ToString("0.0") ?? "N/A") kg</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Calorie Goal</label>
+                <value>@(Model.User.Calories?.ToString("0") ?? "N/A") kcal</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Protein Goal</label>
+                <value>@(Model.User.ProteinGoal?.ToString("0") ?? "N/A") g</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Carbs Goal</label>
+                <value>@(Model.User.CarbsGoal?.ToString("0") ?? "N/A") g</value>
+            </div>
+            
+            <div class="info-item">
+                <label>Fat Goal</label>
+                <value>@(Model.User.FatGoal?.ToString("0") ?? "N/A") g</value>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activity Stats -->
+<div class="admin-card" style="margin-top: 24px;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--admin-primary);">Activity</h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div style="text-align: center; padding: 16px; background: var(--admin-bg); border-radius: 6px;">
+            <div style="font-size: 2rem; font-weight: 700; color: var(--admin-primary);">@Model.RecipeCount</div>
+            <div style="font-size: 0.875rem; color: #666; margin-top: 4px;">Recipes Created</div>
+        </div>
+        
+        <div style="text-align: center; padding: 16px; background: var(--admin-bg); border-radius: 6px;">
+            <div style="font-size: 2rem; font-weight: 700; color: var(--admin-primary);">@Model.MealPlanCount</div>
+            <div style="font-size: 0.875rem; color: #666; margin-top: 4px;">Meal Plans</div>
+        </div>
+        
+        <div style="text-align: center; padding: 16px; background: var(--admin-bg); border-radius: 6px;">
+            <div style="font-size: 2rem; font-weight: 700; color: var(--admin-primary);">
+                @((DateTime.UtcNow - Model.User.CreatedAt).Days)
+            </div>
+            <div style="font-size: 0.875rem; color: #666; margin-top: 4px;">Days Active</div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Dates -->
+<div class="admin-card" style="margin-top: 24px;">
+    <h2 style="font-size: 1.25rem; margin-bottom: 20px; color: var(--admin-primary);">Account Timeline</h2>
+    
+    <div class="info-grid">
+        <div class="info-item">
+            <label>Created</label>
+            <value>@Model.User.CreatedAt.ToString("MMM dd, yyyy HH:mm") UTC</value>
+        </div>
+        
+        <div class="info-item">
+            <label>Last Updated</label>
+            <value>@Model.User.UpdatedAt.ToString("MMM dd, yyyy HH:mm") UTC</value>
+        </div>
+        
+        @if (Model.User.Deleted && Model.User.DeletedAt.HasValue)
+        {
+            <div class="info-item">
+                <label>Deleted</label>
+                <value>@Model.User.DeletedAt.Value.ToString("MMM dd, yyyy HH:mm") UTC</value>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .info-item label {
+        font-size: 0.875rem;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .info-item value {
+        font-size: 1rem;
+        color: var(--admin-text);
+        font-weight: 500;
+    }
+
+    .btn-danger {
+        padding: 10px 20px;
+        background: var(--admin-danger);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-danger:hover {
+        background: #a33b25;
+    }
+
+    .btn-success {
+        padding: 10px 20px;
+        background: var(--admin-secondary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-success:hover {
+        background: #3d6424;
+    }
+
+    .status-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+
+    .status-active {
+        background: #d4ecd4;
+        color: #2d5016;
+    }
+
+    .status-deleted {
+        background: #ffdddd;
+        color: var(--admin-danger);
+    }
+</style>
