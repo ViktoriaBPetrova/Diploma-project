@@ -2,15 +2,16 @@
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Data.Seeding;
-using HealthyRecipes.Data.Seeding.MappingSeeders.RecipeMappingSeeders;
+using HealthyRecipes.Data.Seeding.Identity;
+using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders;
 using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanMappingSeeders;
+using HealthyRecipes.Data.Seeding.MappingSeeders.RecipeMappingSeeders;
 using HealthyRecipes.Data.Seeding.MappingSeeders.SavedSeeders;
 using HealthyRecipes.Data.Seeding.MappingSeeders.UserInfoSeedes;
 using HealthyRecipes.Data.Seeding.MealPlanSeeders;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders;
 using Microsoft.Identity.Client;
 
 namespace HealthyRecipes.Data
@@ -100,6 +101,13 @@ namespace HealthyRecipes.Data
             builder.Entity<Allergy>().HasData(AllergySeeder.GenerateAllergies().ToArray());
             builder.Entity<CommentRating>().HasData(CommentRatingSeeder.GenerateCommentRatings().ToArray());
             builder.Entity<MealPlanFollower>().HasData(MealPlanFollowerSeeder.GenerateMealPlanFollowers().ToArray());
+
+            //IDENTITY
+            var roles = RoleSeeder.GenerateRoles().ToArray();
+            builder.Entity<IdentityRole<Guid>>().HasData(roles);
+
+            var userRoles = UserRoleSeeder.GenerateUserRoles().ToArray();
+            builder.Entity<IdentityUserRole<Guid>>().HasData(userRoles);
 
             base.OnModelCreating(builder);
 
