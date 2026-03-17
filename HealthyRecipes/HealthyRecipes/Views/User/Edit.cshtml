@@ -1,18 +1,18 @@
 @model HealthyRecipes.Web.ViewModels.User.EditProfileViewModel
 @{ ViewData["Title"] = "Edit Profile"; }
 
-<div class="container inline-style-1">
-    <div class="inline-style-2">
-        <a asp-action="Profile" class="inline-style-3">← Back to profile</a>
-        <h1 class="inline-style-4">Edit Profile</h1>
-        <p class="page-subtitle inline-style-5">Update your personal details and nutrition goals</p>
+<div class="container profile-edit-container">
+    <div class="profile-edit-wrapper">
+        <a asp-action="Profile" class="profile-edit-hint">← Back to profile</a>
+        <h1 class="profile-edit-heading">Edit Profile</h1>
+        <p class="page-subtitle profile-edit-subtitle">Update your personal details and nutrition goals</p>
 
         <form asp-action="Edit" method="post">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="validation-summary-errors inline-style-6"></div>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors profile-edit-validation-errors"></div>
 
-            <div class="inline-style-7">
-                <h3 class="inline-style-8">Personal Info</h3>
+            <div class="profile-edit-section">
+                <h3 class="profile-edit-section-title">Personal Info</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label asp-for="FirstName">First name</label>
@@ -43,9 +43,9 @@
                 </div>
             </div>
 
-            <div class="inline-style-9">
-                <h3 class="inline-style-10">Nutrition Goals</h3>
-                <p class="form-hint inline-style-11">Set your daily targets to track progress against your goals.</p>
+            <div class="profile-edit-section">
+                <h3 class="profile-edit-section-title">Nutrition Goals</h3>
+                <p class="form-hint profile-edit-goals-hint">Set your daily targets to track progress against your goals.</p>
                 <div class="form-row">
                     <div class="form-group">
                         <label asp-for="CalorieGoal">Calories (kcal)</label>
@@ -68,66 +68,10 @@
                 </div>
             </div>
 
-            <div class="inline-style-12">
+            <div class="profile-edit-actions">
                 <button type="submit" class="btn-primary">Save changes</button>
                 <a asp-action="Profile" class="btn-ghost">Cancel</a>
             </div>
         </form>
     </div>
 </div>
-
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        padding-top:48px;
-        padding-bottom:64px;
-    }
-    .inline-style-2 {
-        max-width:640px;
-        margin:0 auto;
-    }
-    .inline-style-3 {
-        color:var(--muted);
-        font-size:0.875rem;
-    }
-    .inline-style-4 {
-        margin:16px 0 8px;
-    }
-    .inline-style-5 {
-        margin-bottom:36px;
-    }
-    .inline-style-6 {
-        margin-bottom:16px;
-    }
-    .inline-style-7 {
-        background:white;
-        border-radius:var(--radius-lg);
-        padding:36px;
-        border:1px solid var(--border);
-        box-shadow:var(--shadow);
-        margin-bottom:24px;
-    }
-    .inline-style-8 {
-        margin-bottom:20px;
-    }
-    .inline-style-9 {
-        background:white;
-        border-radius:var(--radius-lg);
-        padding:36px;
-        border:1px solid var(--border);
-        box-shadow:var(--shadow);
-        margin-bottom:24px;
-    }
-    .inline-style-10 {
-        margin-bottom:8px;
-    }
-    .inline-style-11 {
-        margin-bottom:20px;
-    }
-    .inline-style-12 {
-        display:flex;
-        gap:12px;
-    }
-    </style>
-}

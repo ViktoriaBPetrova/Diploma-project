@@ -1,13 +1,13 @@
 @model HealthyRecipes.Web.ViewModels.User.UserProfileViewModel
 @{ ViewData["Title"] = "Profile"; }
 
-<div class="container inline-style-1">
+<div class="container profile-container">
 
     <div class="profile-header">
         <div class="profile-avatar">
             @if (!string.IsNullOrEmpty(Model.ImageUrl))
             {
-                <img src="@Model.ImageUrl" alt="Avatar" class="inline-style-2" />
+                <img src="@Model.ImageUrl" alt="Avatar" class="profile-avatar-img" />
             }
             else
             {
@@ -44,63 +44,63 @@
         </div>
         @if (Model.IsCurrentUser)
         {
-            <a asp-action="Edit" class="btn-ghost inline-style-3">Edit profile</a>
+            <a asp-action="Edit" class="btn-ghost profile-edit-btn">Edit profile</a>
         }
     </div>
 
-    <div class="inline-style-4">
+    <div class="profile-content-grid">
 
         <!-- Goals -->
         @if (Model.CalorieGoal.HasValue || Model.ProteinGoal.HasValue)
         {
-            <div class="inline-style-5">
-                <h3 class="inline-style-6">Daily Goals</h3>
+            <div class="profile-section-card">
+                <h3 class="profile-section-title">Daily Goals</h3>
                 @if (Model.CalorieGoal.HasValue)
                 {
                     <div class="goal-bar-wrap">
                         <div class="goal-bar-label"><span>Calories</span><span>@Model.CalorieGoal kcal</span></div>
-                        <div class="goal-bar"><div class="goal-bar-fill cal inline-style-7"></div></div>
+                        <div class="goal-bar"><div class="goal-bar-fill cal profile-goal-full"></div></div>
                     </div>
                 }
                 @if (Model.ProteinGoal.HasValue)
                 {
                     <div class="goal-bar-wrap">
                         <div class="goal-bar-label"><span>Protein</span><span>@Model.ProteinGoal g</span></div>
-                        <div class="goal-bar"><div class="goal-bar-fill protein inline-style-8"></div></div>
+                        <div class="goal-bar"><div class="goal-bar-fill protein profile-goal-full"></div></div>
                     </div>
                 }
                 @if (Model.CarbsGoal.HasValue)
                 {
                     <div class="goal-bar-wrap">
                         <div class="goal-bar-label"><span>Carbs</span><span>@Model.CarbsGoal g</span></div>
-                        <div class="goal-bar"><div class="goal-bar-fill carbs inline-style-9"></div></div>
+                        <div class="goal-bar"><div class="goal-bar-fill carbs profile-goal-full"></div></div>
                     </div>
                 }
                 @if (Model.FatGoal.HasValue)
                 {
                     <div class="goal-bar-wrap">
                         <div class="goal-bar-label"><span>Fat</span><span>@Model.FatGoal g</span></div>
-                        <div class="goal-bar"><div class="goal-bar-fill fat inline-style-10"></div></div>
+                        <div class="goal-bar"><div class="goal-bar-fill fat profile-goal-full"></div></div>
                     </div>
                 }
             </div>
         }
 
         <!-- Allergies -->
-        <div class="inline-style-11">
-            <h3 class="inline-style-12">Allergies & Intolerances</h3>
+        <div class="profile-section-card">
+            <h3 class="profile-allergy-title">Allergies & Intolerances</h3>
             @if (Model.Allergies.Any())
             {
-                <div class="tags inline-style-13">
+                <div class="tags profile-allergy-tags">
                     @foreach (var allergy in Model.Allergies)
                     {
-                        <span class="tag tag-terracotta inline-style-14">
+                        <span class="tag tag-terracotta profile-allergy-tag">
                             ⚠️ @allergy.IngredientName
                             @if (Model.IsCurrentUser)
                             {
-                                <form asp-action="RemoveAllergy" asp-route-ingredientId="@allergy.IngredientId" method="post" class="inline-style-15">
+                                <form asp-action="RemoveAllergy" asp-route-ingredientId="@allergy.IngredientId" method="post" class="profile-allergy-remove-form">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="inline-style-16">✕</button>
+                                    <button type="submit" class="profile-allergy-remove-btn">✕</button>
                                 </form>
                             }
                         </span>
@@ -109,109 +109,20 @@
             }
             else
             {
-                <p class="inline-style-17">No allergies recorded.</p>
+                <p class="profile-no-allergies">No allergies recorded.</p>
             }
             @if (Model.IsCurrentUser)
             {
-                <a asp-controller="Ingredient" asp-action="Index" class="btn-ghost inline-style-18">Manage allergies →</a>
+                <a asp-controller="Ingredient" asp-action="Index" class="btn-ghost profile-manage-allergies-btn">Manage allergies →</a>
             }
         </div>
     </div>
 
     @if (Model.IsCurrentUser)
     {
-        <div class="inline-style-19">
+        <div class="profile-actions">
             <a asp-controller="Recipe" asp-action="Index" class="btn-ghost">Browse recipes</a>
             <a asp-controller="MealPlan" asp-action="Index" class="btn-primary">My meal plans</a>
         </div>
     }
 </div>
-
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        padding-top:40px;
-        padding-bottom:60px;
-    }
-    .inline-style-2 {
-        width:100%;
-        height:100%;
-        object-fit:cover;
-    }
-    .inline-style-3 {
-        margin-left:auto;
-        color:white;
-        border-color:rgba(255,255,255,0.4);
-        align-self:flex-start;
-    }
-    .inline-style-4 {
-        display:grid;
-        grid-template-columns:1fr 1fr;
-        gap:32px;
-        flex-wrap:wrap;
-    }
-    .inline-style-5 {
-        background:white;
-        border-radius:var(--radius);
-        border:1px solid var(--border);
-        padding:28px;
-    }
-    .inline-style-6 {
-        margin-bottom:20px;
-    }
-    .inline-style-7 {
-        width:100%;
-    }
-    .inline-style-8 {
-        width:100%;
-    }
-    .inline-style-9 {
-        width:100%;
-    }
-    .inline-style-10 {
-        width:100%;
-    }
-    .inline-style-11 {
-        background:white;
-        border-radius:var(--radius);
-        border:1px solid var(--border);
-        padding:28px;
-    }
-    .inline-style-12 {
-        margin-bottom:16px;
-    }
-    .inline-style-13 {
-        margin-bottom:16px;
-    }
-    .inline-style-14 {
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-    }
-    .inline-style-15 {
-        display:inline;
-    }
-    .inline-style-16 {
-        background:none;
-        border:none;
-        cursor:pointer;
-        color:rgba(255,255,255,0.8);
-        font-size:0.9rem;
-        line-height:1;
-    }
-    .inline-style-17 {
-        color:var(--muted);
-        font-style:italic;
-        margin-bottom:16px;
-    }
-    .inline-style-18 {
-        font-size:0.875rem;
-    }
-    .inline-style-19 {
-        margin-top:32px;
-        display:flex;
-        gap:12px;
-    }
-    </style>
-}

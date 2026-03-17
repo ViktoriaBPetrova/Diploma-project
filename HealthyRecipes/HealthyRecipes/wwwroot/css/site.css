@@ -963,6 +963,155 @@ textarea.form-control {
         background: var(--sage);
     }
 
+/* ── Profile Page Extensions ────────────────────────────────── */
+.profile-container {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+.profile-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-edit-btn {
+    margin-left: auto;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.4);
+    align-self: flex-start;
+}
+
+    .profile-edit-btn:hover {
+        color: white;
+        border-color: white;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+.profile-content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.profile-section-card {
+    background: white;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-section-title {
+    margin-bottom: 20px;
+    color: var(--forest);
+}
+
+.profile-goal-full {
+    width: 100%;
+}
+
+.profile-allergy-title {
+    margin-bottom: 16px;
+    color: var(--forest);
+}
+
+.profile-allergy-tags {
+    margin-bottom: 16px;
+}
+
+.profile-allergy-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.profile-allergy-remove-form {
+    display: inline;
+}
+
+.profile-allergy-remove-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.2s;
+}
+
+    .profile-allergy-remove-btn:hover {
+        color: white;
+    }
+
+.profile-no-allergies {
+    color: var(--muted);
+    font-style: italic;
+    margin-bottom: 16px;
+}
+
+.profile-manage-allergies-btn {
+    font-size: 0.875rem;
+}
+
+.profile-actions {
+    margin-top: 32px;
+    display: flex;
+    gap: 12px;
+}
+
+/* ── Profile Edit Page ──────────────────────────────────────── */
+.profile-edit-container {
+    padding-top: 48px;
+    padding-bottom: 64px;
+}
+
+.profile-edit-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+}
+
+.profile-edit-hint {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.profile-edit-heading {
+    margin: 16px 0 8px;
+}
+
+.profile-edit-subtitle {
+    margin-bottom: 36px;
+}
+
+.profile-edit-validation-errors {
+    margin-bottom: 16px;
+}
+
+.profile-edit-section {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: 36px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+}
+
+.profile-edit-section-title {
+    margin-bottom: 20px;
+    color: var(--forest);
+}
+
+.profile-edit-goals-hint {
+    margin-bottom: 20px;
+}
+
+.profile-edit-actions {
+    display: flex;
+    gap: 12px;
+}
+
 /* ── Ingredient Table ─────────────────────────────── */
 .ingredient-table {
     width: 100%;
