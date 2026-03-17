@@ -1,10 +1,10 @@
 @model HealthyRecipes.Web.ViewModels.Category.CreateCategoryViewModel
 @{ ViewData["Title"] = "New Category"; }
 
-<div class="container inline-style-1">
-    <div class="inline-style-2">
-        <a asp-action="Index" class="inline-style-3">← Categories</a>
-        <h1 class="inline-style-4">New Category</h1>
+<div class="container category-form-container">
+    <div class="category-form-wrapper">
+        <a asp-action="Index" class="category-form-hint">← Categories</a>
+        <h1 class="category-form-heading">New Category</h1>
 
         <div class="form-card">
             <form asp-action="Create" method="post">
@@ -17,7 +17,7 @@
                     <span asp-validation-for="Name" class="field-validation-error"></span>
                 </div>
 
-                <div class="inline-style-5">
+                <div class="category-form-actions">
                     <button type="submit" class="btn-primary">Create</button>
                     <a asp-action="Index" class="btn-ghost">Cancel</a>
                 </div>
@@ -26,27 +26,3 @@
     </div>
 </div>
 
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        padding-top:48px;
-        padding-bottom:64px;
-    }
-    .inline-style-2 {
-        max-width:480px;
-        margin:0 auto;
-    }
-    .inline-style-3 {
-        color:var(--muted);
-        font-size:0.875rem;
-    }
-    .inline-style-4 {
-        margin:16px 0 8px;
-    }
-    .inline-style-5 {
-        display:flex;
-        gap:12px;
-    }
-    </style>
-}

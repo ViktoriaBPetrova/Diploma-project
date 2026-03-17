@@ -1,0 +1,57 @@
+/* ═══════════════════════════════════════════════════════════
+   CATEGORY STYLES
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Category Index Page ────────────────────────────────────── */
+.category-card {
+    padding: 24px;
+    text-align: center;
+}
+
+.category-card-title {
+    margin-bottom: 6px;
+}
+
+.category-recipe-count {
+    color: var(--muted);
+    margin-bottom: 16px;
+}
+
+.category-browse-btn {
+    font-size: 0.875rem;
+}
+
+.category-delete-form {
+    display: inline;
+    margin-left: 8px;
+}
+
+.category-delete-btn {
+    font-size: 0.78rem;
+    padding: 6px 12px;
+}
+
+/* ── Category Create/Edit Forms ─────────────────────────────── */
+.category-form-container {
+    padding-top: 48px;
+    padding-bottom: 64px;
+}
+
+.category-form-wrapper {
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+.category-form-hint {
+    color: var(--muted);
+    font-size: 0.875rem;
+}
+
+.category-form-heading {
+    margin: 16px 0 8px;
+}
+
+.category-form-actions {
+    display: flex;
+    gap: 12px;
+}
