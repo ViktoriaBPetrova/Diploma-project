@@ -23,7 +23,7 @@
                 <button type="button" class="btn-ghost" id="toggleBtn">Show Filters</button>
             </div>
 
-            <div class="filter-content inline-style-1" id="filterContent">
+            <div class="filter-content recipe-filter-content-hidden" id="filterContent">
                 
                 <!-- Search Bar -->
                 <div class="filter-section">
@@ -100,7 +100,6 @@
                                 <option value="Easy" selected="@(Model.Filter.DifficultyLevel == "Easy")">Easy</option>
                                 <option value="Medium" selected="@(Model.Filter.DifficultyLevel == "Medium")">Medium</option>
                                 <option value="Hard" selected="@(Model.Filter.DifficultyLevel == "Hard")">Hard</option>
-
                             </select>
                         </div>
                     </div>
@@ -152,20 +151,19 @@
                             <label>Sort By</label>
                             <select name="SortBy" class="form-control">  
                                 <option value="CreatedAt" selected="@(Model.Filter.SortBy == "CreatedAt")">Date Created</option>
-                                <option value="Calories" selected="@(Model.Filter.SortBy == "Calories")" )>Calories</option>
-                                <option value="Protein" selected="@(Model.Filter.SortBy == "Protein")" )>Protein</option>
-                                <option value="Carbs" selected="@(Model.Filter.SortBy == "Carbs")" )>Carbs</option>
-                                <option value="Fat" selected="@(Model.Filter.SortBy == "Fat")" )>Fat</option>
-                                <option value="PrepTime" selected="@(Model.Filter.SortBy == "PrepTime")" )>Prep Time</option>
-
+                                <option value="Calories" selected="@(Model.Filter.SortBy == "Calories")">Calories</option>
+                                <option value="Protein" selected="@(Model.Filter.SortBy == "Protein")">Protein</option>
+                                <option value="Carbs" selected="@(Model.Filter.SortBy == "Carbs")">Carbs</option>
+                                <option value="Fat" selected="@(Model.Filter.SortBy == "Fat")">Fat</option>
+                                <option value="PrepTime" selected="@(Model.Filter.SortBy == "PrepTime")">Prep Time</option>
                             </select>
                         </div>
 
                         <div class="filter-group">
                             <label>Order</label>
                             <select name="SortOrder" class="form-control">
-                                <option value="asc" selected="@(Model.Filter.SortOrder == "asc")" )>Ascending</option>
-                                <option value="desc" selected="@(Model.Filter.SortOrder == "desc")" )>Descending</option>
+                                <option value="asc" selected="@(Model.Filter.SortOrder == "asc")">Ascending</option>
+                                <option value="desc" selected="@(Model.Filter.SortOrder == "desc")">Descending</option>
                             </select>
                         </div>
                     </div>
@@ -181,7 +179,7 @@
         </form>
     </div>
 
-    <!-- Quick Category Filter Pills (Keep your existing style) -->
+    <!-- Quick Category Filter Pills -->
     <div class="filter-row">
         <a asp-action="Index" class="filter-pill @(Model.Filter.CategoryIds?.Count == 0 || Model.Filter.CategoryIds == null ? "active" : "")">All</a>
         @foreach (var cat in Model.Categories)
@@ -195,7 +193,7 @@
     <!-- Results Info -->
     @if (Model.TotalCount > 0)
     {
-        <div class="inline-style-2">
+        <div class="recipe-index-results-info">
             <p>Showing @Model.Recipes.Count() of @Model.TotalCount recipes</p>
         </div>
     }
@@ -284,11 +282,11 @@
             const content = document.getElementById('filterContent');
             const btn = document.getElementById('toggleBtn');
             
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
+            if (content.classList.contains('recipe-filter-content-hidden')) {
+                content.classList.remove('recipe-filter-content-hidden');
                 btn.textContent = 'Hide Filters';
             } else {
-                content.style.display = 'none';
+                content.classList.add('recipe-filter-content-hidden');
                 btn.textContent = 'Show Filters';
             }
         }
@@ -325,161 +323,4 @@
             }
         });
     </script>
-
-    <style>
-    .inline-style-1 {
-        display: none;
-    }
-    .inline-style-2 {
-        margin-bottom: 16px;
-        color: #666;
-    }
-
-        .filter-panel {
-            background: white;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .filter-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            margin-bottom: 16px;
-        }
-
-        .filter-header h3 {
-            margin: 0;
-            font-size: 1.125rem;
-        }
-
-        .filter-content {
-            padding-top: 16px;
-        }
-
-        .filter-section {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .filter-section:last-of-type {
-            border-bottom: none;
-        }
-
-        .filter-section h4 {
-            margin: 0 0 12px 0;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-        }
-
-        .filter-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            font-size: 0.875rem;
-            color: #555;
-        }
-
-        .filter-group small {
-            display: block;
-            margin-top: 4px;
-            color: #888;
-            font-size: 0.75rem;
-        }
-
-        .range-inputs {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .range-inputs input {
-            flex: 1;
-        }
-
-        .range-inputs span {
-            color: #999;
-        }
-
-        .category-checkboxes {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 10px;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            padding: 8px 10px;
-            border-radius: 6px;
-            transition: background-color 0.2s;
-            font-size: 0.9rem;
-        }
-
-        .checkbox-label:hover {
-            background-color: #f5f5f5;
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            cursor: pointer;
-        }
-
-        .filter-actions {
-            display: flex;
-            gap: 12px;
-            padding-top: 16px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--forest, #4CAF50);
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 8px;
-            margin-top: 32px;
-        }
-
-        .pagination a, .pagination span {
-            padding: 8px 12px;
-            border-radius: 6px;
-            text-decoration: none;
-            color: #333;
-            transition: all 0.2s;
-        }
-
-        .pagination a:hover {
-            background-color: #f0f0f0;
-        }
-
-        .pagination .active {
-            background-color: var(--forest, #4CAF50);
-            color: white;
-            font-weight: 600;
-        }
-    </style>
 }

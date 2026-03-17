@@ -2,7 +2,7 @@
 @model HealthyRecipes.Web.ViewModels.Recipe.RecipeDetailsViewModel
 @{ ViewData["Title"] = "Recipe Details"; }
 
-<div class="container inline-style-1">
+<div class="container recipe-detail-container">
 
     @if (Model.HasAllergyConflict)
     {
@@ -29,14 +29,13 @@
     <div class="recipe-layout">
         <!-- Main Content -->
         <div>
-            <h1 class="inline-style-2">
+            <h1 class="recipe-detail-title">
                 @(Model.Title ?? "Untitled Recipe")
             </h1>
-           
 
-            <div class="inline-style-3">
+            <div class="recipe-detail-header-row">
                 <div>
-                    <div class="tags inline-style-4">
+                    <div class="tags recipe-detail-tags">
                         @foreach (var cat in Model.CategoryNames)
                         {
                             <span class="tag tag-forest">@cat</span>
@@ -46,14 +45,14 @@
                             <span class="diff-@Model.Difficulty.ToString()!.ToLower()">@Model.Difficulty</span>
                         }
                     </div>
-                    <div class="inline-style-5">
+                    <div class="recipe-detail-meta-row">
                         <span>👤 @Model.AuthorName</span>
                         @if (Model.PrepTime.HasValue) { <span>⏱ @Model.PrepTime min prep</span> }
                         @if (Model.Servings.HasValue) { <span>🍽 @Model.Servings servings</span> }
                         <span>📅 @Model.CreatedAt.ToString("MMM d, yyyy")</span>
                     </div>
                 </div>
-                <div class="inline-style-6">
+                <div class="recipe-detail-actions">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
@@ -74,14 +73,14 @@
                 </div>
             </div>
 
-            <div class="inline-style-7">
-                <h3 class="inline-style-8">Description</h3>
-                <p class="inline-style-9">@Model.Info</p>
+            <div class="recipe-description-section">
+                <h3 class="recipe-description-heading">Description</h3>
+                <p class="recipe-description-text">@Model.Info</p>
             </div>
 
             <!-- Ingredients -->
-            <h3 class="inline-style-10">Ingredients</h3>
-            <table class="ingredients-table inline-style-11">
+            <h3 class="recipe-ingredients-heading">Ingredients</h3>
+            <table class="ingredients-table recipe-ingredients-table">
                 <thead>
                     <tr><th>Ingredient</th><th>Amount</th><th>Calories</th></tr>
                 </thead>
@@ -99,20 +98,20 @@
 
             @if (!string.IsNullOrEmpty(Model.VideoUrl))
             {
-                <h3 class="inline-style-12">Video</h3>
-                <div class="inline-style-13">
+                <h3 class="recipe-video-heading">Video</h3>
+                <div class="recipe-video-section">
                     <a href="@Model.VideoUrl" target="_blank" class="btn-ghost">▶ Watch video tutorial</a>
                 </div>
             }
 
             <!-- Comments -->
-            <div class="inline-style-14">
-                <h3 class="inline-style-15">Reviews & Comments</h3>
+            <div class="recipe-comments-section">
+                <h3 class="recipe-comments-heading">Reviews & Comments</h3>
 
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <div class="card inline-style-16">
-                        <h4 class="inline-style-17">@(Model.CurrentUserComment != null ? "Edit your review" : "Leave a review")</h4>
+                    <div class="card recipe-comment-form">
+                        <h4 class="recipe-comment-form-heading">@(Model.CurrentUserComment != null ? "Edit your review" : "Leave a review")</h4>
                         <form asp-action="Rate" method="post">
                             @Html.AntiForgeryToken()
                             <input type="hidden" name="RecipeId" value="@Model.Id" />
@@ -132,11 +131,11 @@
                                 <label>Comment (optional)</label>
                                 <textarea name="Comment" class="form-control" rows="3" placeholder="Share your thoughts…">@Model.CurrentUserComment?.Comment</textarea>
                             </div>
-                            <div class="inline-style-18">
+                            <div class="recipe-comment-form-actions">
                                 <button type="submit" class="btn-primary">Submit</button>
                                 @if (Model.CurrentUserComment != null)
                                 {
-                                    <form asp-action="DeleteComment" method="post" class="inline-style-19">
+                                    <form asp-action="DeleteComment" method="post" class="recipe-comment-delete-form">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="recipeId" value="@Model.Id" />
                                         <button type="submit" class="btn-ghost">Remove review</button>
@@ -155,7 +154,7 @@
                             <div class="comment-header">
                                 <div>
                                     <span class="comment-author">@comment.UserName</span>
-                                    <span class="stars inline-style-20">@string.Concat(Enumerable.Repeat("★", (int)comment.Rating))</span>
+                                    <span class="stars recipe-rating-stars">@string.Concat(Enumerable.Repeat("★", (int)comment.Rating))</span>
                                 </div>
                                 <span class="comment-date">@comment.CreatedAt.ToString("MMM d, yyyy")</span>
                             </div>
@@ -168,204 +167,77 @@
                 }
                 else
                 {
-                    <p class="inline-style-21">No reviews yet. Be the first!</p>
+                    <p class="recipe-no-comments">No reviews yet. Be the first!</p>
                 }
             </div>
         </div>
 
         <!-- Sidebar -->
-        <!-- Sidebar -->
         <div class="recipe-sidebar">
             <div class="sticky-box">
                 <div class="nutrition-card">
                     <div class="nutrition-title">Nutrition Info</div>
-                    <div class="inline-style-22">
+                    <div class="recipe-rating-section">
                         <span class="stars">@string.Concat(Enumerable.Repeat("★", (int)Math.Round(Model.AverageRating)))</span>
-                        <span class="inline-style-23"> (@Model.AverageRating.ToString("F1"))</span>
+                        <span class="recipe-rating-value"> (@Model.AverageRating.ToString("F1"))</span>
                     </div>
                     <div class="nutrition-grid">
                         <div class="nutrition-item">
-                            <div class="nutrition-value inline-style-24">@Model.Calories.ToString("F0")</div>
+                            <div class="nutrition-value recipe-nutrition-calories">@Model.Calories.ToString("F0")</div>
                             <div class="nutrition-label">Calories</div>
                         </div>
                         <div class="nutrition-item">
-                            <div class="nutrition-value inline-style-25">@Model.Protein.ToString("F1")g</div>
+                            <div class="nutrition-value recipe-nutrition-protein">@Model.Protein.ToString("F1")g</div>
                             <div class="nutrition-label">Protein</div>
                         </div>
                         <div class="nutrition-item">
-                            <div class="nutrition-value inline-style-26">@Model.Carbs.ToString("F1")g</div>
+                            <div class="nutrition-value recipe-nutrition-carbs">@Model.Carbs.ToString("F1")g</div>
                             <div class="nutrition-label">Carbs</div>
                         </div>
                         <div class="nutrition-item">
-                            <div class="nutrition-value inline-style-27">@Model.Fat.ToString("F1")g</div>
+                            <div class="nutrition-value recipe-nutrition-fat">@Model.Fat.ToString("F1")g</div>
                             <div class="nutrition-label">Fat</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ADD STATISTICS HERE -->
-                <div id="recipe-statistics" data-recipe-id="@Model.Id" class="inline-style-28">
-                    <div class="nutrition-card inline-style-29">
+                <!-- Statistics (Async loaded) -->
+                <div id="recipe-statistics" data-recipe-id="@Model.Id" class="recipe-stats-container">
+                    <div class="nutrition-card recipe-stats-card">
                         <div class="text-center">
                             <div class="spinner-border spinner-border-sm" role="status">
                                 <span class="visually-hidden">Loading...</span>
                             </div>
-                            <p class="text-muted mb-0 inline-style-30">Loading statistics...</p>
+                            <p class="recipe-stats-loading">Loading statistics...</p>
                         </div>
                     </div>
                 </div>
 
-                <a asp-controller="Recipe" asp-action="Index" class="btn-ghost inline-style-31">← Back to recipes</a>
+                <a asp-controller="Recipe" asp-action="Index" class="btn-ghost recipe-back-btn">← Back to recipes</a>
             </div>
         </div>
     </div>
-
-    @section Scripts {
-        <script>
-            $(document).ready(function() {
-                var recipeId = $('#recipe-statistics').data('recipe-id');
-
-                $.ajax({
-                    url: '/Statistics/RecipeStatsPartial/' + recipeId,
-                    type: 'GET',
-                    success: function(data) {
-                        $('#recipe-statistics').html(data);
-                    },
-                    error: function() {
-                        $('#recipe-statistics').html(
-                            '<div class="nutrition-card inline-style-32">' +
-                            '<p class="text-muted text-center mb-0 inline-style-33">Statistics unavailable</p>' +
-                            '</div>'
-                        );
-                    }
-                });
-            });
-        </script>
-    
-    <style>
-    .inline-style-1 {
-        padding-top:40px;
-        padding-bottom:60px;
-    }
-    .inline-style-2 {
-        margin:0 0 16px;
-        font-size:2rem;
-        line-height:1.2;
-    }
-    .inline-style-3 {
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        flex-wrap:wrap;
-        gap:12px;
-        margin-bottom:20px;
-    }
-    .inline-style-4 {
-        margin-bottom:10px;
-    }
-    .inline-style-5 {
-        display:flex;
-        gap:20px;
-        color:var(--muted);
-        font-size:0.875rem;
-        flex-wrap:wrap;
-    }
-    .inline-style-6 {
-        display:flex;
-        gap:10px;
-        align-items:center;
-    }
-    .inline-style-7 {
-        margin-bottom:32px;
-    }
-    .inline-style-8 {
-        margin-bottom:12px;
-    }
-    .inline-style-9 {
-        font-size:1.0625rem;
-        line-height:1.7;
-        color:var(--mid);
-    }
-    .inline-style-10 {
-        margin-bottom:16px;
-    }
-    .inline-style-11 {
-        margin-bottom:40px;
-    }
-    .inline-style-12 {
-        margin-bottom:16px;
-    }
-    .inline-style-13 {
-        margin-bottom:40px;
-    }
-    .inline-style-14 {
-        margin-top:8px;
-    }
-    .inline-style-15 {
-        margin-bottom:20px;
-    }
-    .inline-style-16 {
-        padding:24px;
-        margin-bottom:28px;
-    }
-    .inline-style-17 {
-        margin-bottom:16px;
-    }
-    .inline-style-18 {
-        display:flex;
-        gap:10px;
-    }
-    .inline-style-19 {
-        display:inline
-    }
-    .inline-style-20 {
-        margin-left:8px;
-    }
-    .inline-style-21 {
-        color:var(--muted);
-        font-style:italic;
-    }
-    .inline-style-22 {
-        text-align:center;
-        margin-bottom:16px;
-    }
-    .inline-style-23 {
-        font-size:0.875rem;
-        color:var(--muted);
-    }
-    .inline-style-24 {
-        color:var(--forest);
-    }
-    .inline-style-25 {
-        color:#3B82F6;
-    }
-    .inline-style-26 {
-        color:#F59E0B;
-    }
-    .inline-style-27 {
-        color:#EF4444;
-    }
-    .inline-style-28 {
-        margin-top: 20px;
-    }
-    .inline-style-29 {
-        padding: 16px;
-    }
-    .inline-style-30 {
-        font-size: 0.875rem;
-        margin-top: 8px;
-    }
-    .inline-style-31 {
-        width:100%;
-        justify-content:center;
-        margin-top: 20px;
-    }
-    .inline-style-32 {
-        padding: 16px;
-    }
-    .inline-style-33 {
-        font-size: 0.875rem;
-    }
-    </style>
-}
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            var recipeId = $('#recipe-statistics').data('recipe-id');
+
+            $.ajax({
+                url: '/Statistics/RecipeStatsPartial/' + recipeId,
+                type: 'GET',
+                success: function(data) {
+                    $('#recipe-statistics').html(data);
+                },
+                error: function() {
+                    $('#recipe-statistics').html(
+                        '<div class="nutrition-card recipe-stats-card">' +
+                        '<p class="recipe-stats-unavailable">Statistics unavailable</p>' +
+                        '</div>'
+                    );
+                }
+            });
+        });
+    </script>
+}

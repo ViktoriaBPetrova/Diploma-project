@@ -1,18 +1,18 @@
 @model HealthyRecipes.Web.ViewModels.Recipe.EditRecipeViewModel
 @{ ViewData["Title"] = "Edit Recipe"; }
 
-<div class="container inline-style-1">
-    <div class="inline-style-2">
-        <a asp-action="Details" asp-route-id="@Model.Id" class="inline-style-3">← Back to recipe</a>
-        <h1 class="inline-style-4">Edit Recipe</h1>
-        <p class="page-subtitle inline-style-5">Update your recipe details</p>
+<div class="container recipe-form-container">
+    <div class="recipe-form-wrapper">
+        <a asp-action="Details" asp-route-id="@Model.Id" class="recipe-form-hint">← Back to recipe</a>
+        <h1 class="recipe-form-heading">Edit Recipe</h1>
+        <p class="page-subtitle recipe-form-subtitle">Update your recipe details</p>
 
         <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="validation-summary-errors inline-style-6"></div>
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors recipe-validation-errors"></div>
 
-            <div class="inline-style-7">
-                <h3 class="inline-style-8">Basic Info</h3>
+            <div class="recipe-form-section">
+                <h3>Basic Info</h3>
                 <div class="form-group">
                     <label asp-for="Title">Recipe Title *</label>
                     <input asp-for="Title" class="form-control" />
@@ -51,97 +51,25 @@
                 </div>
             </div>
 
-            <div class="inline-style-9">
-                <h3 class="inline-style-10">Categories</h3>
-                <div class="inline-style-11">
+            <div class="recipe-form-section">
+                <h3>Categories</h3>
+                <div class="recipe-category-grid">
                     @foreach (var cat in Model.AvailableCategories)
                     {
-                        <label class="inline-style-12">
+                        <label class="recipe-category-label">
                             <input type="checkbox" name="SelectedCategoryIds" value="@cat.Id"
                                    @(Model.SelectedCategoryIds.Contains(cat.Id) ? "checked" : "")
-                                   class="inline-style-13" />
+                                   class="recipe-category-checkbox" />
                             @cat.Name
                         </label>
                     }
                 </div>
             </div>
 
-            <div class="inline-style-14">
+            <div class="recipe-form-actions">
                 <button type="submit" class="btn-primary">Save changes</button>
                 <a asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">Cancel</a>
             </div>
         </form>
     </div>
 </div>
-
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        padding-top:48px;
-        padding-bottom:64px;
-    }
-    .inline-style-2 {
-        max-width:720px;
-        margin:0 auto;
-    }
-    .inline-style-3 {
-        color:var(--muted);
-        font-size:0.875rem;
-    }
-    .inline-style-4 {
-        margin:16px 0 8px;
-    }
-    .inline-style-5 {
-        margin-bottom:36px;
-    }
-    .inline-style-6 {
-        margin-bottom:16px;
-    }
-    .inline-style-7 {
-        background:white;
-        border-radius:var(--radius-lg);
-        padding:36px;
-        border:1px solid var(--border);
-        box-shadow:var(--shadow);
-        margin-bottom:24px;
-    }
-    .inline-style-8 {
-        margin-bottom:20px;
-    }
-    .inline-style-9 {
-        background:white;
-        border-radius:var(--radius-lg);
-        padding:36px;
-        border:1px solid var(--border);
-        box-shadow:var(--shadow);
-        margin-bottom:24px;
-    }
-    .inline-style-10 {
-        margin-bottom:20px;
-    }
-    .inline-style-11 {
-        display:flex;
-        flex-wrap:wrap;
-        gap:10px;
-    }
-    .inline-style-12 {
-        display:flex;
-        align-items:center;
-        gap:8px;
-        cursor:pointer;
-        background:var(--parchment);
-        padding:8px 14px;
-        border-radius:20px;
-        border:1.5px solid var(--border);
-        font-size:0.9rem;
-    }
-    .inline-style-13 {
-        accent-color:var(--forest);
-    }
-    .inline-style-14 {
-        display:flex;
-        gap:12px;
-    }
-    </style>
-}
