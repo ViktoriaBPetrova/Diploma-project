@@ -6,10 +6,10 @@
 <div class="container">
     <div class="page-header">
         <h1>Pause Meal Plan</h1>
-        <p class="subtitle">Tell us why you're pausing</p>
+        <p class="page-subtitle">Tell us why you're pausing</p>
     </div>
 
-    <div class="card inline-style-1">
+    <div class="card follower-card-centered">
         <div class="card-header">
             <h2>@Model.MealPlanName</h2>
         </div>
@@ -27,22 +27,22 @@
                               rows="4" 
                               placeholder="Let us know why you're pausing this meal plan..."></textarea>
                     <span asp-validation-for="Reason" class="text-danger"></span>
-                    <small>This helps us improve meal plan recommendations</small>
+                    <small class="form-hint">This helps us improve meal plan recommendations</small>
                 </div>
 
-                <div class="warning-box inline-style-2">
-                    <strong>⚠️ Are you sure?</strong>
-                    <p class="inline-style-3">
+                <div class="follower-warning-box">
+                    <strong>⏸ Pausing Plan</strong>
+                    <p class="follower-warning-text">
                         You can always resume this meal plan later and your current progress will be saved.
                     </p>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="btn-danger inline-style-4">
-                        Pause for some time
+                    <button type="submit" class="btn-primary follower-btn-full">
+                        Pause for Now
                     </button>
-                    <a asp-action="MyActivePlans" class="btn-ghost inline-style-5">
-                        Keep actively Following
+                    <a asp-action="MyActivePlans" class="btn-ghost follower-btn-full-secondary">
+                        Keep Actively Following
                     </a>
                 </div>
             </form>
@@ -52,28 +52,4 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-
-    <style>
-    .inline-style-1 {
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    .inline-style-2 {
-        margin: 24px 0;
-        padding: 16px;
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-    }
-    .inline-style-3 {
-        margin: 8px 0 0 0;
-    }
-    .inline-style-4 {
-        width: 100%;
-    }
-    .inline-style-5 {
-        width: 100%;
-        text-align: center;
-        margin-top: 12px;
-    }
-    </style>
 }

@@ -7,25 +7,25 @@
 <div class="container">
     <div class="page-header">
         <h1>Meal Plan Followers</h1>
-        <p class="subtitle">@Model.MealPlanName</p>
+        <p class="page-subtitle">@Model.MealPlanName</p>
     </div>
 
-    <div class="stats-overview">
-        <div class="stat-card">
-            <span class="stat-number">@Model.TotalFollowers</span>
-            <span class="stat-label">Total Followers</span>
+    <div class="followers-stats-overview">
+        <div class="followers-stat-card">
+            <span class="followers-stat-number">@Model.TotalFollowers</span>
+            <span class="followers-stat-label">Total Followers</span>
         </div>
-        <div class="stat-card">
-            <span class="stat-number">@Model.ActiveFollowers</span>
-            <span class="stat-label">Active</span>
+        <div class="followers-stat-card">
+            <span class="followers-stat-number">@Model.ActiveFollowers</span>
+            <span class="followers-stat-label">Active</span>
         </div>
-        <div class="stat-card">
-            <span class="stat-number">@Model.CompletedFollowers</span>
-            <span class="stat-label">Completed</span>
+        <div class="followers-stat-card">
+            <span class="followers-stat-number">@Model.CompletedFollowers</span>
+            <span class="followers-stat-label">Completed</span>
         </div>
-        <div class="stat-card">
-            <span class="stat-number">@(Model.CompletedFollowers > 0 ? Math.Round((double)Model.CompletedFollowers / Model.TotalFollowers * 100, 1) : 0)%</span>
-            <span class="stat-label">Completion Rate</span>
+        <div class="followers-stat-card">
+            <span class="followers-stat-number">@(Model.CompletedFollowers > 0 ? Math.Round((double)Model.CompletedFollowers / Model.TotalFollowers * 100, 1) : 0)%</span>
+            <span class="followers-stat-label">Completion Rate</span>
         </div>
     </div>
 
@@ -34,24 +34,24 @@
         <div class="followers-list">
             @foreach (var follower in Model.Followers)
             {
-                <div class="follower-card card">
-                    <div class="follower-info">
-                        <div class="follower-avatar">
+                <div class="card followers-follower-card">
+                    <div class="followers-info">
+                        <div class="followers-avatar">
                             @follower.UserName.Substring(0, 1).ToUpper()
                         </div>
-                        <div class="follower-details">
+                        <div class="followers-details">
                             <h3>@follower.UserName</h3>
                             @if (!string.IsNullOrEmpty(follower.UserEmail))
                             {
-                                <p class="follower-email">@follower.UserEmail</p>
+                                <p class="followers-email">@follower.UserEmail</p>
                             }
                         </div>
                     </div>
 
-                    <div class="follower-stats">
+                    <div class="followers-stats">
                         <div class="stat-item">
                             <span class="label">Status</span>
-                            <span class="badge badge-@follower.Status.ToString().ToLower()">
+                            <span class="followers-badge followers-badge-@follower.Status.ToString().ToLower()">
                                 @follower.Status.ToString()
                             </span>
                         </div>
@@ -81,190 +81,14 @@
     else
     {
         <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <h3>No followers yet</h3>
             <p>No one is following this meal plan yet.</p>
-            <p class="subtitle">Be the first to start!</p>
+            <p class="page-subtitle">Be the first to start!</p>
         </div>
     }
 
-    <div class="actions inline-style-1">
-        <a asp-action="Details" asp-route-id="@Model.MealPlanId" class="btn-ghost">Back to Meal Plan</a>
+    <div class="followers-actions">
+        <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.MealPlanId" class="btn-ghost">Back to Meal Plan</a>
     </div>
 </div>
-
-<style>
-    .stats-overview {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin-bottom: 32px;
-    }
-
-    .stat-card {
-        background: var(--parchment);
-        padding: 24px;
-        border-radius: 12px;
-        text-align: center;
-        border: 1px solid var(--border);
-    }
-
-    .stat-number {
-        display: block;
-        font-size: 36px;
-        font-weight: 700;
-        color: var(--forest);
-        margin-bottom: 8px;
-    }
-
-    .stat-label {
-        display: block;
-        font-size: 14px;
-        color: #666;
-        font-weight: 500;
-    }
-
-    .followers-list {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .follower-card {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
-        gap: 24px;
-    }
-
-    .follower-info {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        flex: 1;
-    }
-
-    .follower-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: var(--forest);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        font-weight: 700;
-        flex-shrink: 0;
-    }
-
-    .follower-details h3 {
-        margin: 0;
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--forest);
-    }
-
-    .follower-email {
-        margin: 4px 0 0 0;
-        font-size: 14px;
-        color: #666;
-    }
-
-    .follower-stats {
-        display: flex;
-        gap: 24px;
-        align-items: center;
-    }
-
-    .follower-stats .stat-item {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-        text-align: right;
-    }
-
-    .follower-stats .label {
-        font-size: 12px;
-        color: #666;
-        font-weight: 500;
-    }
-
-    .follower-stats .value {
-        font-size: 14px;
-        font-weight: 600;
-        color: var(--forest);
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    .badge-active {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .badge-completed {
-        background: #cce5ff;
-        color: #004085;
-    }
-
-    .badge-paused {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .badge-dropped {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 64px 24px;
-        background: var(--parchment);
-        border-radius: 12px;
-    }
-
-    .empty-state p {
-        font-size: 18px;
-        color: #666;
-        margin-bottom: 8px;
-    }
-
-    .empty-state .subtitle {
-        font-size: 14px;
-        color: #999;
-    }
-
-    @@media (max-width: 768px) {
-        .follower-card {
-            flex-direction: column;
-            align-items: flex-start;
-        }
-
-        .follower-stats {
-            width: 100%;
-            justify-content: space-between;
-        }
-
-        .follower-stats .stat-item {
-            text-align: left;
-        }
-    }
-</style>
-
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        margin-top: 32px;
-    }
-    </style>
-}
