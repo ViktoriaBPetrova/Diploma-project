@@ -3,241 +3,178 @@
     ViewData["Title"] = "My Statistics Dashboard";
 }
 
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col">
-            <h1 class="display-4">📊 Your Statistics</h1>
-            <p class="text-muted">Track your content performance and engagement</p>
-        </div>
+<div class="container dashboard-container">
+    <div class="dashboard-header">
+        <h1 class="dashboard-title">📊 Your Statistics</h1>
+        <p class="dashboard-subtitle">Track your content performance and engagement</p>
     </div>
 
     <!-- Overview Cards -->
-    <div class="row g-4 mb-4">
+    <div class="dashboard-overview-grid">
         <!-- Content Created -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-muted mb-1">Content Created</h6>
-                            <h2 class="mb-0">@Model.TotalContentCreated</h2>
-                        </div>
-                        <span class="badge bg-primary rounded-circle p-3">📝</span>
-                    </div>
-                    <small class="text-muted">
-                        @Model.RecipesCreatedCount recipes, @Model.MealPlansCreatedCount meal plans
-                    </small>
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-header">
+                <div>
+                    <h6 class="dashboard-stat-label">Content Created</h6>
+                    <h2 class="dashboard-stat-value">@Model.TotalContentCreated</h2>
                 </div>
+                <span class="dashboard-stat-icon dashboard-stat-icon-primary">📝</span>
             </div>
+            <small class="dashboard-stat-detail">
+                @Model.RecipesCreatedCount recipes, @Model.MealPlansCreatedCount meal plans
+            </small>
         </div>
 
         <!-- Total Saves -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-muted mb-1">Total Saves</h6>
-                            <h2 class="mb-0">@(Model.TotalRecipeSaves + Model.TotalMealPlanSaves)</h2>
-                        </div>
-                        <span class="badge bg-success rounded-circle p-3">❤️</span>
-                    </div>
-                    <small class="text-muted">
-                        @Model.TotalRecipeSaves recipes, @Model.TotalMealPlanSaves meal plans
-                    </small>
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-header">
+                <div>
+                    <h6 class="dashboard-stat-label">Total Saves</h6>
+                    <h2 class="dashboard-stat-value">@(Model.TotalRecipeSaves + Model.TotalMealPlanSaves)</h2>
                 </div>
+                <span class="dashboard-stat-icon dashboard-stat-icon-success">❤️</span>
             </div>
+            <small class="dashboard-stat-detail">
+                @Model.TotalRecipeSaves recipes, @Model.TotalMealPlanSaves meal plans
+            </small>
         </div>
 
         <!-- Average Rating -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-muted mb-1">Average Rating</h6>
-                            <h2 class="mb-0">@Model.AverageRatingDisplay</h2>
-                        </div>
-                        <span class="badge bg-warning rounded-circle p-3">⭐</span>
-                    </div>
-                    <small class="text-muted">Across all recipes</small>
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-header">
+                <div>
+                    <h6 class="dashboard-stat-label">Average Rating</h6>
+                    <h2 class="dashboard-stat-value">@Model.AverageRatingDisplay</h2>
                 </div>
+                <span class="dashboard-stat-icon dashboard-stat-icon-warning">⭐</span>
             </div>
+            <small class="dashboard-stat-detail">Across all recipes</small>
         </div>
 
         <!-- Comments Received -->
-        <div class="col-md-6 col-lg-3">
-            <div class="card h-100 border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <h6 class="text-muted mb-1">Comments</h6>
-                            <h2 class="mb-0">@Model.TotalCommentsReceived</h2>
-                        </div>
-                        <span class="badge bg-info rounded-circle p-3">💬</span>
-                    </div>
-                    <small class="text-muted">Total feedback received</small>
+        <div class="dashboard-stat-card">
+            <div class="dashboard-stat-header">
+                <div>
+                    <h6 class="dashboard-stat-label">Comments</h6>
+                    <h2 class="dashboard-stat-value">@Model.TotalCommentsReceived</h2>
                 </div>
+                <span class="dashboard-stat-icon dashboard-stat-icon-info">💬</span>
             </div>
+            <small class="dashboard-stat-detail">Total feedback received</small>
         </div>
     </div>
 
-    <!-- Content Breakdown -->
-    <div class="row g-4 mb-4">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">📚 Content Breakdown</h5>
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🍳</span>
-                                <div>
-                                    <div class="fw-bold">@Model.RecipesCreatedCount</div>
-                                    <small class="text-muted">Recipes</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">📅</span>
-                                <div>
-                                    <div class="fw-bold">@Model.MealPlansCreatedCount</div>
-                                    <small class="text-muted">Meal Plans</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🥕</span>
-                                <div>
-                                    <div class="fw-bold">@Model.IngredientsCreatedCount</div>
-                                    <small class="text-muted">Ingredients</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="d-flex align-items-center">
-                                <span class="me-2">🏷️</span>
-                                <div>
-                                    <div class="fw-bold">@Model.CategoriesCreatedCount</div>
-                                    <small class="text-muted">Categories</small>
-                                </div>
-                            </div>
-                        </div>
+    <!-- Content Breakdown & Engagement -->
+    <div class="dashboard-content-grid">
+        <div class="dashboard-section-card">
+            <h5 class="dashboard-section-title">📚 Content Breakdown</h5>
+            <div class="dashboard-breakdown-grid">
+                <div class="dashboard-breakdown-item">
+                    <span class="dashboard-breakdown-icon">🍳</span>
+                    <div>
+                        <div class="dashboard-breakdown-value">@Model.RecipesCreatedCount</div>
+                        <small class="dashboard-breakdown-label">Recipes</small>
+                    </div>
+                </div>
+                <div class="dashboard-breakdown-item">
+                    <span class="dashboard-breakdown-icon">📅</span>
+                    <div>
+                        <div class="dashboard-breakdown-value">@Model.MealPlansCreatedCount</div>
+                        <small class="dashboard-breakdown-label">Meal Plans</small>
+                    </div>
+                </div>
+                <div class="dashboard-breakdown-item">
+                    <span class="dashboard-breakdown-icon">🥕</span>
+                    <div>
+                        <div class="dashboard-breakdown-value">@Model.IngredientsCreatedCount</div>
+                        <small class="dashboard-breakdown-label">Ingredients</small>
+                    </div>
+                </div>
+                <div class="dashboard-breakdown-item">
+                    <span class="dashboard-breakdown-icon">🏷️</span>
+                    <div>
+                        <div class="dashboard-breakdown-value">@Model.CategoriesCreatedCount</div>
+                        <small class="dashboard-breakdown-label">Categories</small>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-4">🎯 Engagement Stats</h5>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Recipe Saves</span>
-                            <span class="fw-bold">@Model.TotalRecipeSaves</span>
-                        </div>
-                        <div class="progress inline-style-1">
-                            <div class="progress-bar bg-success inline-style-2" role="progressbar"></div>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Meal Plan Saves</span>
-                            <span class="fw-bold">@Model.TotalMealPlanSaves</span>
-                        </div>
-                        <div class="progress inline-style-3">
-                            <div class="progress-bar bg-primary inline-style-4" role="progressbar"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Comments Received</span>
-                            <span class="fw-bold">@Model.TotalCommentsReceived</span>
-                        </div>
-                        <div class="progress inline-style-5">
-                            <div class="progress-bar bg-info inline-style-6" role="progressbar"></div>
-                        </div>
-                    </div>
+        <div class="dashboard-section-card">
+            <h5 class="dashboard-section-title">🎯 Engagement Stats</h5>
+            <div class="dashboard-progress-item">
+                <div class="dashboard-progress-header">
+                    <span>Recipe Saves</span>
+                    <span class="dashboard-breakdown-value">@Model.TotalRecipeSaves</span>
+                </div>
+                <div class="dashboard-progress-bar">
+                    <div class="dashboard-progress-fill dashboard-progress-fill-success" 
+                         style="width: @(Model.TotalEngagement > 0 ? (Model.TotalRecipeSaves * 100.0 / Model.TotalEngagement) : 0)%"></div>
+                </div>
+            </div>
+            <div class="dashboard-progress-item">
+                <div class="dashboard-progress-header">
+                    <span>Meal Plan Saves</span>
+                    <span class="dashboard-breakdown-value">@Model.TotalMealPlanSaves</span>
+                </div>
+                <div class="dashboard-progress-bar">
+                    <div class="dashboard-progress-fill dashboard-progress-fill-primary" 
+                         style="width: @(Model.TotalEngagement > 0 ? (Model.TotalMealPlanSaves * 100.0 / Model.TotalEngagement) : 0)%"></div>
+                </div>
+            </div>
+            <div class="dashboard-progress-item">
+                <div class="dashboard-progress-header">
+                    <span>Comments Received</span>
+                    <span class="dashboard-breakdown-value">@Model.TotalCommentsReceived</span>
+                </div>
+                <div class="dashboard-progress-bar">
+                    <div class="dashboard-progress-fill dashboard-progress-fill-info" 
+                         style="width: @(Model.TotalEngagement > 0 ? (Model.TotalCommentsReceived * 100.0 / Model.TotalEngagement) : 0)%"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Most Popular Content -->
-    <div class="row g-4">
+    <div class="dashboard-popular-grid">
         @if (Model.HasMostPopularRecipe)
         {
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">🏆 Most Popular Recipe</h5>
-                        <h6 class="mb-2">@Model.MostPopularRecipeTitle</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge bg-success me-2">❤️ @Model.MostPopularRecipeSaveCount saves</span>
-                        </div>
-                        <a asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.MostPopularRecipeId" 
-                           class="btn btn-sm btn-outline-primary">View Recipe</a>
-                    </div>
+            <div class="dashboard-popular-card">
+                <h5 class="dashboard-popular-title">🏆 Most Popular Recipe</h5>
+                <h6 class="dashboard-popular-name">@Model.MostPopularRecipeTitle</h6>
+                <div class="dashboard-popular-badges">
+                    <span class="dashboard-badge dashboard-badge-success">❤️ @Model.MostPopularRecipeSaveCount saves</span>
                 </div>
+                <a asp-controller="Recipe" asp-action="Details" asp-route-id="@Model.MostPopularRecipeId" 
+                   class="btn-ghost">View Recipe</a>
             </div>
         }
 
         @if (Model.HasMostPopularMealPlan)
         {
-            <div class="col-lg-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body">
-                        <h5 class="card-title mb-4">🏆 Most Popular Meal Plan</h5>
-                        <h6 class="mb-2">@Model.MostPopularMealPlanName</h6>
-                        <div class="d-flex align-items-center mb-3">
-                            <span class="badge bg-success me-2">❤️ @Model.MostPopularMealPlanSaveCount saves</span>
-                        </div>
-                        <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.MostPopularMealPlanId" 
-                           class="btn btn-sm btn-outline-primary">View Meal Plan</a>
-                    </div>
+            <div class="dashboard-popular-card">
+                <h5 class="dashboard-popular-title">🏆 Most Popular Meal Plan</h5>
+                <h6 class="dashboard-popular-name">@Model.MostPopularMealPlanName</h6>
+                <div class="dashboard-popular-badges">
+                    <span class="dashboard-badge dashboard-badge-success">❤️ @Model.MostPopularMealPlanSaveCount saves</span>
                 </div>
+                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.MostPopularMealPlanId" 
+                   class="btn-ghost">View Meal Plan</a>
             </div>
         }
 
         @if (!Model.HasMostPopularRecipe && !Model.HasMostPopularMealPlan)
         {
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <h5 class="text-muted">No content created yet</h5>
-                        <p class="text-muted mb-4">Start creating recipes and meal plans to see your statistics!</p>
-                        <a asp-controller="Recipe" asp-action="Create" class="btn btn-primary me-2">Create Recipe</a>
-                        <a asp-controller="MealPlan" asp-action="Create" class="btn btn-outline-primary">Create Meal Plan</a>
+            <div class="dashboard-section-card">
+                <div class="dashboard-empty-state">
+                    <h5 class="dashboard-empty-title">No content created yet</h5>
+                    <p class="dashboard-empty-text">Start creating recipes and meal plans to see your statistics!</p>
+                    <div class="dashboard-empty-actions">
+                        <a asp-controller="Recipe" asp-action="Create" class="btn-primary">Create Recipe</a>
+                        <a asp-controller="MealPlan" asp-action="Create" class="btn-ghost">Create Meal Plan</a>
                     </div>
                 </div>
             </div>
         }
     </div>
 </div>
-
-
-@section Scripts {
-    <style>
-    .inline-style-1 {
-        height: 8px;
-    }
-    .inline-style-2 {
-        width: @(Model.TotalEngagement > 0 ? (Model.TotalRecipeSaves * 100.0 / Model.TotalEngagement) : 0)%
-    }
-    .inline-style-3 {
-        height: 8px;
-    }
-    .inline-style-4 {
-        width: @(Model.TotalEngagement > 0 ? (Model.TotalMealPlanSaves * 100.0 / Model.TotalEngagement) : 0)%
-    }
-    .inline-style-5 {
-        height: 8px;
-    }
-    .inline-style-6 {
-        width: @(Model.TotalEngagement > 0 ? (Model.TotalCommentsReceived * 100.0 / Model.TotalEngagement) : 0)%
-    }
-    </style>
-}

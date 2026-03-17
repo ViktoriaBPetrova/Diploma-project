@@ -2,62 +2,50 @@
 
 @if (Model != null)
 {
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <h5 class="card-title mb-3">📊 Recipe Statistics</h5>
-            
-            <div class="row g-3">
-                <!-- Save Count -->
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
-                        <div class="fs-5 fw-bold text-success">@Model.SaveCount</div>
-                        <small class="text-muted">Saves</small>
-                    </div>
-                </div>
-
-                <!-- Average Rating -->
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
-                        <div class="fs-5 fw-bold text-warning" title="@Model.AverageRatingDisplay">
-                            @Model.RatingStars
-                        </div>
-                        <small class="text-muted">@Model.RatingCount ratings</small>
-                    </div>
-                </div>
-
-                <!-- Comments -->
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
-                        <div class="fs-5 fw-bold text-info">@Model.CommentCount</div>
-                        <small class="text-muted">Comments</small>
-                    </div>
-                </div>
-
-                <!-- Meal Plan Usage -->
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-2 bg-light rounded">
-                        <div class="fs-5 fw-bold text-primary">@Model.MealPlanUsageCount</div>
-                        <small class="text-muted">In Meal Plans</small>
-                    </div>
-                </div>
+    <div class="stats-partial-card">
+        <h5 class="stats-partial-title">📊 Recipe Statistics</h5>
+        
+        <div class="stats-partial-grid">
+            <!-- Save Count -->
+            <div class="stats-partial-item">
+                <div class="stats-partial-value stats-partial-value-success">@Model.SaveCount</div>
+                <small class="stats-partial-label">Saves</small>
             </div>
 
-            @if (Model.AverageRating > 0)
-            {
-                <div class="mt-3 text-center">
-                    <small class="text-muted">
-                        Average rating: <strong>@Model.AverageRatingDisplay</strong> / 5.0
-                    </small>
+            <!-- Average Rating -->
+            <div class="stats-partial-item">
+                <div class="stats-partial-value stats-partial-value-warning" title="@Model.AverageRatingDisplay">
+                    @Model.RatingStars
                 </div>
-            }
+                <small class="stats-partial-label">@Model.RatingCount ratings</small>
+            </div>
+
+            <!-- Comments -->
+            <div class="stats-partial-item">
+                <div class="stats-partial-value stats-partial-value-info">@Model.CommentCount</div>
+                <small class="stats-partial-label">Comments</small>
+            </div>
+
+            <!-- Meal Plan Usage -->
+            <div class="stats-partial-item">
+                <div class="stats-partial-value stats-partial-value-primary">@Model.MealPlanUsageCount</div>
+                <small class="stats-partial-label">In Meal Plans</small>
+            </div>
         </div>
+
+        @if (Model.AverageRating > 0)
+        {
+            <div class="stats-partial-footer">
+                <small class="stats-partial-footer-text">
+                    Average rating: <strong>@Model.AverageRatingDisplay</strong> / 5.0
+                </small>
+            </div>
+        }
     </div>
 }
 else
 {
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body text-center text-muted">
-            <p class="mb-0">Statistics unavailable</p>
-        </div>
+    <div class="stats-partial-card">
+        <p class="stats-partial-unavailable">Statistics unavailable</p>
     </div>
 }
