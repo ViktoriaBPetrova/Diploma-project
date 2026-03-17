@@ -1137,6 +1137,56 @@ textarea.form-control {
     margin: 0;
 }
 
+/* ── Home Stats Section ─────────────────────────────────────── */
+.home-stats-section {
+    background: var(--parchment);
+    border-radius: 24px;
+    margin: 0 24px 48px;
+}
+
+.home-stats-grid {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+    padding: 24px 0;
+}
+
+.home-stat {
+    /* Individual stat container - no specific styles needed, inherits from grid */
+}
+
+.home-stat-value {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    color: var(--forest);
+}
+
+.home-stat-label {
+    font-size: 0.875rem;
+    color: var(--muted);
+}
+
+/* ── Home Featured Section ──────────────────────────────────── */
+.home-featured-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: var(--space-md);
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+    .home-featured-header .section-title {
+        margin-bottom: 0;
+    }
+
+.home-view-all-btn {
+    font-size: 0.875rem;
+}
+
+
 /* ── Identity Pages ───────────────────────────────── */
 .identity-container {
     max-width: 480px;
