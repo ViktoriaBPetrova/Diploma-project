@@ -2,6 +2,49 @@
    RECIPE STYLES
    ═══════════════════════════════════════════════════════════ */
 
+/* ── Recipe Card (Partial) ──────────────────────────────────── */
+.recipe-card-tags {
+    margin-bottom: 8px;
+}
+
+.recipe-card-description {
+    font-size: 0.875rem;
+    color: var(--muted);
+    margin: 6px 0 0;
+    line-height: 1.4;
+}
+
+.recipe-card-macros {
+    margin: 10px 0;
+}
+
+.recipe-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+}
+
+.recipe-card-rating-count {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.recipe-card-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.recipe-card-time {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.recipe-card-save-form {
+    display: inline;
+}
+
 /* ── Recipe Create/Edit Forms ───────────────────────────────── */
 .recipe-form-container {
     padding-top: 48px;
