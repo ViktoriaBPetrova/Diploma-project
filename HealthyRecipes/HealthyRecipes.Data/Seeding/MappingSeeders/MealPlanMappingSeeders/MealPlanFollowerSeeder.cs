@@ -23,19 +23,6 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
                     IsActive = true,
                     Status = MealPlanFollowerStatus.Active
                 },
-
-                /* - seed another mealplan for the user to follow
-                // User completed UserMealPlan
-                new MealPlanFollower(
-                    Guid.Parse(UserConstants.UserId),
-                    Guid.Parse(MealPlanConstants.UserMealPlanId),
-                    seedingDate.AddDays(-1) // Started 1 day ago
-                )
-                {
-                    IsActive = false,
-                    Status = MealPlanFollowerStatus.Completed,
-                    CompletedAt = seedingDate // Completed - seeding date
-                }*/
             };
 
             return mealPlanFollowers;

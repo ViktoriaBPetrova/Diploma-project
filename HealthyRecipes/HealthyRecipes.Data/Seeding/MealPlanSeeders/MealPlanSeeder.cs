@@ -17,20 +17,38 @@ namespace HealthyRecipes.Data.Seeding.MealPlanSeeders
             DateTime seedingDate = new DateTime(2025, 12, 18);
 
             List<MealPlan> mealPlans = new List<MealPlan>()
-        {
-            new MealPlan(
-                seedingDate,
-                Guid.Parse(MealPlanConstants.UserMealPlanId)
-                /*MealPlanConstants.UserMealPlanCalories,
-                MealPlanConstants.UserMealPlanFat,
-                MealPlanConstants.UserMealPlanCarbs,
-                MealPlanConstants.UserMealPlanProtein*/
-            )
             {
-                Name = MealPlanConstants.UserMealPlanName,
-                Description = MealPlanConstants.UserMealPlanDescription,
-                UserId = Guid.Parse(MealPlanConstants.UserId)
-            }
+            // Meal Plan 1: John's Lean Bulk Plan
+                new MealPlan(seedingDate, Guid.Parse(MealPlanConstants.UserMealPlanId))
+                {
+                    Name = MealPlanConstants.UserMealPlanName,
+                    Description = MealPlanConstants.UserMealPlanDescription,
+                    UserId = Guid.Parse(MealPlanConstants.UserId)
+                },
+
+                // Meal Plan 2: Sarah's Plant-Based Week
+                new MealPlan(seedingDate, Guid.Parse(MealPlanConstants.SarahMealPlanId))
+                {
+                    Name = MealPlanConstants.SarahMealPlanName,
+                    Description = MealPlanConstants.SarahMealPlanDescription,
+                    UserId = Guid.Parse(MealPlanConstants.SarahUserId)
+                },
+
+                // Meal Plan 3: Mike's Marathon Training Plan
+                new MealPlan(seedingDate, Guid.Parse(MealPlanConstants.MikeMealPlanId))
+                {
+                    Name = MealPlanConstants.MikeMealPlanName,
+                    Description = MealPlanConstants.MikeMealPlanDescription,
+                    UserId = Guid.Parse(MealPlanConstants.MikeUserId)
+                },
+
+                // Meal Plan 4: Emma's Balanced Nutrition Guide
+                new MealPlan(seedingDate, Guid.Parse(MealPlanConstants.EmmaMealPlanId))
+                {
+                    Name = MealPlanConstants.EmmaMealPlanName,
+                    Description = MealPlanConstants.EmmaMealPlanDescription,
+                    UserId = Guid.Parse(MealPlanConstants.EmmaUserId)
+                }
             };
 
             return mealPlans;
