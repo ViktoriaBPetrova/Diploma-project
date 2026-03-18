@@ -1,9 +1,11 @@
+using HealthyRecipes.Web.ViewModels.MealPlan;
 using HealthyRecipes.Web.ViewModels.Recipe;
 
 namespace HealthyRecipes.Web.ViewModels.Recipe
 {
     public class RecipeIndexViewModel
     {
+        public IEnumerable<RecipeCardViewModel> MyRecipes { get; set; } = new List<RecipeCardViewModel>();
         public IEnumerable<RecipeCardViewModel> Recipes { get; set; } = new List<RecipeCardViewModel>();
         public string? SearchQuery { get; set; }
         public Guid? SelectedCategoryId { get; set; }

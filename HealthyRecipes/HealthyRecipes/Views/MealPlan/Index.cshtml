@@ -169,6 +169,14 @@
             }
         </div>
     }
+    else
+    {
+
+        <div class="empty-state">
+            <div class="empty-state-icon">🥦</div>
+            <h3>You haven`t created any MealPlans yet!</h3>
+        </div>
+    }
 
     <!-- Saved Plans Section -->
     @if (Model.SavedMealPlans.Any())

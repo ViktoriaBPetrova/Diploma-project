@@ -3,6 +3,8 @@ using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.CommentRatings;
 using HealthyRecipes.Services.Ingredients;
+using HealthyRecipes.Services.MealPlanFollowers;
+using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.RecipeCategories;
 using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.Recipes;
@@ -10,6 +12,8 @@ using HealthyRecipes.Services.Recipes.Models;
 using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Services.Statistics.Interfaces;
 using HealthyRecipes.Services.Statistics.Services;
+using HealthyRecipes.Services.Users;
+using HealthyRecipes.Web.ViewModels.MealPlan;
 using HealthyRecipes.Web.ViewModels.Recipe;
 
 using Microsoft.AspNetCore.Authorization;
@@ -84,7 +88,7 @@ namespace HealthyRecipes.Web.Controllers
                 };
 
                 // Get filtered recipes from service (this does all the heavy lifting)
-                var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto);
+                var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto);               
 
                 // Get all categories for filter UI
                 var categories = await _categoryService.GetAllCategoriesAsync();
@@ -92,18 +96,49 @@ namespace HealthyRecipes.Web.Controllers
                 // Get saved recipe IDs and allergies for current user
                 HashSet<Guid> savedIds = new();
                 HashSet<Guid> allergyIngredientIds = new();
-
+                List<Recipe> myRecipes = new List<Recipe>();
                 if (User.Identity?.IsAuthenticated == true)
                 {
                     var user = await _userManager.GetUserAsync(User);
                     if (user != null)
                     {
+                        var my = await _recipeService.GetRecipesByUserAsync(user.Id);
+                        myRecipes = my.ToList();
+
                         var saved = await _savedRecipeService.GetSavedRecipesByUserAsync(user.Id);
                         savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
 
                         var allergies = await _allergyService.GetAllergiesByUserAsync(user.Id);
                         allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
                     }
+                }
+
+                // Map My Recipes
+                var myCards = new List<RecipeCardViewModel>();
+                foreach (var recipe in myRecipes)
+                {
+                    var avgRating = await _commentRatingService.GetAverageRatingAsync(recipe.Id);
+                    var ratings = await _commentRatingService.GetRatingsByRecipeAsync(recipe.Id);
+                    var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(recipe.Id);
+
+                    myCards.Add(new RecipeCardViewModel
+                    {
+                        Id = recipe.Id,
+                        Title = recipe.Title,
+                        Info = recipe.Info,
+                        Calories = recipe.Calories,
+                        Protein = recipe.Protein,
+                        Carbs = recipe.Carbs,
+                        Fat = recipe.Fat,
+                        PrepTime = recipe.PrepTime,
+                        Difficulty = recipe.Difficulty,
+                        ImageUrl = recipe.ImageUrl,
+                        AverageRating = avgRating,
+                        RatingCount = ratings.Count(),
+                        CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
+                        IsSaved = savedIds.Contains(recipe.Id),
+                        AuthorName = recipe.User?.UserName ?? "Unknown"
+                    });
                 }
 
                 // Map to RecipeCardViewModel
@@ -138,6 +173,7 @@ namespace HealthyRecipes.Web.Controllers
                 var vm = new RecipeIndexViewModel
                 {
                     Recipes = cards,
+                    MyRecipes = myCards,
                     SearchQuery = filter.SearchTerm,
                     SelectedCategoryId = filter.CategoryIds.FirstOrDefault(),
                     CurrentPage = filter.PageNumber,

@@ -243,6 +243,10 @@
     color: #666;
 }
 
+.recipe-index-grid {
+    margin-bottom: 48px;
+}
+
 .filter-panel {
     background: white;
     border-radius: var(--radius-sm);

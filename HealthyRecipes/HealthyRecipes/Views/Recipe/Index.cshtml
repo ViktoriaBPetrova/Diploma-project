@@ -190,6 +190,28 @@
         }
     </div>
 
+    <!-- My Recipes Section -->
+    @if (Model.MyRecipes.Any())
+    {
+        <h2 class="section-title">My Recipes</h2>
+        <div class="grid-3 recipe-index-grid">
+            @foreach (var recipe in Model.MyRecipes)
+            {
+                <partial name="_RecipeCard" model="recipe" />
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">🥦</div>
+            <h3>You haven`t created any recipes yet!</h3>
+        </div>
+    }
+
+    <!-- Browse All Plans Section (with filters) -->
+    <h2 class="section-title">Browse All Plans</h2>
+
     <!-- Results Info -->
     @if (Model.TotalCount > 0)
     {

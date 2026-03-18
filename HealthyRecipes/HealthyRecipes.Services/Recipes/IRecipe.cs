@@ -21,6 +21,7 @@ namespace HealthyRecipes.Services.Recipes
         Task<bool> RecalculateRecipeNutritionAsync(Guid id);
 
         Task<IEnumerable<Recipe>> GetRecipeAsync(Func<Recipe, bool> predicate);
+        Task<IEnumerable<Recipe>> GetRecipesByUserAsync(Guid userId);
 
         Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(RecipeFilterDto filter);
 

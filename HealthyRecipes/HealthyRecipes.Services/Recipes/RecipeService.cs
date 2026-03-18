@@ -251,6 +251,30 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
+        public async Task<IEnumerable<Recipe>> GetRecipesByUserAsync(Guid userId)
+        {
+            try
+            {
+                return await _context.Recipes
+                    .Include(r => r.RecipeCategories)
+                        .ThenInclude(rc => rc.Category)
+                    .Include(r => r.CommentRatings)
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.Ingredient)
+                    .Include(r => r.RecipeMeals)
+                    .Include(r => r.SavedRecipes)
+                    .Include(r => r.User)
+                    .Where(m => m.UserId == userId && !m.Deleted)
+                    .OrderByDescending(m => m.CreatedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving recipes for user: {UserId}", userId);
+                throw;
+            }
+        }
+
         public async Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(RecipeFilterDto filter)
         {
             if (filter == null)
