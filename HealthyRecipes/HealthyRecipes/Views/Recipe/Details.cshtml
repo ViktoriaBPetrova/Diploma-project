@@ -1,6 +1,11 @@
 @using HealthyRecipes.Web.ViewModels.Statistics
 @model HealthyRecipes.Web.ViewModels.Recipe.RecipeDetailsViewModel
 @{ ViewData["Title"] = "Recipe Details"; }
+@using System.Security.Claims
+@{
+    var isAuthor = User.Identity?.IsAuthenticated == true && 
+                   Model.AuthorId == Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+}
 
 <div class="container recipe-detail-container">
 
@@ -79,22 +84,77 @@
             </div>
 
             <!-- Ingredients -->
-            <h3 class="recipe-ingredients-heading">Ingredients</h3>
-            <table class="ingredients-table recipe-ingredients-table">
-                <thead>
-                    <tr><th>Ingredient</th><th>Amount</th><th>Calories</th></tr>
-                </thead>
-                <tbody>
-                    @foreach (var ing in Model.Ingredients)
-                    {
-                        <tr class="@(ing.IsAllergen ? "allergen-row" : "")">
-                            <td>@ing.IngredientName @(ing.IsAllergen ? "⚠️" : "")</td>
-                            <td>@ing.QuantityInGrams g</td>
-                            <td>@ing.Calories.ToString("F0") kcal</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                <div class="recipe-section">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                        <h2 class="recipe-section-title" >Ingredients</h2>
+
+                        @if (isAuthor)
+                        {
+                            <div class="ingredient-search-toggle-container">
+                                <button type="button" class="btn-search-icon" id="add-ingredient-btn" title="Add ingredient">
+                                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                                    </svg>
+                                </button>
+
+                                <div id="ingredient-search-container" class="ingredient-search-expandable">
+                                    <div class="ingredient-search-wrapper">
+                                        <svg class="ingredient-search-icon-left" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
+                                        </svg>
+                                        <input type="text"
+                                               id="ingredient-search"
+                                               class="ingredient-search-input-expand"
+                                               placeholder="Search ingredients..."
+                                               autocomplete="off">
+                                        <button type="button" class="search-close-icon" id="close-search-btn" title="Close">
+                                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z" />
+                                            </svg>
+                                        </button>
+                                        <div id="search-results" class="search-results"></div>
+                                    </div>
+
+                                    <div id="ingredient-quantity-form" class="ingredient-quantity-form-overlay">
+                                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                            <input type="number"
+                                                   id="ingredient-quantity"
+                                                   class="form-control"
+                                                   placeholder="Quantity"
+                                                   step="0.01"
+                                                   style="flex: 1;">
+                                            
+                                        </div>
+                                        <button type="button" class="btn-primary" id="confirm-add-ingredient">Add</button>
+                                        <button type="button" class="btn-ghost" id="cancel-add-ingredient">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <ul class="recipe-ingredients-list" id="ingredients-list">
+                        @foreach (var ingredient in Model.Ingredients)
+                        {
+                            <li class="recipe-ingredient-item">
+                                <span class="ingredient-name">@ingredient.QuantityInGrams g @ingredient.IngredientName</span>
+                            @if (isAuthor)
+                            {
+                                <button type="button"
+                                        class="btn-delete-ingredient"
+                                        data-ingredient-id="@ingredient.IngredientId"
+                                        title="Remove ingredient">
+                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                                    </svg>
+                                </button>
+                            }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
 
             @if (!string.IsNullOrEmpty(Model.VideoUrl))
             {
@@ -217,27 +277,327 @@
             </div>
         </div>
     </div>
+
+    @* Similar Recipes Section *@
+    @if (Model.SimilarRecipes.Any())
+    {
+        <section class="similar-recipes-section">
+            <div class="similar-recipes-header">
+                <h2 class="similar-recipes-title">You Might Also Like</h2>
+                <p class="similar-recipes-subtitle">Recipes with similar ingredients and categories</p>
+            </div>
+
+            <div class="similar-recipes-grid">
+                @foreach (var similar in Model.SimilarRecipes)
+                {
+                    <div class="similar-recipe-card card">
+                        @if (!string.IsNullOrEmpty(similar.ImageUrl))
+                        {
+                            <div class="similar-recipe-image" style="background-image: url('@similar.ImageUrl');"></div>
+                        }
+                        else
+                        {
+                            <div class="similar-recipe-image similar-recipe-image-placeholder">
+                                <span style="font-size: 2.5rem;">🍽️</span>
+                            </div>
+                        }
+
+                        <div class="similar-recipe-content">
+                            <a asp-action="Details" asp-route-id="@similar.RecipeId" class="similar-recipe-title">
+                                @similar.Title
+                            </a>
+
+                            <p class="similar-recipe-similarity">
+                                @Math.Round(similar.Score)% similar
+                            </p>
+
+                            <div class="similar-recipe-macros macros">
+                                <span class="macro-pill macro-calories">@similar.Calories.ToString("F0") cal</span>
+                                <span class="macro-pill macro-protein">@similar.Protein.ToString("F0")g protein</span>
+                            </div>
+
+                            @if (similar.Categories.Any())
+                            {
+                                <div class="similar-recipe-categories">
+                                    @foreach (var category in similar.Categories.Take(2))
+                                    {
+                                        <span class="tag">@category</span>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </section>
+    }
 </div>
 
 @section Scripts {
     <script>
+        // Recipe statistics loading (keeping jQuery for this part since it's already working)
         $(document).ready(function() {
-            var recipeId = $('#recipe-statistics').data('recipe-id');
+            var recipeStatsId = $('#recipe-statistics').data('recipe-id');
+            if (recipeStatsId) {
+                $.ajax({
+                    url: '/Statistics/RecipeStatsPartial/' + recipeStatsId,
+                    type: 'GET',
+                    success: function(data) {
+                        $('#recipe-statistics').html(data);
+                    },
+                    error: function() {
+                        $('#recipe-statistics').html(
+                            '<div class="nutrition-card recipe-stats-card">' +
+                            '<p class="recipe-stats-unavailable">Statistics unavailable</p>' +
+                            '</div>'
+                        );
+                    }
+                });
+            }
+        });
 
-            $.ajax({
-                url: '/Statistics/RecipeStatsPartial/' + recipeId,
-                type: 'GET',
-                success: function(data) {
-                    $('#recipe-statistics').html(data);
-                },
-                error: function() {
-                    $('#recipe-statistics').html(
-                        '<div class="nutrition-card recipe-stats-card">' +
-                        '<p class="recipe-stats-unavailable">Statistics unavailable</p>' +
-                        '</div>'
-                    );
+        // Ingredient management - Vanilla JavaScript (matching Create view)
+        const recipeId = '@Model.Id';
+        let selectedIngredientId = null;
+        let selectedIngredientName = null;
+
+        // Get elements
+        const addIngredientBtn = document.getElementById('add-ingredient-btn');
+        const searchContainer = document.getElementById('ingredient-search-container');
+        const searchInput = document.getElementById('ingredient-search');
+        const searchResults = document.getElementById('search-results');
+        const quantityForm = document.getElementById('ingredient-quantity-form');
+        const quantityInput = document.getElementById('ingredient-quantity');
+        const unitInput = document.getElementById('ingredient-unit');
+        const confirmBtn = document.getElementById('confirm-add-ingredient');
+        const cancelBtn = document.getElementById('cancel-add-ingredient');
+        const ingredientsList = document.getElementById('ingredients-list');
+
+        let searchTimeout;
+
+        // Show/hide search container with expand animation
+        if (addIngredientBtn) {
+            addIngredientBtn.addEventListener('click', function() {
+                console.log('Button clicked');
+                searchContainer.classList.add('active');
+                addIngredientBtn.style.opacity = '0';
+                addIngredientBtn.style.pointerEvents = 'none';
+                setTimeout(() => {
+                    searchInput.focus();
+                }, 300);
+            });
+        }
+
+        // Close button
+        const closeSearchBtn = document.getElementById('close-search-btn');
+        if (closeSearchBtn) {
+            closeSearchBtn.addEventListener('click', function() {
+                searchContainer.classList.remove('active');
+                addIngredientBtn.style.opacity = '1';
+                addIngredientBtn.style.pointerEvents = 'auto';
+                resetIngredientForm();
+            });
+        }
+
+        // Ingredient search - USING THE SAME ENDPOINT AS CREATE VIEW
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const term = this.value.trim();
+                
+                console.log('Search input:', term);
+                clearTimeout(searchTimeout);
+                
+                if (term.length < 2) {
+                    searchResults.innerHTML = '';
+                    searchResults.style.display = 'none';
+                    return;
+                }
+                
+                searchTimeout = setTimeout(async () => {
+                    try {
+                        console.log('Fetching ingredients...');
+                        // Use the SAME endpoint as Create view
+                        const response = await fetch(`/Recipe/SearchIngredients?term=${encodeURIComponent(term)}`);
+                        const ingredients = await response.json();
+                        
+                        console.log('Results:', ingredients);
+                        
+                        if (ingredients.length === 0) {
+                            searchResults.innerHTML = '<div class="search-result-item">No ingredients found</div>';
+                            searchResults.style.display = 'block';
+                            return;
+                        }
+                        
+                        searchResults.innerHTML = ingredients.map(ing => `
+                            <div class="search-result-item" data-id="${ing.id}" data-name="${ing.name}">
+                                <div class="search-result-name">${ing.name}</div>
+                                <div class="search-result-meta">${ing.caloriesPer100g} cal/100g</div>
+                            </div>
+                        `).join('');
+                        
+                        searchResults.style.display = 'block';
+                        
+                        // Add click handlers
+                        document.querySelectorAll('.search-result-item').forEach(item => {
+                            item.addEventListener('click', function() {
+                                selectIngredient(this.dataset.id, this.dataset.name);
+                            });
+                        });
+                        
+                    } catch (error) {
+                        console.error('Search error:', error);
+                        searchResults.innerHTML = '<div class="search-result-item">Error loading results</div>';
+                        searchResults.style.display = 'block';
+                    }
+                }, 300);
+            });
+        }
+
+        function selectIngredient(id, name) {
+            console.log('Selected ingredient:', id, name);
+            selectedIngredientId = id;
+            selectedIngredientName = name;
+            searchInput.value = name;
+            searchResults.style.display = 'none';
+            quantityForm.style.display = 'block';
+            quantityInput.focus();
+        }
+
+        // Cancel button
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', resetIngredientForm);
+        }
+
+        // Confirm add ingredient
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', async function() {
+                const quantity = parseFloat(quantityInput.value);
+                const unit = unitInput.value.trim();
+
+                console.log('Adding ingredient:', selectedIngredientId, quantity, unit);
+
+                if (!selectedIngredientId || !quantity || !unit) {
+                    alert('Please fill in all fields');
+                    return;
+                }
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    const response = await fetch('/Recipe/AddIngredient', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            recipeId: recipeId,
+                            ingredientId: selectedIngredientId,
+                            quantity: quantity,
+                            unit: unit,
+                            __RequestVerificationToken: token
+                        })
+                    });
+
+                    const result = await response.json();
+                    console.log('Add result:', result);
+
+                    if (result.success) {
+                        addIngredientToList(result.ingredientId, result.ingredientName, result.quantity, result.unit);
+                        resetIngredientForm();
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error adding ingredient:', error);
+                    alert('Failed to add ingredient');
                 }
             });
+        }
+
+        function addIngredientToList(id, name, quantity, unit) {
+            const li = document.createElement('li');
+            li.className = 'recipe-ingredient-item';
+            li.dataset.ingredientId = id;
+            li.innerHTML = `
+                <span class="ingredient-name">${quantity} ${unit} ${name}</span>
+                <button type="button" 
+                        class="btn-delete-ingredient" 
+                        data-ingredient-id="${id}"
+                        title="Remove ingredient">
+                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                    </svg>
+                </button>
+            `;
+            ingredientsList.appendChild(li);
+        }
+
+        function resetIngredientForm() {
+            selectedIngredientId = null;
+            selectedIngredientName = null;
+            searchInput.value = '';
+            quantityInput.value = '';
+            unitInput.value = '';
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            if (quantityForm) {
+                quantityForm.style.display = 'none';
+            }
+            searchContainer.classList.remove('active');
+            addIngredientBtn.style.opacity = '1';
+            addIngredientBtn.style.pointerEvents = 'auto';
+        }
+
+        // Delete ingredient (event delegation)
+        if (ingredientsList) {
+            ingredientsList.addEventListener('click', async function(e) {
+                const deleteBtn = e.target.closest('.btn-delete-ingredient');
+                if (!deleteBtn) return;
+
+                if (!confirm('Remove this ingredient?')) return;
+
+                const ingredientId = deleteBtn.dataset.ingredientId;
+                const listItem = deleteBtn.closest('.recipe-ingredient-item');
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    
+                    const response = await fetch('/Recipe/RemoveIngredient', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            recipeId: recipeId,
+                            ingredientId: ingredientId,
+                            __RequestVerificationToken: token
+                        })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        listItem.style.opacity = '0';
+                        setTimeout(() => listItem.remove(), 300);
+                    } else {
+                        alert(result.message);
+                    }
+                } catch (error) {
+                    console.error('Error removing ingredient:', error);
+                    alert('Failed to remove ingredient');
+                }
+            });
+        }
+
+        // Close search results when clicking outside
+        document.addEventListener('click', function(e) {
+            if (searchInput && searchResults && 
+                !searchInput.contains(e.target) && 
+                !searchResults.contains(e.target) &&
+                !addIngredientBtn.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
         });
     </script>
 }

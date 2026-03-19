@@ -55,7 +55,7 @@ namespace HealthyRecipes.Data.Entities
 
         // ---------- Navigation Collections ----------
         public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; } 
-        public IEnumerable<Allergy> Allergies { get; set; } 
+        public IEnumerable<Allergy> Allergies { get; set; }
 
 
         // ---------- Soft Delete ----------

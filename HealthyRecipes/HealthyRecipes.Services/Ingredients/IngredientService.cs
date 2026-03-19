@@ -191,5 +191,19 @@ namespace HealthyRecipes.Services.Ingredients
                 throw;
             }
         }
+
+        public async Task<IEnumerable<Ingredient>> SearchIngredientsAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return Enumerable.Empty<Ingredient>();
+            }
+
+            return await _context.Ingredients
+                .Where(i => !i.Deleted && i.Name.Contains(searchTerm))
+                .OrderBy(i => i.Name)
+                .Take(10)
+                .ToListAsync();
+        }
     }
 }

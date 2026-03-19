@@ -47,6 +47,8 @@ namespace HealthyRecipes.Data.Entities
         public IEnumerable<RecipeCategory> RecipeCategories { get; set; }
         public IEnumerable<MealPlanCategory> MealPlanCategories { get; set; }
 
+
+
         // ---------- Soft Delete ----------
         public bool Deleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }

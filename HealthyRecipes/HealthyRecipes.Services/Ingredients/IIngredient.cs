@@ -23,5 +23,7 @@ namespace HealthyRecipes.Services.Ingredients
         Task<bool> SoftDeleteIngredientAsync(Guid id);
 
         Task<bool> RestoreIngredientAsync(Guid id);
+
+        Task<IEnumerable<Ingredient>> SearchIngredientsAsync(string searchTerm);
     }
 }

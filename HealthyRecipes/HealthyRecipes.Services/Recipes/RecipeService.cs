@@ -1,5 +1,6 @@
 using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Services.Recipes.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -404,8 +405,29 @@ namespace HealthyRecipes.Services.Recipes
                 throw;
             }
         }
+        public async Task AddIngredientToRecipeAsync(Guid recipeId, Guid ingredientId, float quantity)
+        {
+            var recipeIngredient = new RecipeIngredient
+            {
+                RecipeId = recipeId,
+                IngredientId = ingredientId,
+                QuantityInGrams = quantity
+            };
 
+            await _context.RecipeIngredients.AddAsync(recipeIngredient);
+            await _context.SaveChangesAsync();
+        }
 
+        public async Task RemoveIngredientFromRecipeAsync(Guid recipeId, Guid ingredientId)
+        {
+            var recipeIngredient = await _context.RecipeIngredients
+                .FirstOrDefaultAsync(ri => ri.RecipeId == recipeId && ri.IngredientId == ingredientId);
 
+            if (recipeIngredient != null)
+            {
+                _context.RecipeIngredients.Remove(recipeIngredient);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

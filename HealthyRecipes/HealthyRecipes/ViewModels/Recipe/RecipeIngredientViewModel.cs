@@ -2,6 +2,7 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
 {
     public class RecipeIngredientViewModel
     {
+        public Guid IngredientId { get; set; }
         public string IngredientName { get; set; } = null!;
         public float QuantityInGrams { get; set; }
         public float Calories => IngredientCaloriesPer100g * QuantityInGrams / 100f;

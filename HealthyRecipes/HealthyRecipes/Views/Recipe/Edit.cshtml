@@ -66,6 +66,48 @@
                 </div>
             </div>
 
+            <div class="recipe-form-section">
+                <div class="recipe-ingredients-header">
+                    <h3>Ingredients</h3>
+                </div>
+                
+                <div class="ingredient-search-container">
+                    <label>Search for ingredients</label>
+                    <input type="text" 
+                           id="ingredientSearch" 
+                           class="form-control" 
+                           placeholder="Start typing ingredient name…" 
+                           autocomplete="off" />
+                    <div id="searchResults" class="ingredient-search-results"></div>
+                </div>
+
+                <div id="ingredientsList">
+                    @for (int i = 0; i < Model.Ingredients.Count; i++)
+                    {
+                        <div class="form-row recipe-ingredient-row existing-ingredient" data-ingredient-id="@Model.Ingredients[i].IngredientId">
+                            <div class="ingredient-info">
+                                <strong>Existing Ingredient</strong>
+                                <span class="ingredient-meta">ID: @Model.Ingredients[i].IngredientId</span>
+                            </div>
+                            <div class="form-group ingredient-quantity-group">
+                                <label>Quantity (g)</label>
+                                <input type="number" 
+                                       name="Ingredients[@i].QuantityInGrams" 
+                                       value="@Model.Ingredients[i].QuantityInGrams"
+                                       class="form-control" 
+                                       step="0.1" 
+                                       min="0.1" 
+                                       required />
+                            </div>
+                            <input type="hidden" name="Ingredients[@i].IngredientId" value="@Model.Ingredients[i].IngredientId" />
+                            <button type="button" onclick="removeIngredient(this, '@Model.Ingredients[i].IngredientId')" class="btn-danger recipe-remove-btn">✕</button>
+                        </div>
+                    }
+                </div>
+                
+                <p class="form-hint">Search and select ingredients, then specify quantities. Nutrition totals will be calculated automatically.</p>
+            </div>
+
             <div class="recipe-form-actions">
                 <button type="submit" class="btn-primary">Save changes</button>
                 <a asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">Cancel</a>
@@ -73,3 +115,119 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+<script>
+let ingredientCount = @Model.Ingredients.Count;
+const addedIngredients = new Set();
+
+// Initialize with existing ingredients
+document.querySelectorAll('.existing-ingredient').forEach(el => {
+    addedIngredients.add(el.dataset.ingredientId);
+});
+
+// Ingredient search autocomplete
+const searchInput = document.getElementById('ingredientSearch');
+const searchResults = document.getElementById('searchResults');
+let searchTimeout;
+
+searchInput.addEventListener('input', function() {
+    const term = this.value.trim();
+    
+    clearTimeout(searchTimeout);
+    
+    if (term.length < 2) {
+        searchResults.innerHTML = '';
+        searchResults.style.display = 'none';
+        return;
+    }
+    
+    searchTimeout = setTimeout(async () => {
+        try {
+            const response = await fetch(`/Recipe/SearchIngredients?term=${encodeURIComponent(term)}`);
+            const ingredients = await response.json();
+            
+            if (ingredients.length === 0) {
+                searchResults.innerHTML = '<div class="no-results">No ingredients found</div>';
+                searchResults.style.display = 'block';
+                return;
+            }
+            
+            searchResults.innerHTML = ingredients.map(ing => `
+                <div class="search-result-item" data-id="${ing.id}" data-name="${ing.name}" data-calories="${ing.caloriesPer100g}">
+                    <span class="ingredient-name">${ing.name}</span>
+                    <span class="ingredient-calories">${ing.caloriesPer100g} cal/100g</span>
+                </div>
+            `).join('');
+            
+            searchResults.style.display = 'block';
+            
+            // Add click handlers to search results
+            document.querySelectorAll('.search-result-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    addIngredient(
+                        this.dataset.id,
+                        this.dataset.name,
+                        this.dataset.calories
+                    );
+                    searchInput.value = '';
+                    searchResults.innerHTML = '';
+                    searchResults.style.display = 'none';
+                });
+            });
+            
+        } catch (error) {
+            console.error('Error searching ingredients:', error);
+            searchResults.innerHTML = '<div class="error-message">Error loading results</div>';
+            searchResults.style.display = 'block';
+        }
+    }, 300);
+});
+
+// Close search results when clicking outside
+document.addEventListener('click', function(e) {
+    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+        searchResults.style.display = 'none';
+    }
+});
+
+function addIngredient(id, name, calories) {
+    if (addedIngredients.has(id)) {
+        alert('This ingredient is already added');
+        return;
+    }
+    
+    addedIngredients.add(id);
+    
+    const list = document.getElementById('ingredientsList');
+    const div = document.createElement('div');
+    div.className = 'form-row recipe-ingredient-row';
+    div.dataset.ingredientId = id;
+    div.innerHTML = `
+        <div class="ingredient-info">
+            <strong>${name}</strong>
+            <span class="ingredient-meta">${calories} cal/100g</span>
+        </div>
+        <div class="form-group ingredient-quantity-group">
+            <label>Quantity (g)</label>
+            <input type="number" 
+                   name="Ingredients[${ingredientCount}].QuantityInGrams" 
+                   class="form-control" 
+                   placeholder="100" 
+                   step="0.1" 
+                   min="0.1" 
+                   required />
+        </div>
+        <input type="hidden" name="Ingredients[${ingredientCount}].IngredientId" value="${id}" />
+        <button type="button" onclick="removeIngredient(this, '${id}')" class="btn-danger recipe-remove-btn">✕</button>
+    `;
+    list.appendChild(div);
+    ingredientCount++;
+}
+
+function removeIngredient(button, ingredientId) {
+    addedIngredients.delete(ingredientId);
+    button.parentElement.remove();
+}
+</script>
+}
