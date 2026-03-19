@@ -13,6 +13,7 @@ using HealthyRecipes.Services.RecipeCategories;
 using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.Recipes;
+using HealthyRecipes.Services.Recommendations;
 using HealthyRecipes.Services.SavedMealPlans;
 using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Services.Statistics;
@@ -23,15 +24,14 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
+
 
 // ─── Database ────────────────────────────────────────────────────────────────
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-
 builder.Services.AddDbContext<HealthyRecipesDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(connectionString,
+        sqlOptions => sqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery)));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -90,6 +90,7 @@ builder.Services.AddScoped<IRecipeStatistics, RecipeStatisticsService>();
 builder.Services.AddScoped<IMealPlanStatistics, MealPlanStatisticsService>();
 builder.Services.AddScoped<IUserStatistics, UserStatisticsService>();
 builder.Services.AddScoped<IMealPlanFollower, MealPlanFollowerService>();
+builder.Services.AddScoped<IRecommendation, RecommendationService>();
 
 //Admin
 builder.Services.AddRazorPages(); // Add this if not present

@@ -1,24 +1,21 @@
-using HealthyRecipes.Data.Entities;
+﻿using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.CommentRatings;
 using HealthyRecipes.Services.Ingredients;
-using HealthyRecipes.Services.MealPlanFollowers;
-using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.RecipeCategories;
 using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.Recipes.Models;
+using HealthyRecipes.Services.Recommendations;
+using HealthyRecipes.Services.Recommendations.Models;
 using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Services.Statistics.Interfaces;
-using HealthyRecipes.Services.Statistics.Services;
-using HealthyRecipes.Services.Users;
-using HealthyRecipes.Web.ViewModels.MealPlan;
 using HealthyRecipes.Web.ViewModels.Recipe;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthyRecipes.Web.Controllers
 {
@@ -33,6 +30,7 @@ namespace HealthyRecipes.Web.Controllers
         private readonly ISavedRecipe _savedRecipeService;
         private readonly IAllergy _allergyService;
         private readonly IRecipeStatistics _recipeStatisticsService;
+        private readonly IRecommendation _recommendationService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public RecipeController(
@@ -45,6 +43,7 @@ namespace HealthyRecipes.Web.Controllers
             ISavedRecipe savedRecipeService,
             IAllergy allergyService,
             IRecipeStatistics recipeStatisticsService,
+            IRecommendation recommendationService,
             UserManager<ApplicationUser> userManager)
         {
             _recipeService = recipeService;
@@ -56,6 +55,7 @@ namespace HealthyRecipes.Web.Controllers
             _savedRecipeService = savedRecipeService;
             _allergyService = allergyService;
             _recipeStatisticsService = recipeStatisticsService;
+            _recommendationService = recommendationService;
             _userManager = userManager;
         }
 
@@ -88,7 +88,7 @@ namespace HealthyRecipes.Web.Controllers
                 };
 
                 // Get filtered recipes from service (this does all the heavy lifting)
-                var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto);               
+                var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto);
 
                 // Get all categories for filter UI
                 var categories = await _categoryService.GetAllCategoriesAsync();
@@ -191,7 +191,7 @@ namespace HealthyRecipes.Web.Controllers
             }
             catch (Exception ex)
             {
-                
+
                 TempData["Error"] = "An error occurred while loading recipes.";
 
                 return View(new RecipeIndexViewModel
@@ -244,6 +244,7 @@ namespace HealthyRecipes.Web.Controllers
 
             var ingredientVms = recipeIngredients.Select(ri => new RecipeIngredientViewModel
             {
+                IngredientId = ri.IngredientId,
                 IngredientName = ri.Ingredient?.Name ?? "Unknown",
                 QuantityInGrams = ri.QuantityInGrams,
                 IngredientCaloriesPer100g = ri.Ingredient?.CaloriesPer100g ?? 0,
@@ -253,6 +254,7 @@ namespace HealthyRecipes.Web.Controllers
             var conflictingIngredients = ingredientVms.Where(i => i.IsAllergen).Select(i => i.IngredientName).ToList();
 
             //var stats = await _recipeStatisticsService.GetRecipeStatisticsAsync(id);
+            var similarRecipes = await _recommendationService.GetSimilarRecipesAsync(id, 6);
 
             var vm = new RecipeDetailsViewModel
             {
@@ -287,10 +289,31 @@ namespace HealthyRecipes.Web.Controllers
                 CurrentUserComment = currentUserComment,
                 HasAllergyConflict = conflictingIngredients.Any(),
                 ConflictingIngredients = conflictingIngredients,
-
+                SimilarRecipes = similarRecipes
             };
 
             return View(vm);
+        }
+
+        // GET: /Recipe/SearchIngredients
+        [HttpGet]
+        public async Task<IActionResult> SearchIngredients(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(new List<object>());
+            }
+
+            var ingredients = await _ingredientService.SearchIngredientsAsync(term);
+
+            var results = ingredients.Select(i => new
+            {
+                id = i.Id.ToString(),
+                name = i.Name,
+                caloriesPer100g = i.CaloriesPer100g
+            }).ToList();
+
+            return Json(results);
         }
 
         // GET: /Recipe/Create
@@ -466,6 +489,145 @@ namespace HealthyRecipes.Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             await _commentRatingService.RemoveCommentRatingAsync(user!.Id, recipeId);
             return RedirectToAction(nameof(Details), new { id = recipeId });
+        }
+
+        /// <summary>
+        /// Netflix-style "For You" recommendation page
+        /// </summary>
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Recommended()
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var userName = User.Identity?.Name ?? "there";
+
+            // Check if user has goals set
+            var user = await _userManager.GetUserAsync(User);
+            var hasGoals = user?.Calories != null && user?.ProteinGoal != null;
+
+            var personalizedRecipes = await _recommendationService
+                .GetPersonalizedRecipesAsync(userId, 12);
+
+            var goalsRecipes = hasGoals
+                ? await _recommendationService.GetRecommendedForGoalsAsync(userId, 12)
+                : Enumerable.Empty<RecipeRecommendationDto>();
+
+            var collaborativeRecipes = await _recommendationService
+                .GetCollaborativeRecommendationsAsync(userId, 12);
+
+            var viewModel = new RecommendedRecipesViewModel
+            {
+                PersonalizedRecipes = personalizedRecipes.ToList(),
+                ForYourGoals = goalsRecipes.ToList(),
+                Collaborative = collaborativeRecipes.ToList(),
+                HasGoals = hasGoals,
+                UserName = userName
+            };
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Trending recipes in a category
+        /// </summary>
+        [HttpGet]
+        public async Task<IActionResult> Trending(Guid? categoryId)
+        {
+            var userId = User.Identity?.IsAuthenticated == true
+                ? Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!)
+                : Guid.Empty;
+
+            IEnumerable<RecipeRecommendationDto> trending;
+
+            if (categoryId.HasValue && userId != Guid.Empty)
+            {
+                // Trending in specific category
+                trending = await _recommendationService.GetTrendingInCategoryAsync(categoryId.Value, userId, 20);
+                var category = await _categoryService.GetCategoryByIdAsync(categoryId.Value);
+                ViewBag.CategoryName = category?.Name ?? "Unknown Category";
+            }
+            else
+            {
+                // Return empty or redirect to index
+                TempData["Info"] = "Please select a category to view trending recipes.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            return View(trending);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddIngredient(Guid recipeId, Guid ingredientId, float quantity)
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Json(new { success = false, message = "You must be logged in." });
+            }
+
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var recipe = await _recipeService.GetRecipeByIdAsync(recipeId);
+
+            if (recipe == null)
+            {
+                return Json(new { success = false, message = "Recipe not found." });
+            }
+
+            if (recipe.UserId != userId)
+            {
+                return Json(new { success = false, message = "You can only edit your own recipes." });
+            }
+
+            try
+            {
+                await _recipeService.AddIngredientToRecipeAsync(recipeId, ingredientId, quantity);
+                var ingredient = await _ingredientService.GetIngredientByIdAsync(ingredientId);
+
+                return Json(new
+                {
+                    success = true,
+                    ingredientId = ingredientId,
+                    ingredientName = ingredient.Name,
+                    quantity = quantity
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveIngredient(Guid recipeId, Guid ingredientId)
+        {
+            if (!User.Identity?.IsAuthenticated ?? true)
+            {
+                return Json(new { success = false, message = "You must be logged in." });
+            }
+
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+            var recipe = await _recipeService.GetRecipeByIdAsync(recipeId);
+
+            if (recipe == null)
+            {
+                return Json(new { success = false, message = "Recipe not found." });
+            }
+
+            if (recipe.UserId != userId)
+            {
+                return Json(new { success = false, message = "You can only edit your own recipes." });
+            }
+
+            try
+            {
+                await _recipeService.RemoveIngredientFromRecipeAsync(recipeId, ingredientId);
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
     }
 }

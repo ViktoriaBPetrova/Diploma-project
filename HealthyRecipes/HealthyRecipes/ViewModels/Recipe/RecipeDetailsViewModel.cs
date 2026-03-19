@@ -1,4 +1,5 @@
 using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Services.Recommendations.Models;
 using HealthyRecipes.Web.ViewModels.Recipe;
 
 namespace HealthyRecipes.Web.ViewModels.Recipe
@@ -28,5 +29,7 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         public CommentRatingFormViewModel? CurrentUserComment { get; set; }
         public bool HasAllergyConflict { get; set; }
         public IEnumerable<string> ConflictingIngredients { get; set; } = new List<string>();
+        
+        public IEnumerable<RecipeRecommendationDto> SimilarRecipes { get; set; } = new List<RecipeRecommendationDto>();
     }
 }

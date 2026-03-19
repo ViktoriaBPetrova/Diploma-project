@@ -1,0 +1,84 @@
+@model IEnumerable<HealthyRecipes.Services.Recommendations.Models.RecipeRecommendationDto>
+@{
+    ViewData["Title"] = $"Trending in {ViewBag.CategoryName}";
+}
+
+<div class="container" style="padding-top: 40px; padding-bottom: 60px;">
+    <div class="trending-header">
+        <h1 class="trending-title">
+            🔥 Trending in <span class="trending-category-name">@ViewBag.CategoryName</span>
+        </h1>
+        <p class="trending-subtitle">Popular recipes from the last 3 months</p>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="card" style="padding: 60px 40px; text-align: center;">
+            <h2 style="margin-bottom: 16px; color: var(--muted);">No Trending Recipes</h2>
+            <p style="color: var(--muted); margin-bottom: 24px;">
+                There are no recent recipes in this category yet.
+            </p>
+            <a asp-action="Index" class="btn-primary">Browse All Recipes</a>
+        </div>
+    }
+    else
+    {
+        <div class="trending-grid">
+            @foreach (var recipe in Model)
+            {
+                <div class="recommended-card card">
+                    @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                    {
+                        <div class="recommended-card-image" style="background-image: url('@recipe.ImageUrl');"></div>
+                    }
+                    else
+                    {
+                        <div class="recommended-card-image recommended-card-image-placeholder">
+                            <span style="font-size: 3rem;">🍽️</span>
+                        </div>
+                    }
+                    
+                    <div class="recommended-card-content">
+                        <div class="recommended-card-header">
+                            <a asp-action="Details" asp-route-id="@recipe.RecipeId" class="recommended-card-title">
+                                @recipe.Title
+                            </a>
+                            @if (recipe.AverageRating.HasValue)
+                            {
+                                <div class="recommended-card-rating">
+                                    <span class="stars">@string.Concat(Enumerable.Repeat("★", (int)Math.Round(recipe.AverageRating.Value)))</span>
+                                </div>
+                            }
+                        </div>
+
+                        <div class="recommended-card-macros macros">
+                            <span class="macro-pill macro-calories">@recipe.Calories.ToString("F0") cal</span>
+                            <span class="macro-pill macro-protein">@recipe.Protein.ToString("F0")g protein</span>
+                        </div>
+
+                        @if (recipe.Categories.Any())
+                        {
+                            <div class="recommended-card-categories">
+                                @foreach (var category in recipe.Categories.Take(3))
+                                {
+                                    <span class="tag">@category</span>
+                                }
+                            </div>
+                        }
+
+                        @if (recipe.PrepTime > 0)
+                        {
+                            <div style="margin-top: auto; padding-top: 8px; font-size: 0.875rem; color: var(--muted);">
+                                ⏱️ @recipe.PrepTime min
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div style="margin-top: 40px; text-align: center;">
+            <a asp-action="Index" class="btn-ghost">← Back to All Recipes</a>
+        </div>
+    }
+</div>

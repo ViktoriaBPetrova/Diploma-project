@@ -1,0 +1,204 @@
+@model HealthyRecipes.Web.ViewModels.Recipe.RecommendedRecipesViewModel
+@{
+    ViewData["Title"] = "For You";
+}
+
+<div class="container" style="padding-top: 40px; padding-bottom: 60px;">
+    <div class="recommended-hero">
+        <h1 class="recommended-title">For You, @Model.UserName</h1>
+        <p class="recommended-subtitle">Personalized recipe recommendations based on your tastes and goals</p>
+    </div>
+
+    @if (!Model.PersonalizedRecipes.Any() && !Model.ForYourGoals.Any() && !Model.Collaborative.Any())
+    {
+        <div class="recommended-empty-state card" style="padding: 60px 40px; text-align: center;">
+            <h2 style="margin-bottom: 16px; color: var(--muted);">No Recommendations Yet</h2>
+            <p style="color: var(--muted); margin-bottom: 24px;">
+                Start saving recipes and setting your nutrition goals to get personalized recommendations!
+            </p>
+            <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <a asp-action="Index" class="btn-primary">Browse All Recipes</a>
+                <a asp-controller="User" asp-action="EditProfile" class="btn-ghost">Set Your Goals</a>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* Personalized For You Section *@
+        @if (Model.PersonalizedRecipes.Any())
+        {
+            <section class="recommended-section">
+                <div class="recommended-section-header">
+                    <h2 class="recommended-section-title">🎯 Picked Just For You</h2>
+                    <p class="recommended-section-subtitle">Based on recipes you love and users with similar tastes</p>
+                </div>
+                <div class="recommended-grid">
+                    @foreach (var recipe in Model.PersonalizedRecipes.Take(6))
+                    {
+                        <div class="recommended-card card">
+                            @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                            {
+                                <div class="recommended-card-image" style="background-image: url('@recipe.ImageUrl');"></div>
+                            }
+                            else
+                            {
+                                <div class="recommended-card-image recommended-card-image-placeholder">
+                                    <span style="font-size: 3rem;">🍽️</span>
+                                </div>
+                            }
+                            
+                            <div class="recommended-card-content">
+                                <div class="recommended-card-header">
+                                    <a asp-action="Details" asp-route-id="@recipe.RecipeId" class="recommended-card-title">
+                                        @recipe.Title
+                                    </a>
+                                    @if (recipe.AverageRating.HasValue)
+                                    {
+                                        <div class="recommended-card-rating">
+                                            <span class="stars">@string.Concat(Enumerable.Repeat("★", (int)Math.Round(recipe.AverageRating.Value)))</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="recommended-card-reason">
+                                    <span class="recommended-reason-badge">@recipe.RecommendationReason</span>
+                                </div>
+
+                                <div class="recommended-card-macros macros">
+                                    <span class="macro-pill macro-calories">@recipe.Calories.ToString("F0") cal</span>
+                                    <span class="macro-pill macro-protein">@recipe.Protein.ToString("F0")g protein</span>
+                                </div>
+
+                                @if (recipe.Categories.Any())
+                                {
+                                    <div class="recommended-card-categories">
+                                        @foreach (var category in recipe.Categories.Take(2))
+                                        {
+                                            <span class="tag">@category</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+
+        @* Matches Your Goals Section *@
+        @if (Model.ForYourGoals.Any())
+        {
+            <section class="recommended-section">
+                <div class="recommended-section-header">
+                    <h2 class="recommended-section-title">💪 Matches Your Goals</h2>
+                    <p class="recommended-section-subtitle">Recipes that align with your nutrition targets</p>
+                </div>
+                <div class="recommended-grid">
+                    @foreach (var recipe in Model.ForYourGoals.Take(6))
+                    {
+                        <div class="recommended-card card">
+                            @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                            {
+                                <div class="recommended-card-image" style="background-image: url('@recipe.ImageUrl');"></div>
+                            }
+                            else
+                            {
+                                <div class="recommended-card-image recommended-card-image-placeholder">
+                                    <span style="font-size: 3rem;">🍽️</span>
+                                </div>
+                            }
+                            
+                            <div class="recommended-card-content">
+                                <div class="recommended-card-header">
+                                    <a asp-action="Details" asp-route-id="@recipe.RecipeId" class="recommended-card-title">
+                                        @recipe.Title
+                                    </a>
+                                    <div class="recommended-match-score">
+                                        <span class="match-badge">@Math.Round(recipe.Score)% match</span>
+                                    </div>
+                                </div>
+
+                                <div class="recommended-card-reason">
+                                    <span class="recommended-reason-badge recommended-reason-goals">@recipe.RecommendationReason</span>
+                                </div>
+
+                                <div class="recommended-card-macros macros">
+                                    <span class="macro-pill macro-calories">@recipe.Calories.ToString("F0") cal</span>
+                                    <span class="macro-pill macro-protein">@recipe.Protein.ToString("F0")g protein</span>
+                                    <span class="macro-pill macro-carbs">@recipe.Carbs.ToString("F0")g carbs</span>
+                                    <span class="macro-pill macro-fat">@recipe.Fats.ToString("F0")g fat</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+        else if (Model.HasGoals)
+        {
+            <section class="recommended-section">
+                <div class="card" style="padding: 32px; text-align: center;">
+                    <h3 style="margin-bottom: 12px; color: var(--muted);">No Goal-Based Matches Yet</h3>
+                    <p style="color: var(--muted);">We're still learning your preferences. Keep saving recipes to get better recommendations!</p>
+                </div>
+            </section>
+        }
+
+        @* Because Users Like You Section *@
+        @if (Model.Collaborative.Any())
+        {
+            <section class="recommended-section">
+                <div class="recommended-section-header">
+                    <h2 class="recommended-section-title">👥 Because Users Like You Also Saved</h2>
+                    <p class="recommended-section-subtitle">Popular with people who have similar taste</p>
+                </div>
+                <div class="recommended-grid">
+                    @foreach (var recipe in Model.Collaborative.Take(6))
+                    {
+                        <div class="recommended-card card">
+                            @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                            {
+                                <div class="recommended-card-image" style="background-image: url('@recipe.ImageUrl');"></div>
+                            }
+                            else
+                            {
+                                <div class="recommended-card-image recommended-card-image-placeholder">
+                                    <span style="font-size: 3rem;">🍽️</span>
+                                </div>
+                            }
+                            
+                            <div class="recommended-card-content">
+                                <div class="recommended-card-header">
+                                    <a asp-action="Details" asp-route-id="@recipe.RecipeId" class="recommended-card-title">
+                                        @recipe.Title
+                                    </a>
+                                    @if (recipe.AverageRating.HasValue)
+                                    {
+                                        <div class="recommended-card-rating">
+                                            <span class="stars">@string.Concat(Enumerable.Repeat("★", (int)Math.Round(recipe.AverageRating.Value)))</span>
+                                        </div>
+                                    }
+                                </div>
+
+                                <div class="recommended-card-macros macros">
+                                    <span class="macro-pill macro-calories">@recipe.Calories.ToString("F0") cal</span>
+                                    <span class="macro-pill macro-protein">@recipe.Protein.ToString("F0")g protein</span>
+                                </div>
+
+                                @if (recipe.Categories.Any())
+                                {
+                                    <div class="recommended-card-categories">
+                                        @foreach (var category in recipe.Categories.Take(3))
+                                        {
+                                            <span class="tag">@category</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </section>
+        }
+    }
+</div>
