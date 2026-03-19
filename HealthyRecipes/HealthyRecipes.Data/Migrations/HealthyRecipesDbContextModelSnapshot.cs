@@ -306,7 +306,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("CreatedBy");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
 
                     b.HasData(
                         new
@@ -398,7 +398,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.ToTable("Ingredients");
+                    b.ToTable("Ingredients", (string)null);
 
                     b.HasData(
                         new
@@ -856,7 +856,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Allergies");
+                    b.ToTable("Allergies", (string)null);
 
                     b.HasData(
                         new
@@ -899,7 +899,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CommentRatings");
+                    b.ToTable("CommentRatings", (string)null);
 
                     b.HasData(
                         new
@@ -1078,7 +1078,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("MealPlanCategories");
+                    b.ToTable("MealPlanCategories", (string)null);
 
                     b.HasData(
                         new
@@ -1130,7 +1130,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("MealPlanId");
 
-                    b.ToTable("MealPlanFollowers");
+                    b.ToTable("MealPlanFollowers", (string)null);
 
                     b.HasData(
                         new
@@ -1169,7 +1169,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("RecipeCategories");
+                    b.ToTable("RecipeCategories", (string)null);
 
                     b.HasData(
                         new
@@ -1209,7 +1209,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("IngredientId");
 
-                    b.ToTable("RecipeIngredients");
+                    b.ToTable("RecipeIngredients", (string)null);
 
                     b.HasData(
                         new
@@ -1607,7 +1607,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("MealId");
 
-                    b.ToTable("RecipeMeals");
+                    b.ToTable("RecipeMeals", (string)null);
 
                     b.HasData(
                         new
@@ -2116,7 +2116,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SavedMealPlans");
+                    b.ToTable("SavedMealPlans", (string)null);
 
                     b.HasData(
                         new
@@ -2153,7 +2153,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("SavedRecipes");
+                    b.ToTable("SavedRecipes", (string)null);
 
                     b.HasData(
                         new
@@ -2206,7 +2206,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("MealPlanDayId");
 
-                    b.ToTable("Meals");
+                    b.ToTable("Meals", (string)null);
 
                     b.HasData(
                         new
@@ -3035,7 +3035,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("MealPlans");
+                    b.ToTable("MealPlans", (string)null);
 
                     b.HasData(
                         new
@@ -3139,7 +3139,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("MealPlanId");
 
-                    b.ToTable("MealPlanDays");
+                    b.ToTable("MealPlanDays", (string)null);
 
                     b.HasData(
                         new
@@ -3483,7 +3483,7 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Recipes");
+                    b.ToTable("Recipes", (string)null);
 
                     b.HasData(
                         new

@@ -24,6 +24,7 @@ namespace HealthyRecipes.Data
             
         }
 
+
         public DbSet<ApplicationUser> ApplicationUsers { get; init; } = null!;
         public DbSet<Recipe> Recipes { get; init; } = null!;
         public DbSet<Ingredient> Ingredients { get; init; } = null!;
