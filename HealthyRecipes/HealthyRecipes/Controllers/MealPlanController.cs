@@ -1,12 +1,18 @@
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
+using HealthyRecipes.Services.GroceryLists;
 using HealthyRecipes.Services.MealPlanDays;
 using HealthyRecipes.Services.MealPlanFollowers;
 using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.MealPlans.Models;
 using HealthyRecipes.Services.Meals;
 using HealthyRecipes.Services.RecipeMeals;
+using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.SavedMealPlans;
+using HealthyRecipes.Services.SavedRecipes;
+using HealthyRecipes.Services.Users;
+using HealthyRecipes.Web.Models.MealPlan;
 using HealthyRecipes.Web.ViewModels.MealPlan;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HealthyRecipes.Web.Controllers
 {
-    [Authorize]
+    
     public class MealPlanController : Controller
     {
         private readonly IMealPlan _mealPlanService;
@@ -24,7 +30,8 @@ namespace HealthyRecipes.Web.Controllers
         private readonly ICategory _categoryService;
         private readonly ISavedMealPlan _savedMealPlanService;
         private readonly IMealPlanFollower _mealPlanFollowerService;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IGroceryList _groceryListService;
+        private readonly UserManager<ApplicationUser> _userManager; 
 
         public MealPlanController(
             IMealPlan mealPlanService,
@@ -34,7 +41,8 @@ namespace HealthyRecipes.Web.Controllers
             IRecipeMeal recipeMealService,
             ISavedMealPlan savedMealPlanService,
             IMealPlanFollower mealPlanFollowerService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IGroceryList groceryListService)
         {
             _mealPlanService = mealPlanService;
             _mealPlanDayService = mealPlanDayService;
@@ -44,6 +52,8 @@ namespace HealthyRecipes.Web.Controllers
             _savedMealPlanService = savedMealPlanService;
             _mealPlanFollowerService = mealPlanFollowerService;
             _userManager = userManager;
+            _groceryListService = groceryListService;
+
         }
 
         // GET: /MealPlan
@@ -52,11 +62,11 @@ namespace HealthyRecipes.Web.Controllers
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-
-                if (user == null)
+                Guid? currentUserId = null;
+                if (User.Identity?.IsAuthenticated == true)
                 {
-                    return RedirectToAction("Login", "Account");
+                    var user = await _userManager.GetUserAsync(User);
+                    currentUserId = user?.Id;
                 }
 
                 // Map ViewModel to DTO
@@ -84,12 +94,20 @@ namespace HealthyRecipes.Web.Controllers
                 // Get filtered meal plans (for Browse All section)
                 var (allMealPlans, totalCount) = await _mealPlanService.GetFilteredMealPlansAsync(filterDto);
 
-                // Get user's own meal plans
-                var myPlans = await _mealPlanService.GetMealPlansByUserAsync(user.Id);
+                HashSet<Guid> savedPlanIds = new();
+                List<MealPlan> myPlans = new List<MealPlan>();
 
-                // Get saved meal plans
-                var savedPlans = await _savedMealPlanService.GetSavedMealPlansByUserAsync(user.Id);
-                var savedPlanIds = savedPlans.Select(s => s.MealPlanId).ToHashSet();
+                    
+
+                if (currentUserId != null)
+                {
+                    // Get user's own meal plans
+                    var my = await _mealPlanService.GetMealPlansByUserAsync((Guid)currentUserId);
+                    myPlans = my.ToList();
+                    // Get saved meal plans
+                    var saved = await _savedMealPlanService.GetSavedMealPlansByUserAsync((Guid)currentUserId);
+                    savedPlanIds = saved.Select(s => s.MealPlanId).ToHashSet();
+                }
 
                 // Get all categories for filter UI
                 var categories = await _categoryService.GetAllCategoriesAsync();
@@ -120,35 +138,11 @@ namespace HealthyRecipes.Web.Controllers
                     });
                 }
 
-                // Map Saved Plans 
-                var savedPlanCards = new List<MealPlanCardViewModel>();
-                foreach (var smp in savedPlans)
-                {
-                    var followerCount = await _mealPlanFollowerService.GetFollowerCountAsync(smp.MealPlan.Id);
-
-                    savedPlanCards.Add(new MealPlanCardViewModel
-                    {
-                        Id = smp.MealPlan.Id,
-                        Name = smp.MealPlan.Name,
-                        Description = smp.MealPlan.Description,
-                        Calories = smp.MealPlan.Calories,
-                        Protein = smp.MealPlan.Protein,
-                        Carbs = smp.MealPlan.Carbs,
-                        Fat = smp.MealPlan.Fat,
-                        DayCount = smp.MealPlan.MealPlanDays?.Count() ?? 0,
-                        IsSaved = true,
-                        IsOwner = smp.MealPlan.UserId == user.Id,
-                        CreatedAt = smp.MealPlan.CreatedAt,
-                        FollowerCount = followerCount, 
-                        CategoryNames = smp.MealPlan.MealPlanCategories?
-                            .Where(mpc => !mpc.Deleted && mpc.Category != null && !mpc.Category.Deleted)
-                            .Select(mpc => mpc.Category.Name) ?? Enumerable.Empty<string>()
-                    });
-                }
+                
 
                 // Map Browse All 
                 var browseCards = new List<MealPlanCardViewModel>();
-                foreach (var mp in allMealPlans.Where(mp => mp.UserId != user.Id))
+                foreach (var mp in allMealPlans.Where(mp => mp.UserId != currentUserId))
                 {
                     var followerCount = await _mealPlanFollowerService.GetFollowerCountAsync(mp.Id);
 
@@ -175,7 +169,6 @@ namespace HealthyRecipes.Web.Controllers
                 var vm = new MealPlanIndexViewModel
                 {
                     MyMealPlans = myPlanCards,
-                    SavedMealPlans = savedPlanCards,
                     BrowseAllMealPlans = browseCards,
                     Categories = categories.Select(c => new MealPlanCategoryViewModel
                     {
@@ -233,6 +226,7 @@ namespace HealthyRecipes.Web.Controllers
                         Recipes = recipeMeals.Select(rm => new MealRecipeViewModel
                         {
                             RecipeId = rm.RecipeId,
+                            Name = rm.Recipe?.Title ?? "",
                             Info = rm.Recipe?.Info ?? "",
                             ImageUrl = rm.Recipe?.ImageUrl,
                             Calories = rm.Recipe?.Calories ?? 0,
@@ -355,6 +349,156 @@ namespace HealthyRecipes.Web.Controllers
                 await _savedMealPlanService.SaveMealPlanAsync(user.Id, id);
 
             return RedirectToAction(nameof(Details), new { id });
+        }
+
+
+        // POST: /MealPlan/DeleteDay/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteDay(Guid id)
+        {
+            var day = await _mealPlanDayService.GetMealPlanDayByIdAsync(id);
+            if (day == null) return NotFound();
+
+            var mealPlan = await _mealPlanService.GetByIdAsync(day.MealPlanId);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (mealPlan.UserId != user!.Id && !User.IsInRole("Admin"))
+                return Forbid();
+
+            await _mealPlanDayService.SoftDeleteMealPlanDayAsync(id);
+
+            // Recalculate meal plan totals
+            await _mealPlanService.RecalculateNutritionalTotalsAsync(mealPlan.Id);
+
+            return Ok();
+        }
+
+        // POST: /MealPlan/RemoveRecipeFromMeal
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveRecipeFromMeal([FromBody] RemoveRecipeRequest request)
+        {
+            var meal = await _mealService.GetMealByIdAsync(request.MealId);
+            if (meal == null) return NotFound();
+
+            var day = await _mealPlanDayService.GetMealPlanDayByIdAsync(meal.MealPlanDayId);
+            var mealPlan = await _mealPlanService.GetByIdAsync(day.MealPlanId);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (mealPlan.UserId != user!.Id && !User.IsInRole("Admin"))
+                return Forbid();
+
+            await _recipeMealService.RemoveRecipeFromMealAsync(request.RecipeId, request.MealId);
+
+            // Recalculate meal macros
+            await _mealService.RecalculateNutritionAsync(request.MealId);
+
+            // Recalculate day macros
+            await _mealPlanDayService.RecalculateNutritionAsync(day.Id);
+
+            // Recalculate meal plan macros
+            await _mealPlanService.RecalculateNutritionalTotalsAsync(mealPlan.Id);
+
+            return Ok();
+        }
+
+        // POST: /MealPlan/AddRecipeToMeal
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddRecipeToMeal([FromBody] AddRecipeRequest request)
+        {
+            var meal = await _mealService.GetMealByIdAsync(request.MealId);
+            if (meal == null) return NotFound();
+
+            var day = await _mealPlanDayService.GetMealPlanDayByIdAsync(meal.MealPlanDayId);
+            var mealPlan = await _mealPlanService.GetByIdAsync(day.MealPlanId);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (mealPlan.UserId != user!.Id && !User.IsInRole("Admin"))
+                return Forbid();
+
+            await _recipeMealService.AddRecipeToMealAsync(request.RecipeId, request.MealId);
+
+            // Recalculate meal macros
+            await _mealService.RecalculateNutritionAsync(request.MealId);
+
+            // Recalculate day macros
+            await _mealPlanDayService.RecalculateNutritionAsync(day.Id);
+
+            // Recalculate meal plan macros
+            await _mealPlanService.RecalculateNutritionalTotalsAsync(mealPlan.Id);
+
+            return Ok();
+        }
+
+        // Request models (add these as nested classes or create separate files)
+        public class RemoveRecipeRequest
+        {
+            public Guid MealId { get; set; }
+            public Guid RecipeId { get; set; }
+        }
+
+        public class AddRecipeRequest
+        {
+            public Guid MealId { get; set; }
+            public Guid RecipeId { get; set; }
+        }
+
+        // GET: /MealPlan/GetGroceryList/{id}
+        [HttpGet]
+        public async Task<IActionResult> GetGroceryList(Guid id)
+        {
+            
+                var mealPlan = await _mealPlanService.GetByIdAsync(id);
+                if (mealPlan == null) return NotFound();
+
+                var user = await _userManager.GetUserAsync(User);
+
+                // Check if user has access (owner or follower)
+                bool isOwner = mealPlan.UserId == user!.Id;
+                bool isFollowing = await _mealPlanFollowerService.IsFollowingAsync(user.Id, id);
+
+                if (!isOwner && !isFollowing && !User.IsInRole("Admin"))
+                    return Forbid();
+
+           
+                var groceryListDto = await _groceryListService.GenerateGroceryListForMealPlanAsync(id);
+               
+
+                var viewModel = new GroceryListViewModel
+                {
+                    MealPlanId = groceryListDto.MealPlanId,
+                    MealPlanName = groceryListDto.MealPlanName,
+                    GeneratedAt = groceryListDto.GeneratedAt,
+                    Items = groceryListDto.Items.Select(item => new GroceryItemViewModel
+                    {
+                        IngredientId = item.IngredientId,
+                        IngredientName = item.IngredientName,
+                        Brand = item.Brand,
+                        QuantityInGrams = item.QuantityInGrams,
+                        Stores = item.Stores.Select(store => new StoreAvailabilityViewModel
+                        {
+                            StoreName = store.StoreName,
+                            StoreLocation = store.StoreLocation,
+                            InStock = store.InStock,
+                            Price = store.Price,
+                            Currency = store.Currency,
+                            ProductUrl = store.ProductUrl,
+                            LastUpdated = store.LastUpdated,
+                            PricePer100g = store.PricePer100g,
+                            PackageQuantityInGrams = store.PackageQuantityInGrams,
+                            ProductName = store.ProductName,
+                            ImageUrl = store.ImageUrl,
+                            StoreLogoUrl = store.StoreLogoUrl,
+                            IsMockData = store.IsMockData
+                        })
+                    })
+                };
+
+                return Json(viewModel);
+           
+
         }
     }
 }

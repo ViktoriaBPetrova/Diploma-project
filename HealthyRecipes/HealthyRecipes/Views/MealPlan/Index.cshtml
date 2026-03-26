@@ -168,26 +168,18 @@
                 <partial name="_MealPlanCard" model="plan" />
             }
         </div>
+
     }
     else
     {
 
-        <div class="empty-state">
-            <div class="empty-state-icon">🥦</div>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="empty-state">
+                <div class="empty-state-icon">🥦</div>
             <h3>You haven`t created any MealPlans yet!</h3>
         </div>
-    }
-
-    <!-- Saved Plans Section -->
-    @if (Model.SavedMealPlans.Any())
-    {
-        <h2 class="section-title">Saved Plans</h2>
-        <div class="grid-2 meal-plan-index-grid">
-            @foreach (var plan in Model.SavedMealPlans)
-            {
-                <partial name="_MealPlanCard" model="plan" />
-            }
-        </div>
+        }
     }
 
     <!-- Browse All Plans Section (with filters) -->
@@ -242,7 +234,7 @@
             </div>
         }
     }
-    else if (!Model.MyMealPlans.Any() && !Model.SavedMealPlans.Any())
+    else if (!Model.MyMealPlans.Any())
     {
         <div class="empty-state">
             <div class="empty-state-icon">📋</div>
