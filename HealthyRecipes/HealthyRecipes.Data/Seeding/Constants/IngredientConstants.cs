@@ -1,4 +1,4 @@
-﻿using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Data.Enums;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,6 +13,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Chicken Breast ----------
         public const string ChickenBreastName = "Chicken Breast";
+        public const string ChickenBreastBulgarianName = "пилешко филе";
         public const string ChickenBreastBrand = null; // not store-branded
         public const string ChickenBreastId = "a3b71c2a-5e3f-4d9c-9b5a-9b92d2d89e10";
 
@@ -25,6 +26,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- White Rice(uncooked) ----------
         public const string WhiteRiceName = "White Rice";
+        public const string WhiteRiceBulgarianName = "бял ориз";
         public const string WhiteRiceBrand = null;
         public const string WhiteRiceId = "c2e0b6b7-9a8a-4b92-bac3-9e77a32b9c01";
 
@@ -38,6 +40,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Olive Oil ----------
         public const string OliveOilName = "Olive Oil";
+        public const string OliveOilBulgarianName = "зехтин";
         public const string OliveOilBrand = null;
         public const string OliveOilId = "f5c4b6e9-52c1-4a9e-9e15-1d7e6a2a91c2";
 
@@ -51,6 +54,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Onion ----------
         public const string OnionName = "Onion";
+        public const string OnionBulgarianName = "лук";
         public const string OnionBrand = null;
         public const string OnionId = "7a9cde14-1e39-4f2b-9d4c-6a3e6d01c0aa";
 
@@ -64,6 +68,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Garlic ----------
         public const string GarlicName = "Garlic";
+        public const string GarlicBulgarianName = "чесън";
         public const string GarlicBrand = null;
         public const string GarlicId = "b8e5b40c-44b3-4a1a-9d2f-2bb0d0e07d55";
 
@@ -76,6 +81,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Salmon Fillet ----------
         public const string SalmonName = "Salmon Fillet";
+        public const string SalmonBulgarianName = "филе от сьомга";
         public const string SalmonBrand = null;
         public const string SalmonId = "d4e1f2a3-6b7c-4d8e-9f1a-2b3c4d5e6f7a";
         public const float SalmonCaloriesPer100g = 208f;
@@ -86,6 +92,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Greek Yogurt ----------
         public const string GreekYogurtName = "Greek Yogurt";
+        public const string GreekYogurtBulgarianName = "гръцко кисело мляко";
         public const string GreekYogurtBrand = null;
         public const string GreekYogurtId = "e5f2a3b4-7c8d-4e9f-1a2b-3c4d5e6f7a8b";
         public const float GreekYogurtCaloriesPer100g = 59f;
@@ -96,6 +103,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Spinach ----------
         public const string SpinachName = "Spinach";
+        public const string SpinachBulgarianName = "спанак";
         public const string SpinachBrand = null;
         public const string SpinachId = "f6a3b4c5-8d9e-4f1a-2b3c-4d5e6f7a8b9c";
         public const float SpinachCaloriesPer100g = 23f;
@@ -106,6 +114,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Quinoa ----------
         public const string QuinoaName = "Quinoa";
+        public const string QuinoaBulgarianName = "киноа";
         public const string QuinoaBrand = null;
         public const string QuinoaId = "a7b4c5d6-9e1f-4a2b-3c4d-5e6f7a8b9c1d";
         public const float QuinoaCaloriesPer100g = 368f;
@@ -116,6 +125,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Sweet Potato ----------
         public const string SweetPotatoName = "Sweet Potato";
+        public const string SweetPotatoBulgarianName = "сладък картоф";
         public const string SweetPotatoBrand = null;
         public const string SweetPotatoId = "b8c5d6e7-1f2a-4b3c-4d5e-6f7a8b9c1d2e";
         public const float SweetPotatoCaloriesPer100g = 86f;
@@ -126,6 +136,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Broccoli ----------
         public const string BroccoliName = "Broccoli";
+        public const string BroccoliBulgarianName = "броколи";
         public const string BroccoliBrand = null;
         public const string BroccoliId = "c9d6e7f8-2a3b-4c4d-5e6f-7a8b9c1d2e3f";
         public const float BroccoliCaloriesPer100g = 34f;
@@ -136,6 +147,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Eggs ----------
         public const string EggsName = "Eggs";
+        public const string EggsBulgarianName = "яйца";
         public const string EggsBrand = null;
         public const string EggsId = "d1e7f8a9-3b4c-4d5e-6f7a-8b9c1d2e3f4a";
         public const float EggsCaloriesPer100g = 143f;
@@ -146,6 +158,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Avocado ----------
         public const string AvocadoName = "Avocado";
+        public const string AvocadoBulgarianName = "авокадо";
         public const string AvocadoBrand = null;
         public const string AvocadoId = "e2f8a9b1-4c5d-4e6f-7a8b-9c1d2e3f4a5b";
         public const float AvocadoCaloriesPer100g = 160f;
@@ -156,6 +169,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Almonds ----------
         public const string AlmondsName = "Almonds";
+        public const string AlmondsBulgarianName = "бадеми";
         public const string AlmondsBrand = null;
         public const string AlmondsId = "f3a9b1c2-5d6e-4f7a-8b9c-1d2e3f4a5b6c";
         public const float AlmondsCaloriesPer100g = 579f;
@@ -166,6 +180,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Brown Rice ----------
         public const string BrownRiceName = "Brown Rice";
+        public const string BrownRiceBulgarianName = "кафяв ориз";
         public const string BrownRiceBrand = null;
         public const string BrownRiceId = "a4b1c2d3-6e7f-4a8b-9c1d-2e3f4a5b6c7d";
         public const float BrownRiceCaloriesPer100g = 370f;
@@ -176,6 +191,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Tomato ----------
         public const string TomatoName = "Tomato";
+        public const string TomatoBulgarianName = "домат";
         public const string TomatoBrand = null;
         public const string TomatoId = "b5c2d3e4-7f8a-4b9c-1d2e-3f4a5b6c7d8e";
         public const float TomatoCaloriesPer100g = 18f;
@@ -186,6 +202,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Bell Pepper ----------
         public const string BellPepperName = "Bell Pepper";
+        public const string BellPepperBulgarianName = "чушка";
         public const string BellPepperBrand = null;
         public const string BellPepperId = "c6d3e4f5-8a9b-4c1d-2e3f-4a5b6c7d8e9f";
         public const float BellPepperCaloriesPer100g = 31f;
@@ -196,6 +213,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Lemon ----------
         public const string LemonName = "Lemon";
+        public const string LemonBulgarianName = "лимон";
         public const string LemonBrand = null;
         public const string LemonId = "d7e4f5a6-9b1c-4d2e-3f4a-5b6c7d8e9f1a";
         public const float LemonCaloriesPer100g = 29f;
@@ -206,6 +224,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Honey ----------
         public const string HoneyName = "Honey";
+        public const string HoneyBulgarianName = "мед";
         public const string HoneyBrand = null;
         public const string HoneyId = "e8f5a6b7-1c2d-4e3f-4a5b-6c7d8e9f1a2b";
         public const float HoneyCaloriesPer100g = 304f;
@@ -216,6 +235,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Oats ----------
         public const string OatsName = "Oats";
+        public const string OatsBulgarianName = "овесени ядки";
         public const string OatsBrand = null;
         public const string OatsId = "f9a6b7c8-2d3e-4f4a-5b6c-7d8e9f1a2b3c";
         public const float OatsCaloriesPer100g = 389f;
@@ -226,6 +246,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Banana ----------
         public const string BananaName = "Banana";
+        public const string BananaBulgarianName = "банан";
         public const string BananaBrand = null;
         public const string BananaId = "a1b7c8d9-3e4f-4a5b-6c7d-8e9f1a2b3c4d";
         public const float BananaCaloriesPer100g = 89f;
@@ -236,6 +257,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Peanut Butter ----------
         public const string PeanutButterName = "Peanut Butter";
+        public const string PeanutButterBulgarianName = "фъстъчено масло";
         public const string PeanutButterBrand = null;
         public const string PeanutButterId = "b2c8d9e1-4f5a-4b6c-7d8e-9f1a2b3c4d5e";
         public const float PeanutButterCaloriesPer100g = 588f;
@@ -246,6 +268,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Blueberries ----------
         public const string BlueberriesName = "Blueberries";
+        public const string BlueberriesBulgarianName = "боровинки";
         public const string BlueberriesBrand = null;
         public const string BlueberriesId = "c3d9e1f2-5a6b-4c7d-8e9f-1a2b3c4d5e6f";
         public const float BlueberriesCaloriesPer100g = 57f;
@@ -256,6 +279,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Coconut Oil ----------
         public const string CoconutOilName = "Coconut Oil";
+        public const string CoconutOilBulgarianName = "кокосово масло";
         public const string CoconutOilBrand = null;
         public const string CoconutOilId = "a4e1f2b3-6c7d-4e8f-9a1b-2c3d4e5f6a7b";
         public const float CoconutOilCaloriesPer100g = 862f;
@@ -266,6 +290,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Cucumber ----------
         public const string CucumberName = "Cucumber";
+        public const string CucumberBulgarianName = "краставица";
         public const string CucumberBrand = null;
         public const string CucumberId = "e5f2a3b4-7c8d-4e9f-1a2b-3c4d5e6f7a8c";
         public const float CucumberCaloriesPer100g = 15f;
@@ -276,6 +301,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Parsley ----------
         public const string ParsleyName = "Parsley";
+        public const string ParsleyBulgarianName = "магданоз";
         public const string ParsleyBrand = null;
         public const string ParsleyId = "f6a3b4c5-8d9e-4f1a-2b3c-4d5e6f7a8b9d";
         public const float ParsleyCaloriesPer100g = 36f;
@@ -286,6 +312,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Ginger ----------
         public const string GingerName = "Ginger";
+        public const string GingerBulgarianName = "джинджифил";
         public const string GingerBrand = null;
         public const string GingerId = "a7b4c5d6-9e1f-4a2b-3c4d-5e6f7a8b9c1e";
         public const float GingerCaloriesPer100g = 80f;
@@ -296,6 +323,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Chickpeas ----------
         public const string ChickpeasName = "Chickpeas";
+        public const string ChickpeasBulgarianName = "нахут";
         public const string ChickpeasBrand = null;
         public const string ChickpeasId = "b9d1e2f3-4a5b-4c6d-7e8f-9a1b2c3d4e5f";
         public const float ChickpeasCaloriesPer100g = 164f;
@@ -306,6 +334,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Chia Seeds ----------
         public const string ChiaSeedsName = "Chia Seeds";
+        public const string ChiaSeedsBulgarianName = "семена от чиа";
         public const string ChiaSeedsBrand = null;
         public const string ChiaSeedsId = "c1e2f3a4-5b6c-4d7e-8f9a-1b2c3d4e5f6a";
         public const float ChiaSeedsCaloriesPer100g = 486f;
@@ -316,6 +345,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Soy Sauce ----------
         public const string SoySauceName = "Soy Sauce";
+        public const string SoySauceBulgarianName = "соев сос";
         public const string SoySauceBrand = null;
         public const string SoySauceId = "d2f3a4b5-6c7d-4e8f-9a1b-2c3d4e5f6a7b";
         public const float SoySauceCaloriesPer100g = 53f;
@@ -326,6 +356,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Feta Cheese ----------
         public const string FetaCheeseName = "Feta Cheese";
+        public const string FetaCheeseBulgarianName = "сирене";
         public const string FetaCheeseBrand = null;
         public const string FetaCheeseId = "e3a4b5c6-7d8e-4f9a-1b2c-3d4e5f6a7b8c";
         public const float FetaCheeseCaloriesPer100g = 264f;
@@ -336,6 +367,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Almond Milk ----------
         public const string AlmondMilkName = "Almond Milk";
+        public const string AlmondMilkBulgarianName = "бадемово мляко";
         public const string AlmondMilkBrand = null;
         public const string AlmondMilkId = "f4b5c6d7-8e9f-4a1b-2c3d-4e5f6a7b8c9d";
         public const float AlmondMilkCaloriesPer100g = 17f;
@@ -346,6 +378,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
 
         // ---------- Mixed Berries ----------
         public const string BerriesName = "Mixed Berries";
+        public const string BerriesBulgarianName = "горски плодове";
         public const string BerriesBrand = null;
         public const string BerriesId = "a5c6d7e8-9f1a-4b2c-3d4e-5f6a7b8c9d1e";
         public const float BerriesCaloriesPer100g = 50f;

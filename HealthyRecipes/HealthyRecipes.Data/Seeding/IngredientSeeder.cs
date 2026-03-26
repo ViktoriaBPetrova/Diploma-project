@@ -1,4 +1,4 @@
-﻿using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Seeding.Constants;
 using System;
 using System.Collections.Generic;
@@ -25,6 +25,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.ChickenBreastProteinPer100g)
             {
                 Name = IngredientConstants.ChickenBreastName,
+                BulgarianName = IngredientConstants.ChickenBreastBulgarianName,
                 Brand = IngredientConstants.ChickenBreastBrand,
                 Source = IngredientConstants.ChickenBreastSource
             },
@@ -38,6 +39,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.WhiteRiceProteinPer100g)
             {
                 Name = IngredientConstants.WhiteRiceName,
+                BulgarianName = IngredientConstants.WhiteRiceBulgarianName,
                 Brand = IngredientConstants.WhiteRiceBrand,
                 Source = IngredientConstants.WhiteRiceSource
             },
@@ -51,6 +53,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.OliveOilProteinPer100g)
             {
                 Name = IngredientConstants.OliveOilName,
+                BulgarianName = IngredientConstants.OliveOilBulgarianName,
                 Brand = IngredientConstants.OliveOilBrand,
                 Source = IngredientConstants.OliveOilSource
             },
@@ -64,6 +67,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.OnionProteinPer100g)
             {
                 Name = IngredientConstants.OnionName,
+                BulgarianName = IngredientConstants.OnionBulgarianName,
                 Brand = IngredientConstants.OnionBrand,
                 Source = IngredientConstants.OnionSource
             },
@@ -77,6 +81,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.GarlicProteinPer100g)
             {
                 Name = IngredientConstants.GarlicName,
+                BulgarianName = IngredientConstants.GarlicBulgarianName,
                 Brand = IngredientConstants.GarlicBrand,
                 Source = IngredientConstants.GarlicSource
             },
@@ -92,6 +97,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.SalmonProteinPer100g)
                 {
                     Name = IngredientConstants.SalmonName,
+                    BulgarianName = IngredientConstants.SalmonBulgarianName,
                     Brand = IngredientConstants.SalmonBrand,
                     Source = IngredientConstants.SalmonSource
                 },
@@ -104,6 +110,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.EggsProteinPer100g)
                 {
                     Name = IngredientConstants.EggsName,
+                    BulgarianName = IngredientConstants.EggsBulgarianName,
                     Brand = IngredientConstants.EggsBrand,
                     Source = IngredientConstants.EggsSource
                 },
@@ -117,6 +124,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.QuinoaProteinPer100g)
                 {
                     Name = IngredientConstants.QuinoaName,
+                    BulgarianName = IngredientConstants.QuinoaBulgarianName,
                     Brand = IngredientConstants.QuinoaBrand,
                     Source = IngredientConstants.QuinoaSource
                 },
@@ -129,6 +137,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.BrownRiceProteinPer100g)
                 {
                     Name = IngredientConstants.BrownRiceName,
+                    BulgarianName = IngredientConstants.BrownRiceBulgarianName,
                     Brand = IngredientConstants.BrownRiceBrand,
                     Source = IngredientConstants.BrownRiceSource
                 },
@@ -141,6 +150,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.OatsProteinPer100g)
                 {
                     Name = IngredientConstants.OatsName,
+                    BulgarianName = IngredientConstants.OatsBulgarianName,
                     Brand = IngredientConstants.OatsBrand,
                     Source = IngredientConstants.OatsSource
                 },
@@ -154,6 +164,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.CucumberProteinPer100g)
                 {
                     Name = IngredientConstants.CucumberName,
+                    BulgarianName = IngredientConstants.CucumberBulgarianName,
                     Brand = IngredientConstants.CucumberBrand,
                     Source = IngredientConstants.CucumberSource
                 },
@@ -167,6 +178,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.ParsleyProteinPer100g)
                 {
                     Name = IngredientConstants.ParsleyName,
+                    BulgarianName = IngredientConstants.ParsleyBulgarianName,
                     Brand = IngredientConstants.ParsleyBrand,
                     Source = IngredientConstants.ParsleySource
                 },
@@ -179,6 +191,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.SweetPotatoProteinPer100g)
                 {
                     Name = IngredientConstants.SweetPotatoName,
+                    BulgarianName = IngredientConstants.SweetPotatoBulgarianName,
                     Brand = IngredientConstants.SweetPotatoBrand,
                     Source = IngredientConstants.SweetPotatoSource
                 },
@@ -191,6 +204,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.SpinachProteinPer100g)
                 {
                     Name = IngredientConstants.SpinachName,
+                    BulgarianName = IngredientConstants.SpinachBulgarianName,
                     Brand = IngredientConstants.SpinachBrand,
                     Source = IngredientConstants.SpinachSource
                 },
@@ -203,6 +217,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.BroccoliProteinPer100g)
                 {
                     Name = IngredientConstants.BroccoliName,
+                    BulgarianName = IngredientConstants.BroccoliBulgarianName,
                     Brand = IngredientConstants.BroccoliBrand,
                     Source = IngredientConstants.BroccoliSource
                 },
@@ -215,6 +230,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.TomatoProteinPer100g)
                 {
                     Name = IngredientConstants.TomatoName,
+                    BulgarianName = IngredientConstants.TomatoBulgarianName,
                     Brand = IngredientConstants.TomatoBrand,
                     Source = IngredientConstants.TomatoSource
                 },
@@ -228,6 +244,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.BellPepperProteinPer100g)
                 {
                     Name = IngredientConstants.BellPepperName,
+                    BulgarianName = IngredientConstants.BellPepperBulgarianName,
                     Brand = IngredientConstants.BellPepperBrand,
                     Source = IngredientConstants.BellPepperSource
                 },
@@ -241,6 +258,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.LemonProteinPer100g)
                 {
                     Name = IngredientConstants.LemonName,
+                    BulgarianName = IngredientConstants.LemonBulgarianName,
                     Brand = IngredientConstants.LemonBrand,
                     Source = IngredientConstants.LemonSource
                 },
@@ -253,6 +271,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.BananaProteinPer100g)
                 {
                     Name = IngredientConstants.BananaName,
+                    BulgarianName = IngredientConstants.BananaBulgarianName,
                     Brand = IngredientConstants.BananaBrand,
                     Source = IngredientConstants.BananaSource
                 },
@@ -265,6 +284,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.BlueberriesProteinPer100g)
                 {
                     Name = IngredientConstants.BlueberriesName,
+                    BulgarianName = IngredientConstants.BlueberriesBulgarianName,
                     Brand = IngredientConstants.BlueberriesBrand,
                     Source = IngredientConstants.BlueberriesSource
                 },
@@ -278,6 +298,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.AvocadoProteinPer100g)
                 {
                     Name = IngredientConstants.AvocadoName,
+                    BulgarianName = IngredientConstants.AvocadoBulgarianName,
                     Brand = IngredientConstants.AvocadoBrand,
                     Source = IngredientConstants.AvocadoSource
                 },   
@@ -290,6 +311,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.AlmondsProteinPer100g)
                 {
                     Name = IngredientConstants.AlmondsName,
+                    BulgarianName = IngredientConstants.AlmondsBulgarianName,
                     Brand = IngredientConstants.AlmondsBrand,
                     Source = IngredientConstants.AlmondsSource
                 },
@@ -302,6 +324,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.CoconutOilProteinPer100g)
                 {
                     Name = IngredientConstants.CoconutOilName,
+                    BulgarianName = IngredientConstants.CoconutOilBulgarianName,
                     Brand = IngredientConstants.CoconutOilBrand,
                     Source = IngredientConstants.CoconutOilSource
                 },
@@ -314,6 +337,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.PeanutButterProteinPer100g)
                 {
                     Name = IngredientConstants.PeanutButterName,
+                    BulgarianName = IngredientConstants.PeanutButterBulgarianName,
                     Brand = IngredientConstants.PeanutButterBrand,
                     Source = IngredientConstants.PeanutButterSource
                 },
@@ -327,6 +351,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.HoneyProteinPer100g)
                 {
                     Name = IngredientConstants.HoneyName,
+                    BulgarianName = IngredientConstants.HoneyBulgarianName,
                     Brand = IngredientConstants.HoneyBrand,
                     Source = IngredientConstants.HoneySource
                 },
@@ -339,6 +364,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.GreekYogurtProteinPer100g)
                 {
                     Name = IngredientConstants.GreekYogurtName,
+                    BulgarianName = IngredientConstants.GreekYogurtBulgarianName,
                     Brand = IngredientConstants.GreekYogurtBrand,
                     Source = IngredientConstants.GreekYogurtSource
                 },
@@ -351,6 +377,7 @@ namespace HealthyRecipes.Data.Seeding
                     IngredientConstants.GingerProteinPer100g)
                 {
                     Name = IngredientConstants.GingerName,
+                    BulgarianName = IngredientConstants.GingerBulgarianName,
                     Brand = IngredientConstants.GingerBrand,
                     Source = IngredientConstants.GingerSource
                 },
@@ -364,6 +391,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.ChickpeasProteinPer100g)
             {
                 Name = IngredientConstants.ChickpeasName,
+                BulgarianName = IngredientConstants.ChickpeasBulgarianName,
                 Brand = IngredientConstants.ChickpeasBrand,
                 Source = IngredientConstants.ChickpeasSource
             },
@@ -378,6 +406,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.ChiaSeedsProteinPer100g)
             {
                 Name = IngredientConstants.ChiaSeedsName,
+                BulgarianName = IngredientConstants.ChiaSeedsBulgarianName,
                 Brand = IngredientConstants.ChiaSeedsBrand,
                 Source = IngredientConstants.ChiaSeedsSource
             },
@@ -392,6 +421,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.SoySauceProteinPer100g)
             {
                 Name = IngredientConstants.SoySauceName,
+                BulgarianName = IngredientConstants.SoySauceBulgarianName,
                 Brand = IngredientConstants.SoySauceBrand,
                 Source = IngredientConstants.SoySauceSource
             },
@@ -406,6 +436,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.FetaCheeseProteinPer100g)
             {
                 Name = IngredientConstants.FetaCheeseName,
+                BulgarianName = IngredientConstants.FetaCheeseBulgarianName,
                 Brand = IngredientConstants.FetaCheeseBrand,
                 Source = IngredientConstants.FetaCheeseSource
             },
@@ -420,6 +451,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.AlmondMilkProteinPer100g)
             {
                 Name = IngredientConstants.AlmondMilkName,
+                BulgarianName = IngredientConstants.AlmondMilkBulgarianName,
                 Brand = IngredientConstants.AlmondMilkBrand,
                 Source = IngredientConstants.AlmondMilkSource
             },
@@ -434,6 +466,7 @@ namespace HealthyRecipes.Data.Seeding
                 IngredientConstants.BerriesProteinPer100g)
             {
                 Name = IngredientConstants.BerriesName,
+                BulgarianName = IngredientConstants.BerriesBulgarianName,
                 Brand = IngredientConstants.BerriesBrand,
                 Source = IngredientConstants.BerriesSource
             }
