@@ -1,4 +1,4 @@
-namespace HealthyRecipes.Services.Recommendations.Models
+namespace HealthyRecipes.Services.Recommendations.NewFolder
 {
     public class RecipeRecommendationDto
     {

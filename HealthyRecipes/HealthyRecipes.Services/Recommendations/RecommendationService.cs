@@ -1,6 +1,6 @@
 ﻿using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
-using HealthyRecipes.Services.Recommendations.Models;
+using HealthyRecipes.Services.Recommendations.NewFolder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -693,7 +693,9 @@ namespace HealthyRecipes.Services.Recommendations
 
             if (!ratings.Any() && saveCount == 0) return 0;
 
-            var avgRating = ratings.Any() ? ratings.Average(cr => (decimal)cr.Rating) : 0;
+            var avgRating = ratings.Any(cr => cr.Rating.HasValue)
+            ? ratings.Where(cr => cr.Rating.HasValue).Average(cr => (decimal)cr.Rating!.Value)
+            : 0;
             var ratingScore = avgRating * 20;
             var saveScore = Math.Log(saveCount + 1) * 10;
 
@@ -827,7 +829,9 @@ namespace HealthyRecipes.Services.Recommendations
                           recipe.SavedRecipes.Any(sr => !sr.Deleted && sr.UserId == userId.Value),
                 HasUserRated = userId.HasValue &&
                                ratings.Any(cr => cr.UserId == userId.Value),
-                AverageRating = ratings.Any() ? ratings.Average(cr => (double)cr.Rating) : null
+                AverageRating = ratings.Any(cr => cr.Rating.HasValue)
+                ? ratings.Where(cr => cr.Rating.HasValue).Average(cr => (double)cr.Rating!.Value)
+                : null
             };
         }
 
