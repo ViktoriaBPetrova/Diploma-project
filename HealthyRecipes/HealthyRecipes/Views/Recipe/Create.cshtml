@@ -4,10 +4,10 @@
 <div class="container recipe-form-container">
     <div class="recipe-form-wrapper">
         <a asp-action="Index" class="recipe-form-hint">← Back to recipes</a>
-        <h1 class="recipe-form-heading">New Recipe</h1>
-        <p class="page-subtitle recipe-form-subtitle">Share your healthy creation with the community</p>
+        <h1 class="recipe-form-heading">Create New Recipe</h1>
+        <p class="page-subtitle recipe-form-subtitle">Share your healthy creation</p>
 
-        <form asp-action="Create" method="post" id="recipeForm">
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="validation-summary-errors recipe-validation-errors"></div>
 
@@ -15,39 +15,71 @@
                 <h3>Basic Info</h3>
                 <div class="form-group">
                     <label asp-for="Title">Recipe Title *</label>
-                    <input asp-for="Title" class="form-control" placeholder="e.g., Healthy Chicken & Rice Bowl" />
+                    <input asp-for="Title" class="form-control" />
                     <span asp-validation-for="Title" class="field-validation-error"></span>
                 </div>
                 <div class="form-group">
                     <label asp-for="Info">Description *</label>
-                    <textarea asp-for="Info" class="form-control" rows="4" placeholder="Describe your recipe, cooking method, and what makes it special…"></textarea>
+                    <textarea asp-for="Info" class="form-control" rows="4"></textarea>
                     <span asp-validation-for="Info" class="field-validation-error"></span>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label asp-for="PrepTime">Prep time (minutes)</label>
-                        <input asp-for="PrepTime" type="number" class="form-control" placeholder="30" />
+                        <input asp-for="PrepTime" type="number" class="form-control" />
                     </div>
                     <div class="form-group">
                         <label asp-for="Servings">Servings</label>
-                        <input asp-for="Servings" type="number" class="form-control" placeholder="2" />
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label asp-for="Difficulty">Difficulty</label>
-                        <select asp-for="Difficulty" class="form-control" asp-items="Html.GetEnumSelectList<HealthyRecipes.Data.Enums.Difficulty>()">
-                            <option value="">— Select —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="ImageUrl">Image URL</label>
-                        <input asp-for="ImageUrl" class="form-control" placeholder="https://…" />
+                        <input asp-for="Servings" type="number" class="form-control" />
                     </div>
                 </div>
                 <div class="form-group">
-                    <label asp-for="VideoUrl">Video URL (optional)</label>
-                    <input asp-for="VideoUrl" class="form-control" placeholder="https://youtube.com/…" />
+                    <label asp-for="Difficulty">Difficulty</label>
+                    <select asp-for="Difficulty" class="form-control" asp-items="Html.GetEnumSelectList<HealthyRecipes.Data.Enums.Difficulty>()">
+                        <option value="">— Select —</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="recipe-form-section">
+                <h3>Media</h3>
+                
+                @* Image Upload - Custom Styled *@
+                <div class="form-group">
+                    <label>Recipe Image</label>
+                    <div class="file-upload-wrapper" id="imageUploadWrapper">
+                        <input asp-for="ImageFile" type="file" accept="image/*" id="imageInput" />
+                        <label for="imageInput" class="file-upload-label image-upload">
+                            <span class="file-upload-icon">📷</span>
+                            <span class="file-upload-text">Choose an image</span>
+                        </label>
+                        <div class="file-upload-filename" id="imageFilename" style="display: none;">
+                            <span class="filename-label">Selected:</span>
+                            <span id="imageFilenameText"></span>
+                            <button type="button" class="file-upload-remove" id="imageRemove">✕ Remove</button>
+                        </div>
+                    </div>
+                    <span asp-validation-for="ImageFile" class="field-validation-error"></span>
+                    <small class="file-upload-helper">Max 5MB. Formats: JPG, PNG, WebP</small>
+                </div>
+
+                @* Video Upload - Custom Styled *@
+                <div class="form-group">
+                    <label>Recipe Video</label>
+                    <div class="file-upload-wrapper" id="videoUploadWrapper">
+                        <input asp-for="VideoFile" type="file" accept="video/*" id="videoInput" />
+                        <label for="videoInput" class="file-upload-label video-upload">
+                            <span class="file-upload-icon">🎥</span>
+                            <span class="file-upload-text">Choose a video</span>
+                        </label>
+                        <div class="file-upload-filename" id="videoFilename" style="display: none;">
+                            <span class="filename-label">Selected:</span>
+                            <span id="videoFilenameText"></span>
+                            <button type="button" class="file-upload-remove" id="videoRemove">✕ Remove</button>
+                        </div>
+                    </div>
+                    <span asp-validation-for="VideoFile" class="field-validation-error"></span>
+                    <small class="file-upload-helper">Max 100MB. Formats: MP4, WebM</small>
                 </div>
             </div>
 
@@ -57,7 +89,8 @@
                     @foreach (var cat in Model.AvailableCategories)
                     {
                         <label class="recipe-category-label">
-                            <input type="checkbox" name="SelectedCategoryIds" value="@cat.Id" class="recipe-category-checkbox" />
+                            <input type="checkbox" name="SelectedCategoryIds" value="@cat.Id"
+                                   class="recipe-category-checkbox" />
                             @cat.Name
                         </label>
                     }
@@ -65,29 +98,21 @@
             </div>
 
             <div class="recipe-form-section">
-                <div class="recipe-ingredients-header">
-                    <h3>Ingredients</h3>
+                <h3>Ingredients</h3>
+                <div class="form-group">
+                    <label>Search ingredients</label>
+                    <div class="ingredient-search-wrapper">
+                        <input type="text" id="ingredientSearch" class="form-control" placeholder="Start typing to search..." />
+                        <div id="searchResults" class="search-results"></div>
+                    </div>
                 </div>
-                
-                <div class="ingredient-search-container">
-                    <label>Search for ingredients</label>
-                    <input type="text" 
-                           id="ingredientSearch" 
-                           class="form-control" 
-                           placeholder="Start typing ingredient name…" 
-                           autocomplete="off" />
-                    <div id="searchResults" class="ingredient-search-results"></div>
-                </div>
-
-                <div id="ingredientsList">
+                <div id="ingredientsList" class="ingredients-list">
                     <!-- Ingredients will be added here dynamically -->
                 </div>
-                
-                <p class="form-hint">Search and select ingredients, then specify quantities. Nutrition totals will be calculated automatically.</p>
             </div>
 
             <div class="recipe-form-actions">
-                <button type="submit" class="btn-primary">Create recipe</button>
+                <button type="submit" class="btn-primary">Create Recipe</button>
                 <a asp-action="Index" class="btn-ghost">Cancel</a>
             </div>
         </form>
@@ -96,10 +121,75 @@
 
 @section Scripts {
 <script>
+// File upload interactions
+function setupFileUpload(inputId, wrapperId, filenameId, filenameTextId, removeId) {
+    const input = document.getElementById(inputId);
+    const wrapper = document.getElementById(wrapperId);
+    const filenameDisplay = document.getElementById(filenameId);
+    const filenameText = document.getElementById(filenameTextId);
+    const removeBtn = document.getElementById(removeId);
+
+    input.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            filenameText.textContent = file.name;
+            filenameDisplay.style.display = 'block';
+            wrapper.classList.add('has-file');
+        } else {
+            filenameDisplay.style.display = 'none';
+            wrapper.classList.remove('has-file');
+        }
+    });
+
+    removeBtn.addEventListener('click', function() {
+        input.value = '';
+        filenameDisplay.style.display = 'none';
+        wrapper.classList.remove('has-file');
+    });
+
+    // Drag and drop support
+    const label = wrapper.querySelector('.file-upload-label');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        label.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        label.addEventListener(eventName, function() {
+            wrapper.classList.add('dragging');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        label.addEventListener(eventName, function() {
+            wrapper.classList.remove('dragging');
+        }, false);
+    });
+
+    label.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        input.files = files;
+        
+        // Trigger change event
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+    }, false);
+}
+
+// Initialize file uploads
+setupFileUpload('imageInput', 'imageUploadWrapper', 'imageFilename', 'imageFilenameText', 'imageRemove');
+setupFileUpload('videoInput', 'videoUploadWrapper', 'videoFilename', 'videoFilenameText', 'videoRemove');
+
+// Ingredient management
 let ingredientCount = 0;
 const addedIngredients = new Set();
 
-// Ingredient search autocomplete
 const searchInput = document.getElementById('ingredientSearch');
 const searchResults = document.getElementById('searchResults');
 let searchTimeout;
@@ -135,7 +225,6 @@ searchInput.addEventListener('input', function() {
             
             searchResults.style.display = 'block';
             
-            // Add click handlers to search results
             document.querySelectorAll('.search-result-item').forEach(item => {
                 item.addEventListener('click', function() {
                     addIngredient(
@@ -157,7 +246,6 @@ searchInput.addEventListener('input', function() {
     }, 300);
 });
 
-// Close search results when clicking outside
 document.addEventListener('click', function(e) {
     if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
         searchResults.style.display = 'none';

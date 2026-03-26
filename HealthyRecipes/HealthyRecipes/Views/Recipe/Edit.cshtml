@@ -7,7 +7,7 @@
         <h1 class="recipe-form-heading">Edit Recipe</h1>
         <p class="page-subtitle recipe-form-subtitle">Update your recipe details</p>
 
-        <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="validation-summary-errors recipe-validation-errors"></div>
 
@@ -33,21 +33,78 @@
                         <input asp-for="Servings" type="number" class="form-control" />
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label asp-for="Difficulty">Difficulty</label>
-                        <select asp-for="Difficulty" class="form-control" asp-items="Html.GetEnumSelectList<HealthyRecipes.Data.Enums.Difficulty>()">
-                            <option value="">— Select —</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="ImageUrl">Image URL</label>
-                        <input asp-for="ImageUrl" class="form-control" />
-                    </div>
-                </div>
                 <div class="form-group">
-                    <label asp-for="VideoUrl">Video URL</label>
-                    <input asp-for="VideoUrl" class="form-control" />
+                    <label asp-for="Difficulty">Difficulty</label>
+                    <select asp-for="Difficulty" class="form-control" asp-items="Html.GetEnumSelectList<HealthyRecipes.Data.Enums.Difficulty>()">
+                        <option value="">— Select —</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="recipe-form-section">
+                <h3>Media</h3>
+                
+                @* Current Image Display *@
+                @if (!string.IsNullOrEmpty(Model.CurrentImageUrl))
+                {
+                    <div class="form-group">
+                        <label>Current Image</label>
+                        <div class="current-media-preview">
+                            <img src="@Model.CurrentImageUrl" alt="Current recipe image" class="recipe-current-image" />
+                        </div>
+                    </div>
+                }
+
+                @* New Image Upload - Custom Styled *@
+                <div class="form-group">
+                    <label>@(string.IsNullOrEmpty(Model.CurrentImageUrl) ? "Recipe Image" : "Replace Image")</label>
+                    <div class="file-upload-wrapper" id="imageUploadWrapper">
+                        <input asp-for="NewImageFile" type="file" accept="image/*" id="imageInput" />
+                        <label for="imageInput" class="file-upload-label image-upload">
+                            <span class="file-upload-icon">📷</span>
+                            <span class="file-upload-text">Choose an image</span>
+                        </label>
+                        <div class="file-upload-filename" id="imageFilename" style="display: none;">
+                            <span class="filename-label">Selected:</span>
+                            <span id="imageFilenameText"></span>
+                            <button type="button" class="file-upload-remove" id="imageRemove">✕ Remove</button>
+                        </div>
+                    </div>
+                    <span asp-validation-for="NewImageFile" class="field-validation-error"></span>
+                    <small class="file-upload-helper">Max 5MB. Formats: JPG, PNG, WebP. @(string.IsNullOrEmpty(Model.CurrentImageUrl) ? "" : "Leave empty to keep current image.")</small>
+                </div>
+
+                @* Current Video Display *@
+                @if (!string.IsNullOrEmpty(Model.CurrentVideoUrl))
+                {
+                    <div class="form-group">
+                        <label>Current Video</label>
+                        <div class="current-media-preview">
+                            <video controls class="recipe-current-video">
+                                <source src="@Model.CurrentVideoUrl" type="video/mp4">
+                                Your browser doesn't support video playback.
+                            </video>
+                        </div>
+                    </div>
+                }
+
+                @* New Video Upload - Custom Styled *@
+                <div class="form-group">
+                    <label>@(string.IsNullOrEmpty(Model.CurrentVideoUrl) ? "Recipe Video" : "Replace Video")</label>
+                    <div class="file-upload-wrapper" id="videoUploadWrapper">
+                        <input asp-for="NewVideoFile" type="file" accept="video/*" id="videoInput" />
+                        <label for="videoInput" class="file-upload-label video-upload">
+                            <span class="file-upload-icon">🎥</span>
+                            <span class="file-upload-text">Choose a video</span>
+                        </label>
+                        <div class="file-upload-filename" id="videoFilename" style="display: none;">
+                            <span class="filename-label">Selected:</span>
+                            <span id="videoFilenameText"></span>
+                            <button type="button" class="file-upload-remove" id="videoRemove">✕ Remove</button>
+                        </div>
+                    </div>
+                    <span asp-validation-for="NewVideoFile" class="field-validation-error"></span>
+                    <small class="file-upload-helper">Max 100MB. Formats: MP4, WebM. @(string.IsNullOrEmpty(Model.CurrentVideoUrl) ? "" : "Leave empty to keep current video.")</small>
                 </div>
             </div>
 
@@ -66,48 +123,6 @@
                 </div>
             </div>
 
-            <div class="recipe-form-section">
-                <div class="recipe-ingredients-header">
-                    <h3>Ingredients</h3>
-                </div>
-                
-                <div class="ingredient-search-container">
-                    <label>Search for ingredients</label>
-                    <input type="text" 
-                           id="ingredientSearch" 
-                           class="form-control" 
-                           placeholder="Start typing ingredient name…" 
-                           autocomplete="off" />
-                    <div id="searchResults" class="ingredient-search-results"></div>
-                </div>
-
-                <div id="ingredientsList">
-                    @for (int i = 0; i < Model.Ingredients.Count; i++)
-                    {
-                        <div class="form-row recipe-ingredient-row existing-ingredient" data-ingredient-id="@Model.Ingredients[i].IngredientId">
-                            <div class="ingredient-info">
-                                <strong>Existing Ingredient</strong>
-                                <span class="ingredient-meta">ID: @Model.Ingredients[i].IngredientId</span>
-                            </div>
-                            <div class="form-group ingredient-quantity-group">
-                                <label>Quantity (g)</label>
-                                <input type="number" 
-                                       name="Ingredients[@i].QuantityInGrams" 
-                                       value="@Model.Ingredients[i].QuantityInGrams"
-                                       class="form-control" 
-                                       step="0.1" 
-                                       min="0.1" 
-                                       required />
-                            </div>
-                            <input type="hidden" name="Ingredients[@i].IngredientId" value="@Model.Ingredients[i].IngredientId" />
-                            <button type="button" onclick="removeIngredient(this, '@Model.Ingredients[i].IngredientId')" class="btn-danger recipe-remove-btn">✕</button>
-                        </div>
-                    }
-                </div>
-                
-                <p class="form-hint">Search and select ingredients, then specify quantities. Nutrition totals will be calculated automatically.</p>
-            </div>
-
             <div class="recipe-form-actions">
                 <button type="submit" class="btn-primary">Save changes</button>
                 <a asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">Cancel</a>
@@ -118,78 +133,142 @@
 
 @section Scripts {
 <script>
+// File upload interactions
+function setupFileUpload(inputId, wrapperId, filenameId, filenameTextId, removeId) {
+    const input = document.getElementById(inputId);
+    const wrapper = document.getElementById(wrapperId);
+    const filenameDisplay = document.getElementById(filenameId);
+    const filenameText = document.getElementById(filenameTextId);
+    const removeBtn = document.getElementById(removeId);
+
+    input.addEventListener('change', function(e) {
+        if (this.files && this.files[0]) {
+            const file = this.files[0];
+            filenameText.textContent = file.name;
+            filenameDisplay.style.display = 'block';
+            wrapper.classList.add('has-file');
+        } else {
+            filenameDisplay.style.display = 'none';
+            wrapper.classList.remove('has-file');
+        }
+    });
+
+    removeBtn.addEventListener('click', function() {
+        input.value = '';
+        filenameDisplay.style.display = 'none';
+        wrapper.classList.remove('has-file');
+    });
+
+    // Drag and drop support
+    const label = wrapper.querySelector('.file-upload-label');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        label.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        label.addEventListener(eventName, function() {
+            wrapper.classList.add('dragging');
+        }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        label.addEventListener(eventName, function() {
+            wrapper.classList.remove('dragging');
+        }, false);
+    });
+
+    label.addEventListener('drop', function(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        input.files = files;
+        
+        // Trigger change event
+        const event = new Event('change', { bubbles: true });
+        input.dispatchEvent(event);
+    }, false);
+}
+
+// Initialize file uploads
+setupFileUpload('imageInput', 'imageUploadWrapper', 'imageFilename', 'imageFilenameText', 'imageRemove');
+setupFileUpload('videoInput', 'videoUploadWrapper', 'videoFilename', 'videoFilenameText', 'videoRemove');
+
+// Ingredient management 
 let ingredientCount = @Model.Ingredients.Count;
 const addedIngredients = new Set();
 
-// Initialize with existing ingredients
 document.querySelectorAll('.existing-ingredient').forEach(el => {
     addedIngredients.add(el.dataset.ingredientId);
 });
 
-// Ingredient search autocomplete
 const searchInput = document.getElementById('ingredientSearch');
 const searchResults = document.getElementById('searchResults');
 let searchTimeout;
 
-searchInput.addEventListener('input', function() {
-    const term = this.value.trim();
-    
-    clearTimeout(searchTimeout);
-    
-    if (term.length < 2) {
-        searchResults.innerHTML = '';
-        searchResults.style.display = 'none';
-        return;
-    }
-    
-    searchTimeout = setTimeout(async () => {
-        try {
-            const response = await fetch(`/Recipe/SearchIngredients?term=${encodeURIComponent(term)}`);
-            const ingredients = await response.json();
-            
-            if (ingredients.length === 0) {
-                searchResults.innerHTML = '<div class="no-results">No ingredients found</div>';
-                searchResults.style.display = 'block';
-                return;
-            }
-            
-            searchResults.innerHTML = ingredients.map(ing => `
-                <div class="search-result-item" data-id="${ing.id}" data-name="${ing.name}" data-calories="${ing.caloriesPer100g}">
-                    <span class="ingredient-name">${ing.name}</span>
-                    <span class="ingredient-calories">${ing.caloriesPer100g} cal/100g</span>
-                </div>
-            `).join('');
-            
-            searchResults.style.display = 'block';
-            
-            // Add click handlers to search results
-            document.querySelectorAll('.search-result-item').forEach(item => {
-                item.addEventListener('click', function() {
-                    addIngredient(
-                        this.dataset.id,
-                        this.dataset.name,
-                        this.dataset.calories
-                    );
-                    searchInput.value = '';
-                    searchResults.innerHTML = '';
-                    searchResults.style.display = 'none';
-                });
-            });
-            
-        } catch (error) {
-            console.error('Error searching ingredients:', error);
-            searchResults.innerHTML = '<div class="error-message">Error loading results</div>';
-            searchResults.style.display = 'block';
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const term = this.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (term.length < 2) {
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
+            return;
         }
-    }, 300);
-});
+        
+        searchTimeout = setTimeout(async () => {
+            try {
+                const response = await fetch(`/Recipe/SearchIngredients?term=${encodeURIComponent(term)}`);
+                const ingredients = await response.json();
+                
+                if (ingredients.length === 0) {
+                    searchResults.innerHTML = '<div class="no-results">No ingredients found</div>';
+                    searchResults.style.display = 'block';
+                    return;
+                }
+                
+                searchResults.innerHTML = ingredients.map(ing => `
+                    <div class="search-result-item" data-id="${ing.id}" data-name="${ing.name}" data-calories="${ing.caloriesPer100g}">
+                        <span class="ingredient-name">${ing.name}</span>
+                        <span class="ingredient-calories">${ing.caloriesPer100g} cal/100g</span>
+                    </div>
+                `).join('');
+                
+                searchResults.style.display = 'block';
+                
+                document.querySelectorAll('.search-result-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        addIngredient(
+                            this.dataset.id,
+                            this.dataset.name,
+                            this.dataset.calories
+                        );
+                        searchInput.value = '';
+                        searchResults.innerHTML = '';
+                        searchResults.style.display = 'none';
+                    });
+                });
+                
+            } catch (error) {
+                console.error('Error searching ingredients:', error);
+                searchResults.innerHTML = '<div class="error-message">Error loading results</div>';
+                searchResults.style.display = 'block';
+            }
+        }, 300);
+    });
 
-// Close search results when clicking outside
-document.addEventListener('click', function(e) {
-    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
-        searchResults.style.display = 'none';
-    }
-});
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.style.display = 'none';
+        }
+    });
+}
 
 function addIngredient(id, name, calories) {
     if (addedIngredients.has(id)) {

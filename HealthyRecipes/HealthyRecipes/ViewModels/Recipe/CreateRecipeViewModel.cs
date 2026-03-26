@@ -22,8 +22,11 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         [Range(1, 100)]
         public int? Servings { get; set; }
 
-        public string? ImageUrl { get; set; }
-        public string? VideoUrl { get; set; }
+        [Display(Name = "Recipe Image")]
+        public IFormFile? ImageFile { get; set; }
+
+        [Display(Name = "Recipe Video")]
+        public IFormFile? VideoFile { get; set; }
 
         public List<Guid> SelectedCategoryIds { get; set; } = new();
         public IEnumerable<CategoryFilterViewModel> AvailableCategories { get; set; } = new List<CategoryFilterViewModel>();

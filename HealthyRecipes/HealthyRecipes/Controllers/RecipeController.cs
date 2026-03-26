@@ -1,14 +1,16 @@
 ﻿using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.CommentRatings;
+using HealthyRecipes.Services.FileUploads;
 using HealthyRecipes.Services.Ingredients;
 using HealthyRecipes.Services.RecipeCategories;
 using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.Recipes.Models;
 using HealthyRecipes.Services.Recommendations;
-using HealthyRecipes.Services.Recommendations.Models;
+using HealthyRecipes.Services.Recommendations.NewFolder;
 using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Services.Statistics.Interfaces;
 using HealthyRecipes.Web.ViewModels.Recipe;
@@ -16,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System.Xml.Linq;
 
 namespace HealthyRecipes.Web.Controllers
 {
@@ -31,6 +34,7 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IAllergy _allergyService;
         private readonly IRecipeStatistics _recipeStatisticsService;
         private readonly IRecommendation _recommendationService;
+        private readonly IFileUpload _fileUploadService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public RecipeController(
@@ -44,6 +48,7 @@ namespace HealthyRecipes.Web.Controllers
             IAllergy allergyService,
             IRecipeStatistics recipeStatisticsService,
             IRecommendation recommendationService,
+            IFileUpload fileUploadService,
             UserManager<ApplicationUser> userManager)
         {
             _recipeService = recipeService;
@@ -56,6 +61,7 @@ namespace HealthyRecipes.Web.Controllers
             _allergyService = allergyService;
             _recipeStatisticsService = recipeStatisticsService;
             _recommendationService = recommendationService;
+            _fileUploadService = fileUploadService;
             _userManager = userManager;
         }
 
@@ -64,6 +70,13 @@ namespace HealthyRecipes.Web.Controllers
         {
             try
             {
+                Guid? currentUserId = null;
+                if (User.Identity?.IsAuthenticated == true)
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    currentUserId = user?.Id;
+                }
+
                 // Map ViewModel to DTO
                 var filterDto = new RecipeFilterDto
                 {
@@ -80,6 +93,8 @@ namespace HealthyRecipes.Web.Controllers
                     DifficultyLevel = filter.DifficultyLevel,
                     IncludeIngredients = filter.IncludeIngredients,
                     ExcludeIngredients = filter.ExcludeIngredients,
+                    ExcludeUserAllergies = filter.ExcludeUserAllergies,
+                    UserId = currentUserId,
                     CategoryIds = filter.CategoryIds,
                     PageNumber = filter.PageNumber,
                     PageSize = filter.PageSize,
@@ -97,21 +112,20 @@ namespace HealthyRecipes.Web.Controllers
                 HashSet<Guid> savedIds = new();
                 HashSet<Guid> allergyIngredientIds = new();
                 List<Recipe> myRecipes = new List<Recipe>();
-                if (User.Identity?.IsAuthenticated == true)
-                {
-                    var user = await _userManager.GetUserAsync(User);
-                    if (user != null)
+                
+                    
+                    if (currentUserId != null)
                     {
-                        var my = await _recipeService.GetRecipesByUserAsync(user.Id);
+                        var my = await _recipeService.GetRecipesByUserAsync((Guid)currentUserId);
                         myRecipes = my.ToList();
 
-                        var saved = await _savedRecipeService.GetSavedRecipesByUserAsync(user.Id);
+                        var saved = await _savedRecipeService.GetSavedRecipesByUserAsync((Guid)currentUserId);
                         savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
 
-                        var allergies = await _allergyService.GetAllergiesByUserAsync(user.Id);
+                        var allergies = await _allergyService.GetAllergiesByUserAsync((Guid)currentUserId);
                         allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
                     }
-                }
+                
 
                 // Map My Recipes
                 var myCards = new List<RecipeCardViewModel>();
@@ -210,7 +224,7 @@ namespace HealthyRecipes.Web.Controllers
                 return NotFound();
 
             var avgRating = await _commentRatingService.GetAverageRatingAsync(id);
-            var comments = await _commentRatingService.GetRatingsByRecipeAsync(id);
+            var topLevelComments = await _commentRatingService.GetTopLevelCommentsWithRepliesAsync(id);
             var recipeIngredients = await _recipeIngredientService.GetIngredientsByRecipeAsync(id);
             var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
 
@@ -226,6 +240,7 @@ namespace HealthyRecipes.Web.Controllers
                 {
                     currentUserId = user.Id;
                     isSaved = await _savedRecipeService.IsRecipeSavedAsync(user.Id, id);
+
                     var allergies = await _allergyService.GetAllergiesByUserAsync(user.Id);
                     allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
 
@@ -235,7 +250,7 @@ namespace HealthyRecipes.Web.Controllers
                         currentUserComment = new CommentRatingFormViewModel
                         {
                             RecipeId = id,
-                            Rating = existing.Rating,
+                            Rating = existing.Rating!.Value, // Now Rating is nullable, so use .Value
                             Comment = existing.Comment
                         };
                     }
@@ -251,8 +266,10 @@ namespace HealthyRecipes.Web.Controllers
                 IsAllergen = ri.Ingredient != null && allergyIngredientIds.Contains(ri.IngredientId)
             }).ToList();
 
-            var conflictingIngredients = ingredientVms.Where(i => i.IsAllergen).Select(i => i.IngredientName).ToList();
-
+            var conflictingIngredients = ingredientVms
+                .Where(i => i.IsAllergen)
+                .Select(i => i.IngredientName)
+                .ToList();
             //var stats = await _recipeStatisticsService.GetRecipeStatisticsAsync(id);
             var similarRecipes = await _recommendationService.GetSimilarRecipesAsync(id, 6);
 
@@ -277,15 +294,8 @@ namespace HealthyRecipes.Web.Controllers
                 IsSaved = isSaved,
                 CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
                 Ingredients = ingredientVms,
-                Comments = comments.Select(c => new CommentViewModel
-                {
-                    UserName = c.User?.UserName ?? "Unknown",
-                    UserImageUrl = c.User?.ImageUrl,
-                    Rating = c.Rating,
-                    Comment = c.Comment,
-                    CreatedAt = c.CreatedAt,
-                    IsCurrentUser = c.UserId == currentUserId
-                }),
+                Comments = MapCommentViewModels(topLevelComments, currentUserId, recipe.UserId),
+                TotalCommentCount = await _commentRatingService.GetTotalCommentCountAsync(id),
                 CurrentUserComment = currentUserComment,
                 HasAllergyConflict = conflictingIngredients.Any(),
                 ConflictingIngredients = conflictingIngredients,
@@ -340,16 +350,40 @@ namespace HealthyRecipes.Web.Controllers
                 return View(vm);
             }
 
+            // Handle image upload
+            string? imageUrl = null;
+            if (vm.ImageFile != null)
+            {
+                if (!_fileUploadService.IsValidImage(vm.ImageFile))
+                {
+                    ModelState.AddModelError("ImageFile", "Invalid image file. Allowed: JPG, PNG, WebP. Max size: 5MB");
+                    return View(vm);
+                }
+                imageUrl = await _fileUploadService.UploadImageAsync(vm.ImageFile);
+            }
+
+            // Handle video upload
+            string? videoUrl = null;
+            if (vm.VideoFile != null)
+            {
+                if (!_fileUploadService.IsValidVideo(vm.VideoFile))
+                {
+                    ModelState.AddModelError("VideoFile", "Invalid video file. Allowed: MP4, WebM. Max size: 100MB");
+                    return View(vm);
+                }
+                videoUrl = await _fileUploadService.UploadVideoAsync(vm.VideoFile);
+            }
+
             var user = await _userManager.GetUserAsync(User);
-            var recipe = new Data.Entities.Recipe
+            var recipe = new Recipe
             {
                 Title = vm.Title,
                 Info = vm.Info,
                 PrepTime = vm.PrepTime,
                 Difficulty = vm.Difficulty,
                 Servings = vm.Servings,
-                ImageUrl = vm.ImageUrl,
-                VideoUrl = vm.VideoUrl,
+                ImageUrl = imageUrl,
+                VideoUrl = videoUrl,
                 UserId = user!.Id
             };
 
@@ -381,6 +415,8 @@ namespace HealthyRecipes.Web.Controllers
             var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
             var recipeIngredients = await _recipeIngredientService.GetIngredientsByRecipeAsync(id);
 
+            
+
             var vm = new EditRecipeViewModel
             {
                 Id = id,
@@ -389,8 +425,8 @@ namespace HealthyRecipes.Web.Controllers
                 PrepTime = recipe.PrepTime,
                 Difficulty = recipe.Difficulty,
                 Servings = recipe.Servings,
-                ImageUrl = recipe.ImageUrl,
-                VideoUrl = recipe.VideoUrl,
+                CurrentImageUrl = recipe.ImageUrl,  // Store current image
+                CurrentVideoUrl = recipe.VideoUrl,  // Store current video
                 SelectedCategoryIds = recipeCategories.Select(rc => rc.CategoryId).ToList(),
                 AvailableCategories = categories.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name }),
                 Ingredients = recipeIngredients.Select(ri => new RecipeIngredientInputViewModel
@@ -422,13 +458,80 @@ namespace HealthyRecipes.Web.Controllers
             if (recipe.UserId != user!.Id && !User.IsInRole("Admin"))
                 return Forbid();
 
+            // Update basic properties
             recipe.Title = vm.Title;
             recipe.Info = vm.Info;
             recipe.PrepTime = vm.PrepTime;
             recipe.Difficulty = vm.Difficulty;
             recipe.Servings = vm.Servings;
-            recipe.ImageUrl = vm.ImageUrl;
-            recipe.VideoUrl = vm.VideoUrl;
+
+            // Handle NEW image upload
+            if (vm.NewImageFile != null)
+            {
+                // Validate image
+                if (!_fileUploadService.IsValidImage(vm.NewImageFile))
+                {
+                    ModelState.AddModelError("NewImageFile", "Invalid image file. Allowed: JPG, PNG, WebP. Max size: 5MB");
+                    var cats = await _categoryService.GetAllCategoriesAsync();
+                    vm.AvailableCategories = cats.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name });
+                    return View(vm);
+                }
+
+                // Delete old image if exists
+                if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                {
+                    await _fileUploadService.DeleteFileAsync(recipe.ImageUrl);
+                }
+
+                // Upload new image
+                recipe.ImageUrl = await _fileUploadService.UploadImageAsync(vm.NewImageFile);
+            }
+
+
+            // Handle NEW video upload
+            if (vm.NewVideoFile != null)
+            {
+                // Validate video
+                if (!_fileUploadService.IsValidVideo(vm.NewVideoFile))
+                {
+                    ModelState.AddModelError("NewVideoFile", "Invalid video file. Allowed: MP4, WebM. Max size: 100MB");
+                    var cats = await _categoryService.GetAllCategoriesAsync();
+                    vm.AvailableCategories = cats.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name });
+                    return View(vm);
+                }
+
+                // Delete old video if exists
+                if (!string.IsNullOrEmpty(recipe.VideoUrl))
+                {
+                    await _fileUploadService.DeleteFileAsync(recipe.VideoUrl);
+                }
+
+                // Upload new video
+                recipe.VideoUrl = await _fileUploadService.UploadVideoAsync(vm.NewVideoFile);
+            }
+
+            // ===== ADD THIS SECTION - Update Categories =====
+            // Get current category associations
+            var currentCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
+            var currentCategoryIds = currentCategories.Select(rc => rc.CategoryId).ToHashSet();
+
+            // Remove categories that are no longer selected
+            foreach (var currentCategoryId in currentCategoryIds)
+            {
+                if (!vm.SelectedCategoryIds.Contains(currentCategoryId))
+                {
+                    await _recipeCategoryService.RemoveCategoryFromRecipeAsync(id, currentCategoryId);
+                }
+            }
+
+            // Add newly selected categories
+            foreach (var selectedCategoryId in vm.SelectedCategoryIds)
+            {
+                if (!currentCategoryIds.Contains(selectedCategoryId))
+                {
+                    await _recipeCategoryService.AddCategoryToRecipeAsync(id, selectedCategoryId);
+                }
+            }
 
             await _recipeService.UpdateRecipeAsync(recipe);
             await _recipeService.RecalculateRecipeNutritionAsync(id);
@@ -448,7 +551,21 @@ namespace HealthyRecipes.Web.Controllers
             if (recipe.UserId != user!.Id && !User.IsInRole("Admin"))
                 return Forbid();
 
+            // DELETE FILES FIRST (before soft-deleting recipe)
+            if (!string.IsNullOrEmpty(recipe.ImageUrl))
+            {
+                await _fileUploadService.DeleteFileAsync(recipe.ImageUrl);
+            }
+
+            if (!string.IsNullOrEmpty(recipe.VideoUrl))
+            {
+                await _fileUploadService.DeleteFileAsync(recipe.VideoUrl);
+            }
+
+            // NOW soft delete the recipe
             await _recipeService.SoftDeleteRecipeAsync(id);
+
+            TempData["Success"] = "Recipe deleted successfully";
             return RedirectToAction(nameof(Index));
         }
 
@@ -581,6 +698,7 @@ namespace HealthyRecipes.Web.Controllers
             try
             {
                 await _recipeService.AddIngredientToRecipeAsync(recipeId, ingredientId, quantity);
+                await _recipeService.RecalculateRecipeNutritionAsync(recipeId);
                 var ingredient = await _ingredientService.GetIngredientByIdAsync(ingredientId);
 
                 return Json(new
@@ -622,12 +740,91 @@ namespace HealthyRecipes.Web.Controllers
             try
             {
                 await _recipeService.RemoveIngredientFromRecipeAsync(recipeId, ingredientId);
+                await _recipeService.RecalculateRecipeNutritionAsync(recipeId);
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
             }
+        }
+
+        // POST: /Recipe/AddReply
+        [Authorize]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddReply(Guid recipeId, Guid parentCommentId, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                return RedirectToAction(nameof(Details), new { id = recipeId });
+
+            var user = await _userManager.GetUserAsync(User);
+            await _commentRatingService.AddReplyAsync(parentCommentId, user!.Id, content);
+
+            return RedirectToAction(nameof(Details), new { id = recipeId });
+        }
+
+        // POST: /Recipe/UpdateComment
+        [Authorize]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateComment(Guid commentId, Guid recipeId, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content))
+                return RedirectToAction(nameof(Details), new { id = recipeId });
+
+            var user = await _userManager.GetUserAsync(User);
+            var success = await _commentRatingService.UpdateCommentAsync(commentId, user!.Id, content);
+
+            if (!success)
+                TempData["Error"] = "Unable to update comment";
+
+            return RedirectToAction(nameof(Details), new { id = recipeId });
+        }
+
+        // POST: /Recipe/DeleteCommentById
+        [Authorize]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCommentById(Guid commentId, Guid recipeId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var success = await _commentRatingService.DeleteCommentAsync(commentId, user!.Id);
+
+            if (!success)
+                TempData["Error"] = "Unable to delete comment";
+
+            return RedirectToAction(nameof(Details), new { id = recipeId });
+        }
+
+        // POST: /Recipe/TogglePinComment
+        [Authorize]
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> TogglePinComment(Guid commentId, Guid recipeId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var success = await _commentRatingService.TogglePinAsync(commentId, user!.Id);
+
+            if (!success)
+                TempData["Error"] = "Unable to pin/unpin comment";
+
+            return RedirectToAction(nameof(Details), new { id = recipeId });
+        }
+
+        private List<CommentViewModel> MapCommentViewModels(IEnumerable<CommentRating> comments, Guid? currentUserId, Guid recipeOwnerId)
+        {
+            return comments.Select(c => new CommentViewModel
+            {
+                Id = c.Id,
+                UserId = c.UserId,
+                UserName = c.User?.UserName ?? "Unknown",
+                UserImageUrl = c.User?.ImageUrl,
+                Rating = c.Rating,
+                Comment = c.Comment,
+                CreatedAt = c.CreatedAt,
+                UpdatedAt = c.UpdatedAt,
+                IsCurrentUser = currentUserId.HasValue && c.UserId == currentUserId.Value,
+                IsRecipeOwner = c.UserId == recipeOwnerId,
+                IsPinned = c.IsPinned,
+                Replies = MapCommentViewModels(c.Replies.OrderBy(r => r.CreatedAt), currentUserId, recipeOwnerId)
+            }).ToList();
         }
     }
 }

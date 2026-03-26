@@ -220,6 +220,104 @@
     font-style: italic;
 }
 
+/* ── Allergy Alert Banner ───────────────────────────────────── */
+.allergy-banner {
+    background-color: var(--parchment);
+    backdrop-filter: blur(24px) saturate(200%);
+    border: 1.5px solid #DC2626;
+    /*box-shadow: 0 8px 32px rgba(220, 38, 38, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);*/
+    border-radius: var(--radius-lg);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+    .allergy-banner::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .allergy-banner::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%, rgba(255, 255, 255, 0.05) 100%);
+        border-radius: inherit;
+        pointer-events: none;
+    }
+
+    .allergy-banner > * {
+        position: relative;
+        z-index: 1;
+    }
+
+@keyframes pulse-warning {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
+    }
+}
+
+.allergy-banner .icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    animation: shake 3s ease-in-out infinite;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+
+    10%, 30% {
+        transform: rotate(-5deg);
+    }
+
+    20%, 40% {
+        transform: rotate(5deg);
+    }
+
+    50%, 90% {
+        transform: rotate(0deg);
+    }
+}
+
+.allergy-banner > div {
+    flex: 1;
+    color: var(--charcoal);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+.allergy-banner strong {
+    color: #DC2626;
+    font-weight: 600;
+    
+}
+.allergy-banner h1{
+    font-size: 0.5rem;
+    margin-bottom: 12px;
+}
+
+    .allergy-banner strong:first-child {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 1.0625rem;
+    }
+
 /* ── Recipe Statistics (Async loaded) ──────────────────────── */
 .recipe-stats-loading {
     text-align: center;
@@ -817,3 +915,308 @@
     justify-content: space-between;
     padding: 0.5rem 0;
 }
+
+/* Comment threads */
+.comment-threads {
+    margin-top: 1.5rem;
+}
+
+.comment-thread {
+    margin-bottom: 1rem;
+}
+
+.comment-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.comment-pinned > .comment-card {
+    border-left: 4px solid var(--forest);
+    background-color: rgba(76, 114, 87, 0.03);
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+}
+
+.comment-author-info {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: var(--charcoal);
+}
+
+.author-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.125rem 0.5rem;
+    background-color: var(--forest);
+    color: white;
+    border-radius: 1rem;
+    font-weight: 600;
+}
+
+.comment-pin-badge {
+    font-size: 0.75rem;
+    color: var(--forest);
+    font-weight: 600;
+}
+
+.comment-date {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+.comment-edited {
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+.comment-content {
+    margin-bottom: 0.75rem;
+}
+
+.comment-text {
+    margin: 0;
+    line-height: 1.6;
+    color: var(--charcoal);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Actions dropdown */
+.comment-actions-dropdown {
+    position: relative;
+}
+
+.dropdown-toggle {
+    padding: 0.25rem 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1;
+    color: var(--muted);
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    min-width: 150px;
+    z-index: 1000;
+    padding: 0.5rem 0;
+}
+
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    color: var(--charcoal);
+    font-size: 0.875rem;
+}
+
+    .dropdown-item:hover {
+        background-color: var(--parchment);
+    }
+
+/* Reply form */
+.comment-reply-form {
+    margin: 0.75rem 0 0.75rem 0;
+    padding: 1rem;
+    background-color: var(--parchment);
+    border-radius: 0.375rem;
+}
+
+.reply-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Edit form */
+.comment-edit-form {
+    margin-top: 0.5rem;
+}
+
+.comment-edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* Nested replies */
+.comment-replies {
+    margin-top: 0.5rem;
+}
+
+/* Comments Section Header with Toggle */
+.recipe-comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--border);
+}
+
+.recipe-comments-heading {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--charcoal);
+}
+
+#toggle-comments-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+    #toggle-comments-btn:hover {
+        background-color: var(--parchment);
+    }
+
+#toggle-comments-icon {
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+}
+
+#toggle-comments-btn.active #toggle-comments-icon {
+    transform: rotate(180deg);
+}
+
+#comments-container {
+    margin-top: 1.5rem;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Ensure comments section is full width */
+.recipe-comments-section {
+    width: 100%;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+/* Comment action buttons row */
+.comment-actions-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+/* Toggle replies button */
+.toggle-replies-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    color: var(--forest);
+    font-weight: 500;
+}
+
+    .toggle-replies-btn:hover {
+        background-color: rgba(76, 114, 87, 0.08);
+    }
+
+.toggle-replies-icon {
+    font-size: 0.7rem;
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.toggle-replies-btn.active .toggle-replies-icon {
+    transform: rotate(180deg);
+}
+
+/* Replies container animation */
+.comment-replies {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Update reply button styling to match */
+.reply-toggle-btn {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+}
+
+/* Media Preview Styles (add to recipes.css) */
+
+.current-media-preview {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background-color: var(--parchment);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.recipe-current-image {
+    max-width: 100%;
+    max-height: 300px;
+    object-fit: contain;
+    border-radius: 4px;
+    display: block;
+}
+
+.recipe-current-video {
+    max-width: 100%;
+    max-height: 400px;
+    border-radius: 4px;
+    display: block;
+}
+
+/* File input styling */
+input[type="file"].form-control {
+    padding: 0.5rem;
+    border: 2px dashed var(--border);
+    background-color: var(--parchment);
+    cursor: pointer;
+}
+
+    input[type="file"].form-control:hover {
+        border-color: var(--forest);
+        background-color: var(--sage);
+    }
+
+    input[type="file"].form-control:focus {
+        outline: none;
+        border-color: var(--forest);
+        box-shadow: 0 0 0 3px rgba(45, 85, 72, 0.1);
+    }
