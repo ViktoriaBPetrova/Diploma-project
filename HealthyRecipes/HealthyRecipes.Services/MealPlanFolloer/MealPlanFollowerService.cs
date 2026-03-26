@@ -25,7 +25,22 @@ namespace HealthyRecipes.Services.MealPlanFollowers
         {
             try
             {
-                // Check if already actively following
+                // PHASE 1: Check if user already has an active plan
+                var existingActive = await _context.Set<MealPlanFollower>()
+                    .Include(mpf => mpf.MealPlan)
+                    .FirstOrDefaultAsync(mpf => mpf.UserId == userId
+                                             && mpf.IsActive
+                                             && mpf.Status == MealPlanFollowerStatus.Active
+                                             && !mpf.Deleted);
+
+                if (existingActive != null && existingActive.MealPlanId != mealPlanId)
+                {
+                    _logger.LogWarning("User {UserId} already has active plan {MealPlanId} - cannot start new plan {NewPlanId}", 
+                        userId, existingActive.MealPlanId, mealPlanId);
+                    return false; // User can only follow one plan at a time
+                }
+
+                // Check if already actively following this specific plan
                 var activeFollow = await _context.Set<MealPlanFollower>()
                     .FirstOrDefaultAsync(mpf => mpf.UserId == userId
                                              && mpf.MealPlanId == mealPlanId
@@ -37,6 +52,19 @@ namespace HealthyRecipes.Services.MealPlanFollowers
                     _logger.LogWarning("User {UserId} is already following meal plan {MealPlanId}", userId, mealPlanId);
                     return false;
                 }
+
+                // Get meal plan to calculate expected completion date
+                var mealPlan = await _context.MealPlans
+                    .Include(mp => mp.MealPlanDays)
+                    .FirstOrDefaultAsync(mp => mp.Id == mealPlanId && !mp.Deleted);
+
+                if (mealPlan == null)
+                {
+                    _logger.LogWarning("Meal plan {MealPlanId} not found", mealPlanId);
+                    return false;
+                }
+
+                var durationDays = mealPlan.MealPlanDays.Count(d => !d.Deleted);
 
                 // Check if there's a previous follow (dropped or completed) that can be reactivated
                 var previousFollow = await _context.Set<MealPlanFollower>()
@@ -51,7 +79,10 @@ namespace HealthyRecipes.Services.MealPlanFollowers
                     previousFollow.IsActive = true;
                     previousFollow.Status = MealPlanFollowerStatus.Active;
                     previousFollow.DropoutReason = null;
-                    //previousFollow.PauseReason = null;
+                    previousFollow.PauseReason = null;
+                    previousFollow.StartedAt = DateTime.UtcNow; // Reset start date
+                    previousFollow.ExpectedCompletionDate = DateTime.UtcNow.AddDays(durationDays);
+                    previousFollow.HasSeenCompletionPrompt = false;
                     previousFollow.UpdatedAt = DateTime.UtcNow;
 
                     _logger.LogInformation("User {UserId} reactivated meal plan {MealPlanId}", userId, mealPlanId);
@@ -65,11 +96,15 @@ namespace HealthyRecipes.Services.MealPlanFollowers
                         MealPlanId = mealPlanId,
                         IsActive = true,
                         Status = MealPlanFollowerStatus.Active,
+                        StartedAt = DateTime.UtcNow,
+                        ExpectedCompletionDate = DateTime.UtcNow.AddDays(durationDays),
+                        HasSeenCompletionPrompt = false,
                         UpdatedAt = DateTime.UtcNow
                     };
 
                     await _context.Set<MealPlanFollower>().AddAsync(follower);
-                    _logger.LogInformation("User {UserId} started following meal plan {MealPlanId}", userId, mealPlanId);
+                    _logger.LogInformation("User {UserId} started following meal plan {MealPlanId} (expected completion: {Date})", 
+                        userId, mealPlanId, follower.ExpectedCompletionDate);
                 }
 
                 await _context.SaveChangesAsync();
@@ -100,6 +135,7 @@ namespace HealthyRecipes.Services.MealPlanFollowers
 
                 follower.Status = MealPlanFollowerStatus.Completed;
                 follower.IsActive = false;
+                follower.CompletedAt = DateTime.UtcNow;
                 follower.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -186,6 +222,21 @@ namespace HealthyRecipes.Services.MealPlanFollowers
         {
             try
             {
+                // PHASE 1: Check if user already has a different active plan
+                var existingActive = await _context.Set<MealPlanFollower>()
+                    .Include(mpf => mpf.MealPlan)
+                    .FirstOrDefaultAsync(mpf => mpf.UserId == userId 
+                                             && mpf.IsActive 
+                                             && mpf.Status == MealPlanFollowerStatus.Active
+                                             && !mpf.Deleted);
+
+                if (existingActive != null && existingActive.MealPlanId != mealPlanId)
+                {
+                    _logger.LogWarning("User {UserId} already has active plan {MealPlanId} - cannot resume {PausedPlanId}", 
+                        userId, existingActive.MealPlanId, mealPlanId);
+                    return false;
+                }
+
                 var follower = await _context.Set<MealPlanFollower>()
                     .FirstOrDefaultAsync(mpf => mpf.UserId == userId && mpf.MealPlanId == mealPlanId && !mpf.Deleted);
 
@@ -203,6 +254,7 @@ namespace HealthyRecipes.Services.MealPlanFollowers
 
                 follower.Status = MealPlanFollowerStatus.Active;
                 follower.IsActive = true;
+                follower.PauseReason = null;
                 follower.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
@@ -230,9 +282,6 @@ namespace HealthyRecipes.Services.MealPlanFollowers
             }
         }
 
-        //Get following plans for user
-        //all - dropped, completed, paused, active
-
         public async Task<IEnumerable<MealPlanFollower>> GetAllFollowingPlansAsync(Guid userId)
         {
             try
@@ -242,7 +291,7 @@ namespace HealthyRecipes.Services.MealPlanFollowers
                         .ThenInclude(mp => mp.User)
                     .Include(mpf => mpf.MealPlan)
                         .ThenInclude(mp => mp.MealPlanDays)
-                    .Where(mpf => mpf.UserId == userId)
+                    .Where(mpf => mpf.UserId == userId && !mpf.Deleted)
                     .OrderByDescending(mpf => mpf.StartedAt)
                     .ToListAsync();
             }
@@ -253,7 +302,6 @@ namespace HealthyRecipes.Services.MealPlanFollowers
             }
         }
 
-        //Get followers for mealplan - all ever
         public async Task<IEnumerable<MealPlanFollower>> GetPlanFollowersAsync(Guid mealPlanId)
         {
             try
@@ -272,8 +320,6 @@ namespace HealthyRecipes.Services.MealPlanFollowers
             }
         }
 
-        //Statistics
-        //for one
         public async Task<MealPlanFollower?> GetFollowerDetailsAsync(Guid userId, Guid mealPlanId)
         {
             try
@@ -291,47 +337,114 @@ namespace HealthyRecipes.Services.MealPlanFollowers
                 _logger.LogError(ex, "Error getting follower details for user {UserId} and meal plan {MealPlanId}", userId, mealPlanId);
                 throw;
             }
-
-
         }
 
-        /*
-        public async Task<MealPlanFollowerStats> GetFollowerStatisticsAsync(Guid mealPlanId)
-        {
-            try
-            {
-                var followers = await _context.Set<MealPlanFollower>()
-                    .Where(mpf => mpf.MealPlanId == mealPlanId && !mpf.Deleted)
-                    .ToListAsync();
-
-                return new MealPlanFollowerStats
-                {
-                    TotalFollowers = followers.Count,
-            ActiveFollowers = followers.Count(f => f.IsActive),
-            PausedFollowers = followers.Count(f => f.Status == MealPlanFollowerStatus.Paused),
-            CompletedFollowers = followers.Count(f => f.Status == MealPlanFollowerStatus.Completed),
-            DroppedFollowers = followers.Count(f => f.Status == MealPlanFollowerStatus.Dropped)
-                };
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting follower statistics for meal plan {MealPlanId}", mealPlanId);
-                throw;
-            }
-        }
-        */
-
-        //count - dropped, completed and current
         public async Task<int> GetFollowerCountAsync(Guid mealPlanId)
         {
             try
             {
                 return await _context.Set<MealPlanFollower>()
-                    .CountAsync(mpf => mpf.MealPlanId == mealPlanId);
+                    .CountAsync(mpf => mpf.MealPlanId == mealPlanId && !mpf.Deleted);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting follower count for meal plan {MealPlanId}", mealPlanId);
+                throw;
+            }
+        }
+
+        // ========== PHASE 1: NEW METHODS ==========
+
+        public async Task<MealPlanFollower?> GetActivePlanAsync(Guid userId)
+        {
+            try
+            {
+                return await _context.Set<MealPlanFollower>()
+                    .Include(mpf => mpf.MealPlan)
+                        .ThenInclude(mp => mp.User)
+                    .Include(mpf => mpf.MealPlan)
+                        .ThenInclude(mp => mp.MealPlanDays)
+                    .FirstOrDefaultAsync(mpf => mpf.UserId == userId 
+                                             && mpf.IsActive 
+                                             && mpf.Status == MealPlanFollowerStatus.Active
+                                             && !mpf.Deleted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting active plan for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<MealPlanFollower>> GetActiveFollowingPlansAsync(Guid userId)
+        {
+            try
+            {
+                return await _context.Set<MealPlanFollower>()
+                    .Include(mpf => mpf.MealPlan)
+                        .ThenInclude(mp => mp.User)
+                    .Include(mpf => mpf.MealPlan)
+                        .ThenInclude(mp => mp.MealPlanDays)
+                    .Where(mpf => mpf.UserId == userId 
+                               && mpf.Status == MealPlanFollowerStatus.Active
+                               && !mpf.Deleted)
+                    .OrderByDescending(mpf => mpf.StartedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting active following plans for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<MealPlanFollower>> GetPausedFollowingPlansAsync(Guid userId)
+        {
+            try
+            {
+                return await _context.Set<MealPlanFollower>()
+                    .Include(mpf => mpf.MealPlan)
+                        .ThenInclude(mp => mp.User)
+                    .Include(mpf => mpf.MealPlan)
+                        .ThenInclude(mp => mp.MealPlanDays)
+                    .Where(mpf => mpf.UserId == userId 
+                               && mpf.Status == MealPlanFollowerStatus.Paused
+                               && !mpf.Deleted)
+                    .OrderByDescending(mpf => mpf.UpdatedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting paused following plans for user {UserId}", userId);
+                throw;
+            }
+        }
+
+        public async Task<bool> MarkCompletionPromptSeenAsync(Guid userId, Guid mealPlanId)
+        {
+            try
+            {
+                var follower = await _context.Set<MealPlanFollower>()
+                    .FirstOrDefaultAsync(mpf => mpf.UserId == userId 
+                                             && mpf.MealPlanId == mealPlanId 
+                                             && !mpf.Deleted);
+
+                if (follower == null)
+                {
+                    _logger.LogWarning("Follower not found for user {UserId} and meal plan {MealPlanId}", userId, mealPlanId);
+                    return false;
+                }
+
+                follower.HasSeenCompletionPrompt = true;
+                follower.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Marked completion prompt as seen for user {UserId} and meal plan {MealPlanId}", userId, mealPlanId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error marking completion prompt as seen for user {UserId} and meal plan {MealPlanId}", userId, mealPlanId);
                 throw;
             }
         }

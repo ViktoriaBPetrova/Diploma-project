@@ -17,7 +17,8 @@ namespace HealthyRecipes.Data.Entities
             UpdatedAt = DateTime.UtcNow;
             RecipeCategories  = new List<RecipeCategory>();
             CommentRatings  = new List<CommentRating>();
-            RecipeIngredients  = new List<RecipeIngredient>();
+          
+            RecipeIngredients = new List<RecipeIngredient>();
             RecipeMeals = new List<RecipeMeal>();
             SavedRecipes = new List<SavedRecipe>();
         }
@@ -61,7 +62,8 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Navigation Collections ----------
         //(Many-to-many)
         public IEnumerable<RecipeCategory> RecipeCategories { get; set; }
-        public IEnumerable<CommentRating> CommentRatings { get; set; } 
+        public IEnumerable<CommentRating> CommentRatings { get; set; }
+       
         public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; } 
         public IEnumerable<RecipeMeal> RecipeMeals { get; set; } 
         public IEnumerable<SavedRecipe> SavedRecipes { get; set; } 

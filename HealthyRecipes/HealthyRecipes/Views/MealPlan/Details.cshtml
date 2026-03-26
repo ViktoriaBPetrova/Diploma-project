@@ -1,131 +1,825 @@
-@model HealthyRecipes.Web.ViewModels.MealPlan.MealPlanDetailsViewModel
-@{ ViewData["Title"] = Model.Name; }
+@model MealPlanDetailsViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
 
-<div class="container meal-plan-details-container">
-
-    <a asp-action="Index" class="meal-plan-meta">← My Meal Plans</a>
-
-    <div class="meal-plan-details-header">
-        <div>
-            <h1 class="day-header">@Model.Name</h1>
+<div class="plan-details-container">
+    <!-- Header Section -->
+    <div class="plan-header">
+        <div class="plan-header-content">
+            <h1 class="plan-title">@Model.Name</h1>
             @if (!string.IsNullOrEmpty(Model.Description))
             {
-                <p class="meal-plan-meta">@Model.Description</p>
+                <p class="plan-description">@Model.Description</p>
             }
         </div>
-        <div class="meal-plan-tags">
-            <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
-                @Html.AntiForgeryToken()
-                <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
-                    @(Model.IsSaved ? "♥ Saved" : "♡ Save Plan")
-                </button>
-            </form>
-            @if (!Model.IsFollowing)
+        
+        <div class="plan-actions">
+            @if (!Model.IsOwner)
             {
-                <a asp-controller="MealPlanFollower" asp-action="StartFollowing" asp-route-id="@Model.Id" class="btn-primary">
-                    📋 Start Following This Plan
-                </a>
+                @if (!Model.IsSaved)
+                {
+                    <form asp-controller="MealPlan" asp-action="Save" asp-route-id="@Model.Id" method="post" class="inline-form">
+                        <button type="submit" class="btn-save">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Save Plan
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <form asp-controller="MealPlan" asp-action="Unsave" asp-route-id="@Model.Id" method="post" class="inline-form">
+                        <button type="submit" class="btn-save btn-saved">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2">
+                                <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/>
+                                <polyline points="17 21 17 13 7 13 7 21"/>
+                                <polyline points="7 3 7 8 15 8"/>
+                            </svg>
+                            Saved
+                        </button>
+                    </form>
+                }
+                
+                @if (!Model.IsFollowing)
+                {
+                    <a asp-controller="MealPlanFollower" asp-action="StartFollowing" asp-route-id="@Model.Id" class="btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+                            <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                        Start Following
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="MealPlanFollower" asp-action="ActiveMealPlans" class="btn-ghost">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 11 12 14 22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        Following
+                    </a>
+                }
             }
             else
             {
-                <a asp-controller="MealPlanFollower" asp-action="MyActivePlans" class="btn-ghost">
-                    ✓ Already Following - View My Plans
+                <a asp-controller="MealPlan" asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Edit Plan
                 </a>
-            }
-            @if (Model.IsOwner)
-            {
-                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
-                <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Delete this plan?')">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="btn-danger">Delete</button>
-                </form>
+                
+                <button id="toggleGroceryList" class="btn-primary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                    Grocery List
+                </button>
             }
         </div>
     </div>
 
-    <!-- Weekly Totals -->
-    <div class="meal-plan-nutrition-summary">
-        <div class="nutrition-stat">
-            <div class="nutrition-stat-label">Weekly avg calories</div>
-            <div class="nutrition-stat-value">@Model.Calories.ToString("F0")</div>
+    <!-- Nutrition Dashboard -->
+    <div class="nutrition-dashboard">
+        <div class="nutrition-card">
+            <div class="nutrition-label">Daily Calories</div>
+            <div class="nutrition-value">@Math.Round(Model.Calories, 0)</div>
+            <div class="nutrition-unit">kcal</div>
         </div>
-        <div class="nutrition-stat">
-            <div class="nutrition-stat-label">Protein</div>
-            <div class="nutrition-stat-value">@Model.Protein.ToString("F0")<span class="nutrition-stat-unit">g</span></div>
-        </div>
-        <div class="nutrition-stat">
-            <div class="nutrition-stat-label">Carbs</div>
-            <div class="nutrition-stat-value">@Model.Carbs.ToString("F0")<span class="nutrition-stat-unit">g</span></div>
-        </div>
-        <div class="nutrition-stat">
-            <div class="nutrition-stat-label">Fat</div>
-            <div class="nutrition-stat-value">@Model.Fat.ToString("F0")<span class="nutrition-stat-unit">g</span></div>
-        </div>
-        <div class="nutrition-stat">
-            <div class="nutrition-stat-label">Days planned</div>
-            <div class="nutrition-stat-value">@Model.Days.Count()</div>
-        </div>
-    </div>
-
-    @if (Model.Days.Any())
-    {
-        @foreach (var day in Model.Days)
-        {
-            <div class="day-card">
-                <div class="day-header">
-                    <span class="day-title">Day @day.DayNumber — @day.DayOfWeek</span>
-                    <div class="macro-row">
-                        <span class="macro-pill cal meal-plan-day-list">🔥 @day.Calories.ToString("F0")</span>
-                    </div>
+        
+        <div class="nutrition-card macro-card">
+            <div class="macro-ring-container">
+                <svg class="macro-ring" viewBox="0 0 120 120">
+                    <circle class="macro-ring-bg" cx="60" cy="60" r="50"/>
+                    <circle class="macro-ring-progress macro-ring-protein" 
+                            cx="60" cy="60" r="50"
+                            data-value="@Model.Protein"/>
+                </svg>
+                <div class="macro-ring-content">
+                    <div class="macro-value">@Math.Round(Model.Protein, 0)g</div>
+                    <div class="macro-label">Protein</div>
                 </div>
-                <div class="day-body">
-                    @if (day.Meals.Any())
-                    {
-                        @foreach (var meal in day.Meals)
+            </div>
+        </div>
+        
+        <div class="nutrition-card macro-card">
+            <div class="macro-ring-container">
+                <svg class="macro-ring" viewBox="0 0 120 120">
+                    <circle class="macro-ring-bg" cx="60" cy="60" r="50"/>
+                    <circle class="macro-ring-progress macro-ring-carbs" 
+                            cx="60" cy="60" r="50"
+                            data-value="@Model.Carbs"/>
+                </svg>
+                <div class="macro-ring-content">
+                    <div class="macro-value">@Math.Round(Model.Carbs, 0)g</div>
+                    <div class="macro-label">Carbs</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="nutrition-card macro-card">
+            <div class="macro-ring-container">
+                <svg class="macro-ring" viewBox="0 0 120 120">
+                    <circle class="macro-ring-bg" cx="60" cy="60" r="50"/>
+                    <circle class="macro-ring-progress macro-ring-fat" 
+                            cx="60" cy="60" r="50"
+                            data-value="@Model.Fat"/>
+                </svg>
+                <div class="macro-ring-content">
+                    <div class="macro-value">@Math.Round(Model.Fat, 0)g</div>
+                    <div class="macro-label">Fat</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Plan Grid -->
+    <div class="weekly-plan">
+        <h2 class="section-title">Weekly Meal Plan</h2>
+        
+        <div class="days-grid">
+            @foreach (var day in Model.Days.OrderBy(d => d.DayNumber))
+            {
+                <div class="day-card" data-day="@day.DayNumber" data-day-id="@day.Id">
+                    <div class="day-card-header">
+                        <div class="day-number">Day @day.DayNumber</div>
+                        <div class="day-header-actions">
+                            @if (Model.IsOwner)
+                            {
+                                <button class="day-delete-btn" data-day-id="@day.Id" title="Delete day">
+                                    <svg class="icon-delete" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="3 6 5 6 21 6"/>
+                                        <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                                    </svg>
+                                </button>
+                            }
+                            <button class="day-expand-btn" aria-label="Expand day details">
+                                <svg class="expand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="day-card-summary">
+                        <div class="day-macros">
+                            <span class="day-macro">@Math.Round(day.Calories, 0) cal</span>
+                            <span class="day-macro-dot">•</span>
+                            <span class="day-macro">@Math.Round(day.Protein, 0)g P</span>
+                            <span class="day-macro-dot">•</span>
+                            <span class="day-macro">@Math.Round(day.Carbs, 0)g C</span>
+                            <span class="day-macro-dot">•</span>
+                            <span class="day-macro">@Math.Round(day.Fat, 0)g F</span>
+                        </div>
+                        <div class="day-meal-count">@day.Meals.Count() meals</div>
+                    </div>
+                    
+                    <div class="day-card-content">
+                        @foreach (var meal in day.Meals.OrderBy(m => m.Type))
                         {
-                            <div class="meal-item">
-                                <div class="meal-type-label">@meal.Type</div>
-                                <div class="macro-row day-header">
-                                    <span class="macro-pill cal">@meal.Calories.ToString("F0") kcal</span>
-                                    <span class="macro-pill protein">P @meal.Protein.ToString("F0")g</span>
-                                    <span class="macro-pill carbs">C @meal.Carbs.ToString("F0")g</span>
-                                    <span class="macro-pill fat">F @meal.Fat.ToString("F0")g</span>
-                                </div>
-                                @if (meal.Recipes.Any())
-                                {
-                                    <div class="day-meals">
-                                        @foreach (var recipe in meal.Recipes)
-                                        {
-                                            <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId"
-                                               class="day-meal-link">
-                                                @(recipe.Info.Length > 50 ? recipe.Info[..50] + "…" : recipe.Info)
-                                                <span class="day-meal-recipes">@recipe.Calories.ToString("F0") kcal</span>
-                                            </a>
-                                        }
+                            <div class="meal-section" data-meal-id="@meal.Id">
+                                <div class="meal-header">
+                                    <h4 class="meal-title">@meal.Type</h4>
+                                    <div class="meal-macros-mini">
+                                        @Math.Round(meal.Calories, 0) cal
                                     </div>
-                                }
-                                else
+                                </div>
+                                
+                                <div class="meal-recipes">
+                                    @foreach (var recipe in meal.Recipes)
+                                    {
+                                        <div class="meal-recipe-card">
+                                            <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId" 
+                                               class="recipe-card-link">
+                                                @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                                                {
+                                                    <div class="recipe-card-image" style="background-image: url('@recipe.ImageUrl')"></div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="recipe-card-image recipe-card-image-placeholder">
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                                            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                                        </svg>
+                                                    </div>
+                                                }
+                                                
+                                                <div class="recipe-card-content">
+                                                    <h5 class="recipe-card-title">@recipe.Info</h5>
+                                                    
+                                                    <div class="recipe-card-macros">
+                                                        <div class="macro-pill macro-calories">
+                                                            <span class="macro-value">@Math.Round(recipe.Calories, 0)</span>
+                                                            <span class="macro-label">cal</span>
+                                                        </div>
+                                                        <div class="macro-pill macro-protein">
+                                                            <span class="macro-value">@Math.Round(recipe.Protein, 1)g</span>
+                                                            <span class="macro-label">P</span>
+                                                        </div>
+                                                        <div class="macro-pill macro-carbs">
+                                                            <span class="macro-value">@Math.Round(recipe.Carbs, 1)g</span>
+                                                            <span class="macro-label">C</span>
+                                                        </div>
+                                                        <div class="macro-pill macro-fat">
+                                                            <span class="macro-value">@Math.Round(recipe.Fat, 1)g</span>
+                                                            <span class="macro-label">F</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                            
+                                            @if (Model.IsOwner)
+                                            {
+                                                <button class="recipe-card-delete-btn" 
+                                                        data-meal-id="@meal.Id" 
+                                                        data-recipe-id="@recipe.RecipeId"
+                                                        title="Remove recipe">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                                    </svg>
+                                                </button>
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                                
+                                @if (Model.IsOwner)
                                 {
-                                    <p class="no-meals-message">No recipes added to this meal.</p>
+                                    <button class="add-recipe-btn" data-meal-id="@meal.Id">
+                                        <svg class="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <circle cx="12" cy="12" r="10"/>
+                                            <line x1="12" y1="8" x2="12" y2="16"/>
+                                            <line x1="8" y1="12" x2="16" y2="12"/>
+                                        </svg>
+                                        Add Recipe
+                                    </button>
+                                    
+                                    <div class="recipe-search-panel" data-meal-id="@meal.Id" style="display: none;">
+                                        <div class="search-controls">
+                                            <div class="search-input-wrapper">
+                                                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <circle cx="11" cy="11" r="8"/>
+                                                    <path d="m21 21-4.35-4.35"/>
+                                                </svg>
+                                                <input type="text" 
+                                                       class="recipe-search-input" 
+                                                       placeholder="Search recipes..."
+                                                       data-meal-id="@meal.Id">
+                                                <button class="search-close-btn">
+                                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                        <line x1="18" y1="6" x2="6" y2="18"/>
+                                                        <line x1="6" y1="6" x2="18" y2="18"/>
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            
+                                            <div class="search-filter-wrapper">
+                                                <select class="recipe-filter-dropdown" data-meal-id="@meal.Id">
+                                                    <option value="all">All Recipes</option>
+                                                    <option value="mine">My Recipes</option>
+                                                    <option value="saved">Saved Recipes</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="recipe-search-results"></div>
+                                    </div>
                                 }
                             </div>
                         }
-                    }
-                    else
-                    {
-                        <p class="no-days-message">No meals for this day.</p>
-                    }
+                    </div>
                 </div>
-            </div>
-        }
-    }
-    else
-    {
-        <div class="empty-state">
-            <div class="empty-state-icon">📅</div>
-            <h3>No days added yet</h3>
-            <p>This meal plan doesn't have any days configured.</p>
+            }
         </div>
-    }
+    </div>
 </div>
 
+<!-- Grocery List Sidebar -->
+<div id="groceryListSidebar" class="grocery-sidebar">
+    <div class="grocery-sidebar-header">
+        <h2 class="grocery-sidebar-title">Grocery List</h2>
+        <button id="closeGroceryList" class="grocery-close-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+        </button>
+    </div>
+    
+    <div class="grocery-sidebar-content">
+        <div class="grocery-loading" id="groceryLoading">
+            <div class="loading-spinner"></div>
+            <p>Generating grocery list...</p>
+        </div>
+        
+        <div class="grocery-list-container" id="groceryListContainer" style="display: none;">
+            <div class="grocery-meta">
+                <p class="grocery-plan-name" id="groceryPlanName"></p>
+                <p class="grocery-generated-at" id="groceryGeneratedAt"></p>
+                <div id="dataSourceNotice" class="data-source-notice" style="display: none;"></div>
+            </div>
+            
+            <div class="grocery-items" id="groceryItems"></div>
+            
+            <div class="grocery-actions">
+                <button class="btn-primary grocery-action-btn" id="printGroceryList">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 6 2 18 2 18 9"/>
+                        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+                        <rect x="6" y="14" width="12" height="8"/>
+                    </svg>
+                    Print List
+                </button>
+                
+                <button class="btn-ghost grocery-action-btn" id="exportGroceryList">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export CSV
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overlay -->
+<div id="groceryOverlay" class="grocery-overlay"></div>
+
+<!-- Confirmation Modal -->
+<div id="deleteModal" class="modal">
+    <div class="modal-content">
+        <h3 class="modal-title">Confirm Delete</h3>
+        <p class="modal-message"></p>
+        <div class="modal-actions">
+            <button class="btn-ghost" id="cancelDelete">Cancel</button>
+            <button class="btn-danger" id="confirmDelete">Delete</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Macro ring animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const rings = document.querySelectorAll('.macro-ring-progress');
+            const circumference = 2 * Math.PI * 50;
+            
+            rings.forEach(ring => {
+                const value = parseFloat(ring.getAttribute('data-value'));
+                const maxValue = 200;
+                const percentage = Math.min(value / maxValue, 1);
+                const offset = circumference * (1 - percentage);
+                
+                ring.style.strokeDasharray = circumference;
+                ring.style.strokeDashoffset = circumference;
+                
+                setTimeout(() => {
+                    ring.style.strokeDashoffset = offset;
+                }, 100);
+            });
+            
+            // Day card expand/collapse
+            const dayCards = document.querySelectorAll('.day-card');
+            dayCards.forEach(card => {
+                const expandBtn = card.querySelector('.day-expand-btn');
+                const content = card.querySelector('.day-card-content');
+                
+                expandBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    card.classList.toggle('expanded');
+                });
+            });
+            
+            // Delete handlers
+            let deleteTarget = null;
+            const modal = document.getElementById('deleteModal');
+            const modalMessage = modal.querySelector('.modal-message');
+            const cancelBtn = document.getElementById('cancelDelete');
+            const confirmBtn = document.getElementById('confirmDelete');
+            
+            // Delete day
+            document.querySelectorAll('.day-delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dayId = this.getAttribute('data-day-id');
+                    deleteTarget = { type: 'day', id: dayId, element: this.closest('.day-card') };
+                    modalMessage.textContent = 'Are you sure you want to delete this entire day? All meals and recipes will be removed.';
+                    modal.classList.add('show');
+                });
+            });
+            
+            // Delete recipe
+            document.querySelectorAll('.recipe-card-delete-btn').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const mealId = this.getAttribute('data-meal-id');
+                    const recipeId = this.getAttribute('data-recipe-id');
+                    deleteTarget = { type: 'recipe', mealId, recipeId, element: this.closest('.meal-recipe-card') };
+                    modalMessage.textContent = 'Remove this recipe from the meal?';
+                    modal.classList.add('show');
+                });
+            });
+            
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.remove('show');
+                deleteTarget = null;
+            });
+            
+            confirmBtn.addEventListener('click', async () => {
+                if (!deleteTarget) return;
+                
+                try {
+                    if (deleteTarget.type === 'day') {
+                        const response = await fetch(`/MealPlan/DeleteDay/${deleteTarget.id}`, {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            deleteTarget.element.remove();
+                        }
+                    } else if (deleteTarget.type === 'recipe') {
+                        const response = await fetch(`/MealPlan/RemoveRecipeFromMeal`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                            },
+                            body: JSON.stringify({
+                                mealId: deleteTarget.mealId,
+                                recipeId: deleteTarget.recipeId
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            deleteTarget.element.remove();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Delete failed:', error);
+                    alert('Failed to delete. Please try again.');
+                }
+                
+                modal.classList.remove('show');
+                deleteTarget = null;
+            });
+            
+            // Add recipe search
+            document.querySelectorAll('.add-recipe-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mealId = this.getAttribute('data-meal-id');
+                    const panel = document.querySelector(`.recipe-search-panel[data-meal-id="${mealId}"]`);
+                    panel.style.display = 'block';
+                    panel.querySelector('.recipe-search-input').focus();
+                    this.style.display = 'none';
+                    
+                    // Load initial results (all recipes or based on dropdown)
+                    const filterDropdown = panel.querySelector('.recipe-filter-dropdown');
+                    const filterValue = filterDropdown.value;
+                    loadRecipes(mealId, '', filterValue);
+                });
+            });
+            
+            document.querySelectorAll('.search-close-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const panel = this.closest('.recipe-search-panel');
+                    const mealId = panel.getAttribute('data-meal-id');
+                    panel.style.display = 'none';
+                    panel.querySelector('.recipe-search-results').innerHTML = '';
+                    panel.querySelector('.recipe-search-input').value = '';
+                    panel.querySelector('.recipe-filter-dropdown').value = 'all';
+                    document.querySelector(`.add-recipe-btn[data-meal-id="${mealId}"]`).style.display = 'flex';
+                });
+            });
+            
+            // Filter dropdown change
+            document.querySelectorAll('.recipe-filter-dropdown').forEach(dropdown => {
+                dropdown.addEventListener('change', function() {
+                    const mealId = this.getAttribute('data-meal-id');
+                    const panel = this.closest('.recipe-search-panel');
+                    const searchInput = panel.querySelector('.recipe-search-input');
+                    const query = searchInput.value.trim();
+                    const filterValue = this.value;
+                    
+                    loadRecipes(mealId, query, filterValue);
+                });
+            });
+            
+            // Recipe search with debounce
+            let searchTimeout;
+            document.querySelectorAll('.recipe-search-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    const query = this.value.trim();
+                    const mealId = this.getAttribute('data-meal-id');
+                    const panel = this.closest('.recipe-search-panel');
+                    const filterDropdown = panel.querySelector('.recipe-filter-dropdown');
+                    const filterValue = filterDropdown.value;
+                    
+                    searchTimeout = setTimeout(() => {
+                        loadRecipes(mealId, query, filterValue);
+                    }, 300);
+                });
+            });
+            
+            // Load recipes function
+            async function loadRecipes(mealId, query, filter) {
+                const panel = document.querySelector(`.recipe-search-panel[data-meal-id="${mealId}"]`);
+                const resultsContainer = panel.querySelector('.recipe-search-results');
+                
+                try {
+                    const response = await fetch(`/Api/SearchRecipes?query=${encodeURIComponent(query)}&filter=${filter}`);
+                    const recipes = await response.json();
+                    
+                    if (recipes.length === 0) {
+                        resultsContainer.innerHTML = '<div class="search-no-results">No recipes found</div>';
+                        return;
+                    }
+                    
+                    resultsContainer.innerHTML = recipes.map(recipe => `
+                        <div class="search-result-item" data-recipe-id="${recipe.id}">
+                            <div class="search-result-info">
+                                <div class="search-result-name">${recipe.name}</div>
+                                <div class="search-result-macros">
+                                    ${Math.round(recipe.calories)} cal • 
+                                    P: ${recipe.protein}g • 
+                                    C: ${recipe.carbs}g • 
+                                    F: ${recipe.fat}g
+                                </div>
+                            </div>
+                            <button class="add-to-meal-btn" data-meal-id="${mealId}" data-recipe-id="${recipe.id}">
+                                Add
+                            </button>
+                        </div>
+                    `).join('');
+                    
+                    // Add event listeners to "Add" buttons
+                    resultsContainer.querySelectorAll('.add-to-meal-btn').forEach(addBtn => {
+                        addBtn.addEventListener('click', async function() {
+                            const recipeId = this.getAttribute('data-recipe-id');
+                            const mealId = this.getAttribute('data-meal-id');
+                            
+                            try {
+                                const response = await fetch(`/MealPlan/AddRecipeToMeal`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                                    },
+                                    body: JSON.stringify({ mealId, recipeId })
+                                });
+                                
+                                if (response.ok) {
+                                    window.location.reload();
+                                }
+                            } catch (error) {
+                                console.error('Failed to add recipe:', error);
+                                alert('Failed to add recipe. Please try again.');
+                            }
+                        });
+                    });
+                } catch (error) {
+                    console.error('Search failed:', error);
+                    resultsContainer.innerHTML = '<div class="search-no-results">Error loading recipes</div>';
+                }
+            }
+            
+            // Grocery List functionality
+            const toggleGroceryBtn = document.getElementById('toggleGroceryList');
+            const closeGroceryBtn = document.getElementById('closeGroceryList');
+            const grocerySidebar = document.getElementById('groceryListSidebar');
+            const groceryOverlay = document.getElementById('groceryOverlay');
+            const mealPlanId = '@Model.Id';
+            
+            if (toggleGroceryBtn) {
+                toggleGroceryBtn.addEventListener('click', async function() {
+                    grocerySidebar.classList.add('open');
+                    groceryOverlay.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Load grocery list
+                    await loadGroceryList();
+                });
+            }
+            
+            if (closeGroceryBtn) {
+                closeGroceryBtn.addEventListener('click', closeGrocerySidebar);
+            }
+            
+            if (groceryOverlay) {
+                groceryOverlay.addEventListener('click', closeGrocerySidebar);
+            }
+            
+            function closeGrocerySidebar() {
+                grocerySidebar.classList.remove('open');
+                groceryOverlay.classList.remove('show');
+                document.body.style.overflow = '';
+            }
+            
+            async function loadGroceryList() {
+                const loading = document.getElementById('groceryLoading');
+                const container = document.getElementById('groceryListContainer');
+                
+                loading.style.display = 'flex';
+                container.style.display = 'none';
+                
+                try {
+                    const response = await fetch(`/MealPlan/GetGroceryList/${mealPlanId}`);
+                    const data = await response.json();
+ 
+                    // Update meta info
+                    document.getElementById('groceryPlanName').textContent = data.mealPlanName;
+                    const date = new Date(data.generatedAt);
+                    document.getElementById('groceryGeneratedAt').textContent = 
+                        `Generated on ${date.toLocaleDateString()} at ${date.toLocaleTimeString()}`;
+                    
+ // Count items with real vs mock data
+        const realDataCount = data.items.filter(item => 
+            item.stores.some(s => !s.isMockData)
+        ).length;
+        const mockDataCount = data.items.length - realDataCount;
+        
+        const notice = document.getElementById('dataSourceNotice');
+        if (mockDataCount === 0) {
+            // All real data
+            notice.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                <span>All prices are live from Bulgarian stores</span>
+            `;
+            notice.className = 'data-source-notice live';
+            notice.style.display = 'flex';
+        } else if (realDataCount === 0) {
+            // All mock data
+            notice.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>Price API unavailable - showing sample prices</span>
+            `;
+            notice.className = 'data-source-notice demo';
+            notice.style.display = 'flex';
+        } else {
+            // Mixed data
+            notice.innerHTML = `
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <span>${realDataCount} items with live prices, ${mockDataCount} with sample prices</span>
+            `;
+            notice.className = 'data-source-notice mixed';
+            notice.style.display = 'flex';
+        }
+
+                    // Render items
+                    const itemsContainer = document.getElementById('groceryItems');
+                    itemsContainer.innerHTML = data.items.map(item => {
+                        const cheapestStore = item.stores.find(s => s.inStock);
+                        const hasStores = item.stores && item.stores.length > 0;
+                        
+                        // Check if this ingredient has ANY real data
+                        const hasRealData = item.stores.some(s => !s.isMockData);
+                        const allMockData = item.stores.every(s => s.isMockData);
+
+                        return `
+                        <div class="grocery-item" data-item-id="${item.ingredientId}">
+                            <div class="grocery-item-checkbox">
+                                <input type="checkbox" id="item-${item.ingredientId}" class="grocery-checkbox">
+                            </div>
+                            <label for="item-${item.ingredientId}" class="grocery-item-content">
+                                <div class="grocery-item-main">
+                                    <div class="grocery-item-info">
+                                        <div class="grocery-item-name">
+                                            ${item.ingredientName}
+                                             ${hasRealData ? 
+                                                '<span class="data-badge live">Live Prices</span>' : 
+                                                '<span class="data-badge demo">Sample Prices</span>'}
+                                        </div>
+                                        ${item.brand ? `<div class="grocery-item-brand">${item.brand}</div>` : ''}
+                                        <div class="grocery-item-quantity">Need: ${item.displayQuantity}</div>
+                                    </div>
+                                    ${hasStores && cheapestStore ? `
+                                    <div class="grocery-item-price">
+                                        <div class="cheapest-badge">Cheapest</div>
+                                        <div class="store-name">${cheapestStore.storeName}</div>
+                                        <div class="price-main">${cheapestStore.price.toFixed(2)} ${cheapestStore.currency}</div>
+                                        <div class="price-per-unit">${cheapestStore.pricePer100g.toFixed(2)} ${cheapestStore.currency}/100g</div>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                ${hasStores && item.stores.length > 1 ? `
+                                <button class="compare-stores-btn" data-item-id="${item.ingredientId}" type="button">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"/>
+                                    </svg>
+                                    Compare ${item.stores.length} stores
+                                </button>
+                                ` : ''}
+                            </label>
+                            ${hasStores ? `
+                            <div class="store-comparison" id="comparison-${item.ingredientId}" style="display: none;">
+                                ${item.stores.map((store, idx) => `
+                                <div class="store-option ${!store.inStock ? 'out-of-stock' : ''} ${idx === 0 ? 'cheapest' : ''}">
+                                    <div class="store-header">
+                                        <div class="store-info">
+                                            <strong>${store.storeName}</strong>
+                                            <span class="store-location">${store.storeLocation}</span>
+                                        </div>
+                                        ${!store.inStock ? '<span class="stock-badge out">Out of Stock</span>' : 
+                                          idx === 0 ? '<span class="stock-badge best">Best Price</span>' : 
+                                          '<span class="stock-badge in">In Stock</span>'}
+                                    </div>
+                                    <div class="store-details">
+                                        <div class="price-info">
+                                            <div class="price-large">${store.price.toFixed(2)} ${store.currency}</div>
+                                            <div class="price-small">${store.pricePer100g.toFixed(2)} ${store.currency}/100g</div>
+                                            <div class="package-size">Package: ${store.packageQuantityInGrams >= 1000 ? (store.packageQuantityInGrams / 1000).toFixed(1) + ' kg' : store.packageQuantityInGrams + ' g'}</div>
+                                        </div>
+                                        ${store.productUrl ? `
+                                        <a href="${store.productUrl}" target="_blank" class="store-link">
+                                            View Product →
+                                        </a>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+                        </div>
+                        `;
+                    }).join('');
+                    
+                    // Add event listeners for compare buttons
+                    document.querySelectorAll('.compare-stores-btn').forEach(btn => {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const itemId = this.getAttribute('data-item-id');
+                            const comparison = document.getElementById(`comparison-${itemId}`);
+                            const isVisible = comparison.style.display === 'block';
+                            comparison.style.display = isVisible ? 'none' : 'block';
+                            this.classList.toggle('expanded', !isVisible);
+                        });
+                    });
+                    
+                    loading.style.display = 'none';
+                    container.style.display = 'block';
+                    
+                } catch (error) {
+                    console.error('Failed to load grocery list:', error);
+                    loading.innerHTML = '<p class="error-message">Failed to load grocery list. Please try again.</p>';
+                }
+            }
+            
+            // Print grocery list
+            document.getElementById('printGroceryList')?.addEventListener('click', function() {
+                window.print();
+            });
+            
+            // Export to CSV
+            document.getElementById('exportGroceryList')?.addEventListener('click', async function() {
+                try {
+                    const response = await fetch(`/MealPlan/GetGroceryList/${mealPlanId}`);
+                    const data = await response.json();
+                    
+                    let csv = 'Ingredient,Brand,Quantity\n';
+                    data.items.forEach(item => {
+                        csv += `"${item.ingredientName}","${item.brand || ''}","${item.displayQuantity}"\n`;
+                    });
+                    
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `grocery-list-${data.mealPlanName}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error('Failed to export grocery list:', error);
+                    alert('Failed to export grocery list. Please try again.');
+                }
+            });
+        });
+    </script>
+}

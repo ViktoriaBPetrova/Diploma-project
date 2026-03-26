@@ -9,6 +9,7 @@ namespace HealthyRecipes.Data.Entities.MappingEntities
             StartedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
             IsActive = true;
+            HasSeenCompletionPrompt = false;
             Status = MealPlanFollowerStatus.Active;
         }
 
@@ -29,6 +30,8 @@ namespace HealthyRecipes.Data.Entities.MappingEntities
         // ---------- Tracking Properties ----------
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public DateTime? ExpectedCompletionDate { get; set; }
+        public bool HasSeenCompletionPrompt { get; set; }
         public bool IsActive { get; set; }
         public MealPlanFollowerStatus Status { get; set; }
         public string? DropoutReason { get; set; }

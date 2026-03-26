@@ -1,8 +1,7 @@
-using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Enums;
 using HealthyRecipes.Services.MealPlanFollowers;
-using HealthyRecipes.Services.MealPlanDays;
 using HealthyRecipes.Services.MealPlans;
+using HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard;
 using HealthyRecipes.Web.ViewModels.MealPlanFollower;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -15,50 +14,194 @@ namespace HealthyRecipes.Web.Controllers
     {
         private readonly IMealPlanFollower _mealPlanFollowerService;
         private readonly IMealPlan _mealPlanService;
-        private readonly IMealPlanDay _mealPlanDayService;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<Data.Entities.ApplicationUser> _userManager;
 
         public MealPlanFollowerController(
             IMealPlanFollower mealPlanFollowerService,
             IMealPlan mealPlanService,
-            IMealPlanDay mealPlanDayService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<Data.Entities.ApplicationUser> userManager)
         {
-            _mealPlanFollowerService = mealPlanFollowerService;
-            _mealPlanService = mealPlanService;
-            _mealPlanDayService = mealPlanDayService;
-            _userManager = userManager;
+            _mealPlanFollowerService = mealPlanFollowerService ?? throw new ArgumentNullException(nameof(mealPlanFollowerService));
+            _mealPlanService = mealPlanService ?? throw new ArgumentNullException(nameof(mealPlanService));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
+
+        // ========== PHASE 1: NEW FOLLOWING DASHBOARD ==========
+        
+        // GET: /MealPlanFollower/FollowingDashboard
+        public async Task<IActionResult> FollowingDashboard()
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return RedirectToAction("Login", "Account");
+
+                var viewModel = new FollowingDashboardViewModel();
+
+                // Get active plan
+                var activePlan = await _mealPlanFollowerService.GetActivePlanAsync(user.Id);
+
+                if (activePlan != null)
+                {
+                    var daysFollowing = (int)(DateTime.UtcNow - activePlan.StartedAt).TotalDays;
+                    var totalDays = activePlan.MealPlan.MealPlanDays.Count(d => !d.Deleted);
+                    var daysRemaining = Math.Max(0, totalDays - daysFollowing);
+                    var progressPercentage = totalDays > 0 ? (float)daysFollowing / totalDays * 100 : 0;
+                    var isOverdue = activePlan.ExpectedCompletionDate.HasValue && 
+                                   DateTime.UtcNow > activePlan.ExpectedCompletionDate.Value;
+
+                    viewModel.ActivePlan = new ActivePlanDetailViewModel
+                    {
+                        MealPlanId = activePlan.MealPlanId,
+                        Name = activePlan.MealPlan.Name,
+                        Description = activePlan.MealPlan.Description,
+                        TotalDays = totalDays,
+                        DaysFollowing = daysFollowing,
+                        DaysRemaining = daysRemaining,
+                        ProgressPercentage = Math.Min(progressPercentage, 100),
+                        StartedAt = activePlan.StartedAt,
+                        ExpectedCompletionDate = activePlan.ExpectedCompletionDate ?? DateTime.UtcNow.AddDays(totalDays),
+                        IsOverdue = isOverdue,
+                        Calories = activePlan.MealPlan.Calories,
+                        Protein = activePlan.MealPlan.Protein,
+                        Carbs = activePlan.MealPlan.Carbs,
+                        Fat = activePlan.MealPlan.Fat,
+                        CreatorName = activePlan.MealPlan.User?.UserName ?? "Unknown"
+                    };
+
+                    // Check for completion alert
+                    if (isOverdue && !activePlan.HasSeenCompletionPrompt)
+                    {
+                        viewModel.ShowCompletionAlert = true;
+                        viewModel.CompletionAlertMessage = $"You were expected to complete this plan by {activePlan.ExpectedCompletionDate:MMM dd}. Would you like to mark it as complete?";
+                    }
+
+                    // Get today's meals (calculate which day user is on)
+                    var currentDayNumber = Math.Min(daysFollowing + 1, totalDays);
+                    var todaysPlanDay = activePlan.MealPlan.MealPlanDays
+                        .Where(d => !d.Deleted)
+                        .OrderBy(d => d.DayNumber)
+                        .Skip(currentDayNumber - 1)
+                        .FirstOrDefault();
+
+                    if (todaysPlanDay != null)
+                    {
+                        viewModel.TodaysSchedule = new TodaysMealsViewModel
+                        {
+                            CurrentDayNumber = currentDayNumber,
+                            DayOfWeek = (Data.Enums.DayOfWeek)todaysPlanDay.DayOfWeek,
+                            MealPlanDayId = todaysPlanDay.Id,
+                            Calories = todaysPlanDay.Calories,
+                            Protein = todaysPlanDay.Protein,
+                            Carbs = todaysPlanDay.Carbs,
+                            Fat = todaysPlanDay.Fat,
+                            Meals = todaysPlanDay.Meals
+                                .Where(m => !m.Deleted)
+                                .OrderBy(m => m.Type)
+                                .Select(m => new TodaysMealItemViewModel
+                                {
+                                    MealId = m.Id,
+                                    Type = m.Type,
+                                    Calories = m.Calories,
+                                    Protein = m.Protein,
+                                    Carbs = m.Carbs,
+                                    Fat = m.Fat,
+                                    Recipes = m.RecipeMeals
+                                        .Where(rm => !rm.Deleted && rm.Recipe != null)
+                                        .Select(rm => new MealRecipeItemViewModel
+                                        {
+                                            RecipeId = rm.RecipeId,
+                                            Name = rm.Recipe.Title,
+                                            ImageUrl = rm.Recipe.ImageUrl,
+                                            PrepTime = rm.Recipe.PrepTime,
+                                            Calories = rm.Recipe.Calories,
+                                            Protein = rm.Recipe.Protein,
+                                            Carbs = rm.Recipe.Carbs,
+                                            Fat = rm.Recipe.Fat
+                                        })
+                                })
+                        };
+                    }
+                }
+
+                // Get paused plans
+                var pausedPlans = await _mealPlanFollowerService.GetPausedFollowingPlansAsync(user.Id);
+                viewModel.PausedPlans = pausedPlans.Select(p => new PausedPlanItemViewModel
+                {
+                    MealPlanId = p.MealPlanId,
+                    MealPlanName = p.MealPlan.Name,
+                    MealPlanDescription = p.MealPlan.Description,
+                    DaysCount = p.MealPlan.MealPlanDays.Count(d => !d.Deleted),
+                    PausedAt = p.UpdatedAt,
+                    PauseReason = p.PauseReason,
+                    CreatorName = p.MealPlan.User?.UserName ?? "Unknown",
+                    Calories = p.MealPlan.Calories,
+                    Protein = p.MealPlan.Protein,
+                    Carbs = p.MealPlan.Carbs,
+                    Fat = p.MealPlan.Fat
+                });
+
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while loading your following dashboard.";
+                return RedirectToAction("Index", "MealPlan");
+            }
+        }
+
+        // POST: /MealPlanFollower/DismissCompletionAlert/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DismissCompletionAlert(Guid id)
+        {
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null)
+                    return RedirectToAction("Login", "Account");
+
+                await _mealPlanFollowerService.MarkCompletionPromptSeenAsync(user.Id, id);
+                
+                return RedirectToAction(nameof(FollowingDashboard));
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred.";
+                return RedirectToAction(nameof(FollowingDashboard));
+            }
+        }
+
+        // ========== UPDATED ACTIONS WITH PHASE 1 VALIDATION ==========
 
         // GET: /MealPlanFollower/StartFollowing/{id}
         public async Task<IActionResult> StartFollowing(Guid id)
         {
             try
             {
-                var mealPlan = await _mealPlanService.GetByIdAsync(id);
-                if (mealPlan == null)
-                    return NotFound();
-
                 var user = await _userManager.GetUserAsync(User);
                 if (user == null)
                     return RedirectToAction("Login", "Account");
 
-                // Check if already following
-                var isFollowing = await _mealPlanFollowerService.IsFollowingAsync(user.Id, id);
-                if (isFollowing)
+                // PHASE 1: Check if user already has an active plan
+                var activePlan = await _mealPlanFollowerService.GetActivePlanAsync(user.Id);
+                if (activePlan != null && activePlan.MealPlanId != id)
                 {
-                    TempData["ErrorMessage"] = "You are already following this meal plan.";
+                    TempData["ErrorMessage"] = $"You're already following '{activePlan.MealPlan.Name}'. Please pause or complete it before starting a new plan.";
                     return RedirectToAction("Details", "MealPlan", new { id });
                 }
 
-                var days = await _mealPlanDayService.GetDaysByMealPlanAsync(id);
+                var mealPlan = await _mealPlanService.GetByIdAsync(id);
+                if (mealPlan == null)
+                    return NotFound();
 
                 var viewModel = new StartFollowingViewModel
                 {
                     MealPlanId = id,
                     MealPlanName = mealPlan.Name,
                     MealPlanDescription = mealPlan.Description,
-                    DaysCount = days.Count(),
+                    DaysCount = mealPlan.MealPlanDays?.Count() ?? 0,
                     Calories = mealPlan.Calories,
                     Protein = mealPlan.Protein,
                     Carbs = mealPlan.Carbs,
@@ -90,11 +233,11 @@ namespace HealthyRecipes.Web.Controllers
                 if (success)
                 {
                     TempData["SuccessMessage"] = "You are now following this meal plan!";
-                    return RedirectToAction(nameof(MyActivePlans));
+                    return RedirectToAction(nameof(FollowingDashboard));
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Could not start following this meal plan.";
+                    TempData["ErrorMessage"] = "Could not start following this meal plan. You may already have an active plan.";
                     return RedirectToAction("Details", "MealPlan", new { id });
                 }
             }
@@ -149,7 +292,7 @@ namespace HealthyRecipes.Web.Controllers
                 if (followerDetails == null)
                 {
                     TempData["ErrorMessage"] = "You are not following this meal plan.";
-                    return RedirectToAction(nameof(MyActivePlans));
+                    return RedirectToAction(nameof(FollowingDashboard));
                 }
 
                 var viewModel = new ReasonMealPlanViewModel
@@ -163,7 +306,7 @@ namespace HealthyRecipes.Web.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading the page.";
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
         }
 
@@ -189,12 +332,12 @@ namespace HealthyRecipes.Web.Controllers
                     TempData["ErrorMessage"] = "Could not stop following this meal plan.";
                 }
 
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while dropping the meal plan.";
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
         }
 
@@ -211,7 +354,7 @@ namespace HealthyRecipes.Web.Controllers
                 if (followerDetails == null)
                 {
                     TempData["ErrorMessage"] = "You are not following this meal plan.";
-                    return RedirectToAction(nameof(MyActivePlans));
+                    return RedirectToAction(nameof(FollowingDashboard));
                 }
 
                 var viewModel = new ReasonMealPlanViewModel
@@ -225,7 +368,7 @@ namespace HealthyRecipes.Web.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading the page.";
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
         }
 
@@ -244,19 +387,19 @@ namespace HealthyRecipes.Web.Controllers
 
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Meal plan paused successfully.";
+                    TempData["SuccessMessage"] = "You have paused this meal plan.";
                 }
                 else
                 {
                     TempData["ErrorMessage"] = "Could not pause this meal plan.";
                 }
 
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while pausing the meal plan.";
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
         }
 
@@ -275,21 +418,23 @@ namespace HealthyRecipes.Web.Controllers
 
                 if (success)
                 {
-                    TempData["SuccessMessage"] = "Meal plan resumed successfully.";
+                    TempData["SuccessMessage"] = "You have resumed this meal plan.";
                 }
                 else
                 {
-                    TempData["ErrorMessage"] = "Could not resume this meal plan.";
+                    TempData["ErrorMessage"] = "Could not resume this meal plan. You may already have an active plan.";
                 }
 
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while resuming the meal plan.";
-                return RedirectToAction(nameof(MyActivePlans));
+                return RedirectToAction(nameof(FollowingDashboard));
             }
         }
+
+        // ========== EXISTING ACTIONS (KEPT FOR COMPATIBILITY) ==========
 
         // GET: /MealPlanFollower/MyActivePlans
         public async Task<IActionResult> MyActivePlans()
@@ -423,7 +568,7 @@ namespace HealthyRecipes.Web.Controllers
                         Status = f.Status,
                         IsActive = f.IsActive,
                         DaysFollowing = (int)(DateTime.UtcNow - f.StartedAt).TotalDays
-                    }).OrderByDescending(f => f.StartedAt)
+                    })
                 };
 
                 return View(viewModel);
@@ -431,7 +576,7 @@ namespace HealthyRecipes.Web.Controllers
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading followers.";
-                return RedirectToAction("Details", "MealPlan", new { id });
+                return RedirectToAction("Index", "MealPlan");
             }
         }
     }

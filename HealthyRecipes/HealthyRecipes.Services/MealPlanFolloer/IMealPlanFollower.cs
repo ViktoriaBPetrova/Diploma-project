@@ -34,5 +34,17 @@ namespace HealthyRecipes.Services.MealPlanFollowers
 
         /// Get follower count for a meal plan
         Task<int> GetFollowerCountAsync(Guid mealPlanId);
+
+        /// Get user's current active plan (if any)
+        Task<MealPlanFollower?> GetActivePlanAsync(Guid userId);
+
+        /// Get active following plans (only Active status)
+        Task<IEnumerable<MealPlanFollower>> GetActiveFollowingPlansAsync(Guid userId);
+
+        /// Get paused following plans (only Paused status)
+        Task<IEnumerable<MealPlanFollower>> GetPausedFollowingPlansAsync(Guid userId);
+
+        /// Mark completion prompt as seen
+        Task<bool> MarkCompletionPromptSeenAsync(Guid userId, Guid mealPlanId);
     }
 }

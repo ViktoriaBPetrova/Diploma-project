@@ -1,0 +1,227 @@
+@model HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard.FollowingDashboardViewModel
+@{
+    ViewData["Title"] = "My Following";
+}
+
+<div class="container-main">
+    <div class="page-header">
+        <h1 class="page-title">My Meal Plan Journey</h1>
+        <p class="page-subtitle">Track your progress and stay accountable</p>
+    </div>
+
+    @if (Model.ActivePlan != null)
+    {
+        <!-- Completion Alert -->
+        @if (Model.ShowCompletionAlert)
+        {
+            <div class="follower-completion-alert">
+                <div class="alert-content">
+                    <strong>🎉 Time to Complete!</strong>
+                    <p>@Model.CompletionAlertMessage</p>
+                </div>
+                <div class="alert-actions">
+                    <form asp-action="CompletePlan" asp-route-id="@Model.ActivePlan.MealPlanId" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-primary">✓ Mark Complete</button>
+                    </form>
+                    <form asp-action="DismissCompletionAlert" asp-route-id="@Model.ActivePlan.MealPlanId" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn-ghost">Dismiss</button>
+                    </form>
+                </div>
+            </div>
+        }
+
+        <!-- Active Plan Highlight -->
+        <div class="follower-active-plan-card card">
+            <div class="active-plan-header">
+                <div class="plan-title-section">
+                    <span class="follower-status-badge follower-status-active">Active</span>
+                    <h2 class="plan-name">@Model.ActivePlan.Name</h2>
+                    @if (!string.IsNullOrEmpty(Model.ActivePlan.Description))
+                    {
+                        <p class="plan-description">@Model.ActivePlan.Description</p>
+                    }
+                    <p class="plan-creator">Created by <strong>@Model.ActivePlan.CreatorName</strong></p>
+                </div>
+                <div class="plan-actions-section">
+                    <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-ghost btn-sm">View Full Plan</a>
+                    <a asp-action="PausePlan" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-ghost btn-sm">⏸️ Pause</a>
+                    <a asp-action="DropPlan" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-danger btn-sm">Drop Plan</a>
+                </div>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="active-plan-progress">
+                <div class="progress-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Day</span>
+                        <span class="stat-value">@Model.ActivePlan.DaysFollowing of @Model.ActivePlan.TotalDays</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Remaining</span>
+                        <span class="stat-value">@Model.ActivePlan.DaysRemaining days</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Expected Completion</span>
+                        <span class="stat-value">@Model.ActivePlan.ExpectedCompletionDate.ToString("MMM dd, yyyy")</span>
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: @Model.ActivePlan.ProgressPercentage%"></div>
+                </div>
+                <p class="progress-percentage">@Model.ActivePlan.ProgressPercentage.ToString("F1")% Complete</p>
+            </div>
+
+            <!-- Nutrition Overview -->
+            <div class="active-plan-nutrition">
+                <h4>Daily Average Nutrition</h4>
+                <div class="macro-pills">
+                    <span class="macro-pill calories">@Model.ActivePlan.Calories.ToString("F0") cal</span>
+                    <span class="macro-pill protein">@Model.ActivePlan.Protein.ToString("F0")g protein</span>
+                    <span class="macro-pill carbs">@Model.ActivePlan.Carbs.ToString("F0")g carbs</span>
+                    <span class="macro-pill fat">@Model.ActivePlan.Fat.ToString("F0")g fat</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Meals Section -->
+        @if (Model.TodaysSchedule != null)
+        {
+            <div class="follower-todays-schedule">
+                <div class="section-header">
+                    <h3 class="section-title">📅 Today's Meals - Day @Model.TodaysSchedule.CurrentDayNumber (@Model.TodaysSchedule.DayOfWeek)</h3>
+                </div>
+
+                <div class="todays-meals-grid">
+                    @foreach (var meal in Model.TodaysSchedule.Meals)
+                    {
+                        <div class="todays-meal-card card">
+                            <div class="meal-header">
+                                <h4 class="meal-type">@meal.Type</h4>
+                                <div class="meal-macros-compact">
+                                    <span>@meal.Calories.ToString("F0") cal</span>
+                                    <span>P: @meal.Protein.ToString("F0")g</span>
+                                    <span>C: @meal.Carbs.ToString("F0")g</span>
+                                    <span>F: @meal.Fat.ToString("F0")g</span>
+                                </div>
+                            </div>
+
+                            <div class="meal-recipes">
+                                @foreach (var recipe in meal.Recipes)
+                                {
+                                    <div class="recipe-item">
+                                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                                        {
+                                            <img src="@recipe.ImageUrl" alt="@recipe.Name" class="recipe-thumb" />
+                                        }
+                                        <div class="recipe-info">
+                                            <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId" class="recipe-name">@recipe.Name</a>
+                                            @if (recipe.PrepTime.HasValue)
+                                            {
+                                                <p class="recipe-time">
+                                                    @if (recipe.PrepTime.HasValue)
+                                                    {
+                                                        <span>Prep: @recipe.PrepTime min</span>
+                                                    }
+                                                  
+                                                </p>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Phase 2 Placeholder: Meal Journal -->
+                            <div class="meal-journal-placeholder">
+                                <p class="phase2-note">✨ Coming soon: Log how you felt after this meal and add a photo!</p>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Day Summary -->
+                <div class="day-summary card">
+                    <h4>Daily Totals</h4>
+                    <div class="macro-pills">
+                        <span class="macro-pill calories">@Model.TodaysSchedule.Calories.ToString("F0") cal</span>
+                        <span class="macro-pill protein">@Model.TodaysSchedule.Protein.ToString("F0")g protein</span>
+                        <span class="macro-pill carbs">@Model.TodaysSchedule.Carbs.ToString("F0")g carbs</span>
+                        <span class="macro-pill fat">@Model.TodaysSchedule.Fat.ToString("F0")g fat</span>
+                    </div>
+                    
+                    <!-- Phase 2 Placeholder: Day Reflection -->
+                    <div class="day-reflection-placeholder">
+                        <p class="phase2-note">✨ Coming soon: At the end of the day, reflect on how you felt overall!</p>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <!-- No Active Plan -->
+        <div class="follower-empty-state card">
+            <div class="empty-icon">📋</div>
+            <h3>No Active Meal Plan</h3>
+            <p>You're not currently following any meal plan. Browse our collection to find your perfect plan!</p>
+            <a asp-controller="MealPlan" asp-action="Index" class="btn-primary">Browse Meal Plans</a>
+        </div>
+    }
+
+    <!-- Paused Plans Section -->
+    @if (Model.PausedPlans.Any())
+    {
+        <div class="follower-paused-section">
+            <h3 class="section-title">⏸️ Paused Plans</h3>
+            <p class="section-subtitle">Resume when you're ready to continue</p>
+
+            <div class="paused-plans-grid">
+                @foreach (var plan in Model.PausedPlans)
+                {
+                    <div class="paused-plan-card card">
+                        <div class="card-header">
+                            <span class="follower-status-badge follower-status-paused">Paused</span>
+                            <h4>@plan.MealPlanName</h4>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
+                        {
+                            <p class="plan-description">@plan.MealPlanDescription</p>
+                        }
+
+                        <div class="plan-meta">
+                            <p><strong>@plan.DaysCount</strong> days • By <strong>@plan.CreatorName</strong></p>
+                            <p class="pause-info">Paused @plan.PausedAt.ToString("MMM dd, yyyy")</p>
+                            @if (!string.IsNullOrEmpty(plan.PauseReason))
+                            {
+                                <p class="pause-reason"><em>"@plan.PauseReason"</em></p>
+                            }
+                        </div>
+
+                        <div class="macro-pills">
+                            <span class="macro-pill calories">@plan.Calories.ToString("F0") cal</span>
+                            <span class="macro-pill protein">@plan.Protein.ToString("F0")g P</span>
+                            <span class="macro-pill carbs">@plan.Carbs.ToString("F0")g C</span>
+                            <span class="macro-pill fat">@plan.Fat.ToString("F0")g F</span>
+                        </div>
+
+                        <div class="card-actions">
+                            <form asp-action="ResumePlan" asp-route-id="@plan.MealPlanId" method="post" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-primary btn-full">▶️ Resume Plan</button>
+                            </form>
+                            <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId" class="btn-ghost btn-full-secondary">View Details</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Quick Links -->
+    <div class="follower-quick-links">
+        <a asp-action="MyActivePlans" class="quick-link">View All My Plans (Active/Completed/Dropped)</a>
+        <a asp-controller="MealPlan" asp-action="Index" class="quick-link">Browse More Meal Plans</a>
+    </div>
+</div>

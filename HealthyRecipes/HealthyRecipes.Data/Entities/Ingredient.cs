@@ -39,6 +39,7 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Core Data ----------
         public string Name { get; set; } = null!;  // required // private ste?
         public string? Brand { get; set; }         // optional - if not store-bought // private set?
+        public string? BulgarianName { get; set; }
 
         // ---------- Nutritional Values ----------
         public float CaloriesPer100g { get; set; }

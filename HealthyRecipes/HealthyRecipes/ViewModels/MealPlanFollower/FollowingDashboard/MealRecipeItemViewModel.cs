@@ -1,11 +1,14 @@
-namespace HealthyRecipes.Web.ViewModels.MealPlan
+﻿namespace HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard
 {
-    public class MealRecipeViewModel
+    public class MealRecipeItemViewModel
     {
         public Guid RecipeId { get; set; }
-        public string Name { get; set; }
-        public string Info { get; set; } = null!;
+        public string Name { get; set; } = null!;
         public string? ImageUrl { get; set; }
+        public int? PrepTime { get; set; }
+
+        
+        // Nutrition
         public float Calories { get; set; }
         public float Protein { get; set; }
         public float Carbs { get; set; }

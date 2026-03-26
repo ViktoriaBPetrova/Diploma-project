@@ -19,9 +19,10 @@ namespace HealthyRecipes.Data.Entities
             SavedMealPlans = new List<SavedMealPlan>();
             MealPlansFollowed = new List<MealPlanFollower>();
             CommentRatings  = new List<CommentRating>();
+           
 
             // (One-to-Many)
-            CreatedCategories  = new List<Category>();
+            CreatedCategories = new List<Category>();
             CreatedRecipes  = new List<Recipe>();
             CreatedIngredients  = new List<Ingredient>();
             CreatedMealPlans  = new List<MealPlan>();
@@ -57,8 +58,7 @@ namespace HealthyRecipes.Data.Entities
         public IEnumerable<SavedMealPlan> SavedMealPlans { get; set; }
         public IEnumerable<CommentRating> CommentRatings { get; set; }
         public IEnumerable<MealPlanFollower> MealPlansFollowed { get; set; }
-
-
+        
 
         // (One-to-Many)
         public IEnumerable<Category> CreatedCategories { get; set; } 
