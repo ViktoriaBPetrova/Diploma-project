@@ -1,0 +1,151 @@
+﻿@using HealthyRecipes.Web.ViewModels.Recipe
+@model Tuple<CommentViewModel, Guid, bool>
+@{
+    var comment = Model.Item1;
+    var recipeId = Model.Item2;
+    var isRecipeOwner = Model.Item3;
+    var nestingLevel = ViewData["NestingLevel"] as int? ?? 0;
+    var maxNesting = 3;
+    var hasReplies = comment.Replies.Any();
+    var replyCount = comment.Replies.Count;
+}
+
+<div class="comment-thread @(comment.IsPinned ? "comment-pinned" : "")" data-comment-id="@comment.Id" style="margin-left: @(nestingLevel * 1.5)rem;">
+    <div class="comment-card">
+        <div class="comment-header">
+            <div class="comment-author-info">
+                <span class="comment-author">
+                    @comment.UserName
+                    @if (comment.IsRecipeOwner)
+                    {
+                        <span class="author-badge">👨‍🍳 Author</span>
+                    }
+                </span>
+                @if (comment.Rating.HasValue)
+                {
+                    <span class="stars recipe-rating-stars">@string.Concat(Enumerable.Repeat("★", (int)comment.Rating.Value))</span>
+                }
+                @if (comment.IsPinned)
+                {
+                    <span class="comment-pin-badge">📌 Pinned</span>
+                }
+                <span class="comment-date">
+                    @comment.CreatedAt.ToString("MMM d, yyyy")
+                    @if (comment.IsEdited)
+                    {
+                        <span class="comment-edited">(edited)</span>
+                    }
+                </span>
+            </div>
+
+            @* Actions menu *@
+            @if (User.Identity?.IsAuthenticated == true && (comment.IsCurrentUser || isRecipeOwner))
+            {
+                <div class="comment-actions-dropdown">
+                    <button type="button" class="btn-ghost btn-sm dropdown-toggle" data-comment-id="@comment.Id">
+                        ⋮
+                    </button>
+                    <div class="dropdown-menu" id="dropdown-@comment.Id">
+                        @if (comment.IsCurrentUser)
+                        {
+                            <button type="button" class="dropdown-item edit-comment-btn" data-comment-id="@comment.Id">
+                                ✏️ Edit
+                            </button>
+                            <form asp-action="DeleteCommentById" method="post" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="commentId" value="@comment.Id" />
+                                <input type="hidden" name="recipeId" value="@recipeId" />
+                                <button type="submit" class="dropdown-item" onclick="return confirm('Delete this comment?')">
+                                    🗑️ Delete
+                                </button>
+                            </form>
+                        }
+                        @if (isRecipeOwner && nestingLevel == 0)
+                        {
+                            <form asp-action="TogglePinComment" method="post" style="margin: 0;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="commentId" value="@comment.Id" />
+                                <input type="hidden" name="recipeId" value="@recipeId" />
+                                <button type="submit" class="dropdown-item">
+                                    @(comment.IsPinned ? "📌 Unpin" : "📍 Pin")
+                                </button>
+                            </form>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        @* Comment content *@
+        <div class="comment-content">
+            <div id="comment-display-@comment.Id">
+                <p class="comment-text">@comment.Comment</p>
+
+                @* Action buttons row *@
+                <div class="comment-actions-row">
+                    @* Reply button - always visible if authenticated and under max nesting *@
+                    @if (User.Identity?.IsAuthenticated == true && nestingLevel < maxNesting)
+                    {
+                        <button type="button" class="btn-ghost btn-sm reply-toggle-btn" data-comment-id="@comment.Id">
+                            💬 Reply
+                        </button>
+                    }
+
+                    @* Show/Hide Replies button - only if there are replies *@
+                    @if (hasReplies)
+                    {
+                        <button type="button" class="btn-ghost btn-sm toggle-replies-btn" data-comment-id="@comment.Id">
+                            <span class="toggle-replies-text">Show @replyCount @(replyCount == 1 ? "reply" : "replies")</span>
+                            <span class="toggle-replies-icon">▼</span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @* Edit form (hidden by default) *@
+            <div class="comment-edit-form" id="edit-form-@comment.Id" style="display: none;">
+                <form asp-action="UpdateComment" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="commentId" value="@comment.Id" />
+                    <input type="hidden" name="recipeId" value="@recipeId" />
+                    <textarea name="content" class="form-control" rows="3" required>@comment.Comment</textarea>
+                    <div class="comment-edit-actions">
+                        <button type="submit" class="btn-primary btn-sm">Save</button>
+                        <button type="button" class="btn-ghost btn-sm cancel-edit-btn" data-comment-id="@comment.Id">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        
+    </div>
+
+    @* Reply form (hidden by default) *@
+    @if (User.Identity?.IsAuthenticated == true && nestingLevel < maxNesting)
+    {
+        <div class="comment-reply-form" id="reply-form-@comment.Id" style="display: none;">
+            <form asp-action="AddReply" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="recipeId" value="@recipeId" />
+                <input type="hidden" name="parentCommentId" value="@comment.Id" />
+                <textarea name="content" class="form-control" rows="2" placeholder="Write a reply…" required></textarea>
+                <div class="reply-form-actions">
+                    <button type="submit" class="btn-primary btn-sm">Post Reply</button>
+                    <button type="button" class="btn-ghost btn-sm cancel-reply-btn" data-comment-id="@comment.Id">Cancel</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    @* Nested replies - HIDDEN BY DEFAULT *@
+    @if (hasReplies)
+    {
+        <div class="comment-replies" id="replies-@comment.Id" style="display: none;">
+            @foreach (var reply in comment.Replies)
+            {
+                 ViewData["NestingLevel"] = nestingLevel + 1; 
+                @await Html.PartialAsync("_CommentThread", new Tuple<CommentViewModel, Guid, bool>(reply, recipeId, isRecipeOwner))
+            }
+        </div>
+    }
+</div>
