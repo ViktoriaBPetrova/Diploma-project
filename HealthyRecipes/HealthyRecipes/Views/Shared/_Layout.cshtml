@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="~/css/ingredients.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/statistics.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/recommendations.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/file-upload.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -28,6 +29,7 @@
                 {
                     <a asp-controller="Statistics" asp-action="Dashboard" class="nav-link">My Statistics</a>
                     <a asp-controller="MealPlanFollower" asp-action="MyActivePlans" asp-area="">My Active Plans</a>
+                    <a asp-controller="MealPlanFollower" asp-action="FollowingDashboard">Following</a>
                     <a asp-controller="Recipe" asp-action="Recommended" class="nav-link">For You</a>
                 }    
                 <a asp-controller="Recipe" asp-action="Index">Recipes</a>
