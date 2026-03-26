@@ -9,6 +9,24 @@ namespace HealthyRecipes.Data.Seeding.Constants.MappingConstants
 {
     public class CommentRatingConstants
     {
+
+        // ========== COMMENT IDs (for the 15 existing comments) ==========
+        public const string Comment1Id = "10000000-0000-0000-0000-000000000001";
+        public const string Comment2Id = "10000000-0000-0000-0000-000000000002";
+        public const string Comment3Id = "10000000-0000-0000-0000-000000000003";
+        public const string Comment4Id = "10000000-0000-0000-0000-000000000004";
+        public const string Comment5Id = "10000000-0000-0000-0000-000000000005";
+        public const string Comment6Id = "10000000-0000-0000-0000-000000000006";
+        public const string Comment7Id = "10000000-0000-0000-0000-000000000007";
+        public const string Comment8Id = "10000000-0000-0000-0000-000000000008";
+        public const string Comment9Id = "10000000-0000-0000-0000-000000000009";
+        public const string Comment10Id = "10000000-0000-0000-0000-000000000010";
+        public const string Comment11Id = "10000000-0000-0000-0000-000000000011";
+        public const string Comment12Id = "10000000-0000-0000-0000-000000000012";
+        public const string Comment13Id = "10000000-0000-0000-0000-000000000013";
+        public const string Comment14Id = "10000000-0000-0000-0000-000000000014";
+        public const string Comment15Id = "10000000-0000-0000-0000-000000000015";
+
         // ---------- Comment 1: User (John) on Grilled Salmon (Emma's recipe) ----------
         public const Rating UserRating = Rating.Delicious;
         public const string UserComment = "This salmon recipe is amazing! The lemon quinoa pairs perfectly. Already made it twice!";
@@ -82,5 +100,28 @@ namespace HealthyRecipes.Data.Seeding.Constants.MappingConstants
         public const Rating EmmaRating4 = Rating.Delicious;
         public const string EmmaRating4Comment =
             "Quick and nutritious! Done in 20 minutes, exactly as promised. Perfect for busy weeknights.";
+
+        // ========== REPLY IDs ==========
+        public const string Reply1Id = "20000000-0000-0000-0000-000000000001";
+        public const string Reply2Id = "20000000-0000-0000-0000-000000000002";
+        public const string Reply3Id = "20000000-0000-0000-0000-000000000003";
+        public const string Reply4Id = "20000000-0000-0000-0000-000000000004";
+        public const string Reply5Id = "20000000-0000-0000-0000-000000000005";
+
+        // ========== REPLY TEXT ==========
+        // Reply 1: Mike replies to Sarah's comment on Grilled Salmon
+        public const string Reply1Text = "I totally agree! I add extra lemon zest to mine for even more flavor. Great recipe!";
+
+        // Reply 2: John (author) replies to Emma's feedback
+        public const string Reply2Text = "Thanks Emma! Great idea about adding more vegetables. I'll update the recipe with some veggie variations.";
+
+        // Reply 3: Sarah replies to Mike's reply (nested)
+        public const string Reply3Text = "Ooh, lemon zest sounds amazing! I'll try that next time.";
+
+        // Reply 4: Sarah replies to John on Overnight Oats
+        public const string Reply4Text = "Same here! I also prep mine on Sundays. Such a time-saver during the week.";
+
+        // Reply 5: Mike (author) replies to Sarah on Chicken Stir-Fry
+        public const string Reply5Text = "Love that tofu swap idea! I've tried it with tempeh too and it works great.";
     }
 }

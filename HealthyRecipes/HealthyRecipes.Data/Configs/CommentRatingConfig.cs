@@ -13,8 +13,10 @@ namespace HealthyRecipes.Data.Configs
     {
         public void Configure(EntityTypeBuilder<CommentRating> builder)
         {
-            
-                builder.HasKey(cr => new { cr.RecipeId, cr.UserId });
+
+            // Composite key for top-level comments (recipe + user)
+            // For replies, we'll use the Id property
+            builder.HasKey(cr => cr.Id);
 
                 builder.HasOne(cr => cr.Recipe)
                       .WithMany(r => r.CommentRatings)
@@ -26,8 +28,12 @@ namespace HealthyRecipes.Data.Configs
                       .HasForeignKey(cr => cr.UserId)
                       .OnDelete(DeleteBehavior.Restrict);
 
-
-            
+            // Self-referencing relationship for replies
+            builder.HasOne(cr => cr.ParentComment)      // This comment HAS ONE parent
+            .WithMany(cr => cr.Replies)             // That parent has MANY replies
+            .HasForeignKey(cr => cr.ParentCommentId)
+            .OnDelete(DeleteBehavior.Restrict);
+            //A comment has one parent comment, and that parent has many replies
         }
     }
 }
