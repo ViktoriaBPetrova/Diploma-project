@@ -141,6 +141,17 @@
                             <small>Comma-separated ingredients</small>
                         </div>
                     </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <div class="filter-group" style="margin-top: 1rem;">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="ExcludeUserAllergies" value="true"
+                                       @(Model.Filter.ExcludeUserAllergies ? "checked" : "") />
+                                <span>Exclude recipes with my allergens for you</span>
+                            </label>
+                        </div>
+                    }
                 </div>
 
                 <!-- Sorting -->
@@ -200,17 +211,23 @@
                 <partial name="_RecipeCard" model="recipe" />
             }
         </div>
+
     }
     else
     {
-        <div class="empty-state">
-            <div class="empty-state-icon">🥦</div>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+
+            <div class="empty-state">
+                <div class="empty-state-icon">🥦</div>
             <h3>You haven`t created any recipes yet!</h3>
         </div>
+        }
     }
 
     <!-- Browse All Plans Section (with filters) -->
-    <h2 class="section-title">Browse All Plans</h2>
+    <h2 class="section-title">Browse All Recipes</h2>
 
     <!-- Results Info -->
     @if (Model.TotalCount > 0)
@@ -291,7 +308,9 @@
         if (!string.IsNullOrEmpty(filter.DifficultyLevel)) dict["DifficultyLevel"] = filter.DifficultyLevel;
         if (!string.IsNullOrEmpty(filter.SortBy)) dict["SortBy"] = filter.SortBy;
         if (!string.IsNullOrEmpty(filter.SortOrder)) dict["SortOrder"] = filter.SortOrder;
-        
+        if (filter.ExcludeUserAllergies) dict["ExcludeUserAllergies"] = "true";
+
+
         dict["PageNumber"] = page.ToString();
         
         return dict;

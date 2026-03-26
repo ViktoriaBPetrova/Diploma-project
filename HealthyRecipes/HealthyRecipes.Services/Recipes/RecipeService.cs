@@ -321,6 +321,22 @@ namespace HealthyRecipes.Services.Recipes
                 if (filter.MaxFat.HasValue)
                     query = query.Where(r => r.Fat <= filter.MaxFat.Value);
 
+                if (filter.ExcludeUserAllergies && filter.UserId.HasValue)
+                {
+                    // Get user's allergenic ingredient IDs
+                    var allergyIngredientIds = await _context.Allergies
+                        .Where(a => a.UserId == filter.UserId.Value && !a.Deleted)
+                        .Select(a => a.IngredientId)
+                        .ToListAsync();
+
+                    if (allergyIngredientIds.Any())
+                    {
+                        // Exclude recipes that contain any of these ingredients
+                        query = query.Where(r => !r.RecipeIngredients
+                            .Any(ri => allergyIngredientIds.Contains(ri.IngredientId)));
+                    }
+                }
+
                 // Preparation time
                 if (filter.MaxPreparationTime.HasValue)
                     query = query.Where(r => r.PrepTime.HasValue && r.PrepTime.Value <= filter.MaxPreparationTime.Value);
@@ -427,6 +443,28 @@ namespace HealthyRecipes.Services.Recipes
             {
                 _context.RecipeIngredients.Remove(recipeIngredient);
                 await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<Recipe>> SearchRecipesAsync(string query)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(query))
+                    return Enumerable.Empty<Recipe>();
+
+                var searchLower = query.ToLower();
+
+                return await _context.Recipes
+                    .Where(r => !r.Deleted && r.Info.ToLower().Contains(searchLower))
+                    .OrderBy(r => r.Info)
+                    .Take(10)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching recipes with query: {Query}", query);
+                throw;
             }
         }
     }

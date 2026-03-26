@@ -30,5 +30,6 @@ namespace HealthyRecipes.Services.Recipes
         Task<bool> RestoreRecipeAsync(Guid id);
         Task AddIngredientToRecipeAsync(Guid recipeId, Guid ingredientId, float quantity);
         Task RemoveIngredientFromRecipeAsync(Guid recipeId, Guid ingredientId);
+        Task<IEnumerable<Recipe>> SearchRecipesAsync(string query);
     }
 }

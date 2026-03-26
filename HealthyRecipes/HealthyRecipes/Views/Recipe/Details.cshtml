@@ -14,7 +14,8 @@
         <div class="allergy-banner">
             <span class="icon">⚠️</span>
             <div>
-                <strong>Allergy alert!</strong> This recipe contains ingredients you are allergic to:
+                <h1><strong>Allergy alert!</strong></h1>
+                This recipe contains ingredients you are allergic to:
                 <strong>@string.Join(", ", Model.ConflictingIngredients)</strong>
             </div>
         </div>
@@ -22,7 +23,7 @@
 
     <div class="recipe-hero">
         @if (!string.IsNullOrEmpty(Model.ImageUrl))
-        {
+        {          
             <img src="@Model.ImageUrl" alt="Recipe" class="recipe-hero-img" />
         }
         else
@@ -154,83 +155,95 @@
                         }
                     </ul>
                 </div>
-            </div>
 
             @if (!string.IsNullOrEmpty(Model.VideoUrl))
             {
                 <h3 class="recipe-video-heading">Video</h3>
                 <div class="recipe-video-section">
                     <a href="@Model.VideoUrl" target="_blank" class="btn-ghost">▶ Watch video tutorial</a>
-                </div>
+                    @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                    {
+                        <video controls class="recipe-video">
+                            <source src="@Model.VideoUrl" type="video/mp4">
+                            Your browser doesn't support video playback.
+                        </video>
+                    }
+                </div>             
             }
 
-            <!-- Comments -->
+            <!-- Comments Section - MOVED HERE -->
             <div class="recipe-comments-section">
-                <h3 class="recipe-comments-heading">Reviews & Comments</h3>
+                <div class="recipe-comments-header">
+                    <h3 class="recipe-comments-heading">
+                        Reviews & Discussion (@Model.TotalCommentCount @(Model.TotalCommentCount == 1 ? "comment" : "comments"))
+                    </h3>
+                    <button type="button" id="toggle-comments-btn" class="btn-ghost">
+                        <span id="toggle-comments-text">Show Comments</span>
+                        <span id="toggle-comments-icon">▼</span>
+                    </button>
+                </div>
 
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <div class="card recipe-comment-form">
-                        <h4 class="recipe-comment-form-heading">@(Model.CurrentUserComment != null ? "Edit your review" : "Leave a review")</h4>
-                        <form asp-action="Rate" method="post">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="RecipeId" value="@Model.Id" />
-                            <div class="form-group">
-                                <label>Rating</label>
-                                <div class="rating-select">
-                                    @for (int i = 5; i >= 1; i--)
+                <div id="comments-container" style="display: none;">
+                    @* Rating/Comment form for non-authors *@
+                    @if (User.Identity?.IsAuthenticated == true && !isAuthor)
+                    {
+                        <div class="card recipe-comment-form">
+                            <h4 class="recipe-comment-form-heading">@(Model.CurrentUserComment != null ? "Edit your review" : "Leave a review")</h4>
+                            <form asp-action="Rate" method="post">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="RecipeId" value="@Model.Id" />
+                                <div class="form-group">
+                                    <label>Rating</label>
+                                    <div class="rating-select">
+                                        @for (int i = 5; i >= 1; i--)
+                                        {
+                                            var rating = (HealthyRecipes.Data.Enums.Rating)i;
+                                            var isChecked = Model.CurrentUserComment?.Rating == rating;
+                                            <input type="radio" name="Rating" id="star@(i)" value="@i" @(isChecked ? "checked" : "") required />
+                                            <label for="star@(i)">★</label>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Comment (optional)</label>
+                                    <textarea name="Comment" class="form-control" rows="3" placeholder="Share your thoughts…">@Model.CurrentUserComment?.Comment</textarea>
+                                </div>
+                                <div class="recipe-comment-form-actions">
+                                    <button type="submit" class="btn-primary">Submit</button>
+                                    @if (Model.CurrentUserComment != null)
                                     {
-                                        var rating = (HealthyRecipes.Data.Enums.Rating)i;
-                                        var isChecked = Model.CurrentUserComment?.Rating == rating;
-                                        <input type="radio" name="Rating" id="star@(i)" value="@i" @(isChecked ? "checked" : "") />
-                                        <label for="star@(i)">★</label>
+                                        <form asp-action="DeleteComment" method="post" class="recipe-comment-delete-form">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="recipeId" value="@Model.Id" />
+                                            <button type="submit" class="btn-ghost">Remove review</button>
+                                        </form>
                                     }
                                 </div>
-                            </div>
-                            <div class="form-group">
-                                <label>Comment (optional)</label>
-                                <textarea name="Comment" class="form-control" rows="3" placeholder="Share your thoughts…">@Model.CurrentUserComment?.Comment</textarea>
-                            </div>
-                            <div class="recipe-comment-form-actions">
-                                <button type="submit" class="btn-primary">Submit</button>
-                                @if (Model.CurrentUserComment != null)
-                                {
-                                    <form asp-action="DeleteComment" method="post" class="recipe-comment-delete-form">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="recipeId" value="@Model.Id" />
-                                        <button type="submit" class="btn-ghost">Remove review</button>
-                                    </form>
-                                }
-                            </div>
-                        </form>
-                    </div>
-                }
+                            </form>
+                        </div>
+                    }
 
-                @if (Model.Comments.Any())
-                {
-                    @foreach (var comment in Model.Comments)
+                    @* Display comments *@
+                    @if (Model.Comments.Any())
                     {
-                        <div class="comment-card">
-                            <div class="comment-header">
-                                <div>
-                                    <span class="comment-author">@comment.UserName</span>
-                                    <span class="stars recipe-rating-stars">@string.Concat(Enumerable.Repeat("★", (int)comment.Rating))</span>
-                                </div>
-                                <span class="comment-date">@comment.CreatedAt.ToString("MMM d, yyyy")</span>
-                            </div>
-                            @if (!string.IsNullOrEmpty(comment.Comment))
+                        <div class="comment-threads">
+                            @foreach (var comment in Model.Comments)
                             {
-                                <p class="comment-text">@comment.Comment</p>
+                                @await Html.PartialAsync("_CommentThread", new Tuple<CommentViewModel, Guid, bool>(comment, Model.Id, isAuthor))
                             }
                         </div>
                     }
-                }
-                else
-                {
-                    <p class="recipe-no-comments">No reviews yet. Be the first!</p>
-                }
+                    else
+                    {
+                        <p class="recipe-no-comments">No reviews yet. Be the first!</p>
+                    }
+                </div>
             </div>
+            <!-- End Comments Section -->
+
         </div>
+
+            
 
         <!-- Sidebar -->
         <div class="recipe-sidebar">
@@ -261,7 +274,9 @@
                     </div>
                 </div>
 
-                <!-- Statistics (Async loaded) -->
+            <!-- Statistics (Async loaded) - Only visible to recipe owner -->
+            @if (isAuthor)
+            {
                 <div id="recipe-statistics" data-recipe-id="@Model.Id" class="recipe-stats-container">
                     <div class="nutrition-card recipe-stats-card">
                         <div class="text-center">
@@ -272,6 +287,7 @@
                         </div>
                     </div>
                 </div>
+            }
 
                 <a asp-controller="Recipe" asp-action="Index" class="btn-ghost recipe-back-btn">← Back to recipes</a>
             </div>
@@ -356,29 +372,199 @@
             }
         });
 
-        // Ingredient management - Vanilla JavaScript (matching Create view)
+                document.addEventListener('DOMContentLoaded', function() {
+            // ============================================
+            // TOGGLE MAIN COMMENTS SECTION
+            // ============================================
+            const toggleBtn = document.getElementById('toggle-comments-btn');
+            const commentsContainer = document.getElementById('comments-container');
+            const toggleText = document.getElementById('toggle-comments-text');
+            const hasUserComment = @(Model.CurrentUserComment != null ? "true" : "false");
+            const isAuthor = @(isAuthor.ToString().ToLower());
+
+            // Auto-expand if user has commented or if viewing own recipe
+            const shouldAutoExpand = hasUserComment || isAuthor;
+
+            if (shouldAutoExpand && commentsContainer) {
+                commentsContainer.style.display = 'block';
+                toggleText.textContent = 'Hide Comments';
+                toggleBtn.classList.add('active');
+            }
+
+            if (toggleBtn && commentsContainer) {
+                toggleBtn.addEventListener('click', function() {
+                    const isVisible = commentsContainer.style.display === 'block';
+
+                    if (isVisible) {
+                        commentsContainer.style.display = 'none';
+                        toggleText.textContent = 'Show Comments';
+                        toggleBtn.classList.remove('active');
+                    } else {
+                        commentsContainer.style.display = 'block';
+                        toggleText.textContent = 'Hide Comments';
+                        toggleBtn.classList.add('active');
+                    }
+                });
+            }
+
+            // ============================================
+            // TOGGLE REPLIES FOR EACH COMMENT
+            // ============================================
+            document.querySelectorAll('.toggle-replies-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const commentId = this.dataset.commentId;
+                    const repliesContainer = document.getElementById(`replies-${commentId}`);
+                    const toggleText = this.querySelector('.toggle-replies-text');
+
+                    if (repliesContainer) {
+                        const isVisible = repliesContainer.style.display === 'block';
+                        const replyCount = repliesContainer.querySelectorAll('.comment-thread').length;
+                        const replyWord = replyCount === 1 ? 'reply' : 'replies';
+
+                        if (isVisible) {
+                            // Hide replies
+                            repliesContainer.style.display = 'none';
+                            toggleText.textContent = `Show ${replyCount} ${replyWord}`;
+                            this.classList.remove('active');
+                        } else {
+                            // Show replies
+                            repliesContainer.style.display = 'block';
+                            toggleText.textContent = `Hide ${replyCount} ${replyWord}`;
+                            this.classList.add('active');
+                        }
+                    }
+                });
+            });
+
+            // ============================================
+            // COMMENT THREADING FUNCTIONALITY
+            // ============================================
+
+            // Reply toggle
+            document.querySelectorAll('.reply-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const commentId = this.dataset.commentId;
+                    const replyForm = document.getElementById(`reply-form-${commentId}`);
+                    if (replyForm) {
+                        const isVisible = replyForm.style.display === 'block';
+                        replyForm.style.display = isVisible ? 'none' : 'block';
+                        if (!isVisible) {
+                            replyForm.querySelector('textarea').focus();
+                        }
+                    }
+                });
+            });
+
+            // Cancel reply
+            document.querySelectorAll('.cancel-reply-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const commentId = this.dataset.commentId;
+                    const replyForm = document.getElementById(`reply-form-${commentId}`);
+                    if (replyForm) {
+                        replyForm.style.display = 'none';
+                        replyForm.querySelector('textarea').value = '';
+                    }
+                });
+            });
+
+                    // Edit comment
+        document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const commentId = this.dataset.commentId;
+                const commentDisplay = document.getElementById(`comment-display-${commentId}`);
+                const editForm = document.getElementById(`edit-form-${commentId}`);
+                const dropdown = document.getElementById(`dropdown-${commentId}`);
+
+                if (commentDisplay && editForm) {
+                    commentDisplay.style.display = 'none';
+                    editForm.style.display = 'block';
+                    if (dropdown) dropdown.style.display = 'none';
+                    editForm.querySelector('textarea').focus();
+                }
+            });
+        });
+
+        // Cancel edit
+        document.querySelectorAll('.cancel-edit-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const commentId = this.dataset.commentId;
+                const commentDisplay = document.getElementById(`comment-display-${commentId}`);
+                const editForm = document.getElementById(`edit-form-${commentId}`);
+
+                if (commentDisplay && editForm) {
+                    commentDisplay.style.display = 'block';
+                    editForm.style.display = 'none';
+                }
+            });
+        });
+       
+        
+
+            // Dropdown toggle
+            document.querySelectorAll('.dropdown-toggle').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const commentId = this.dataset.commentId;
+                    const dropdown = document.getElementById(`dropdown-${commentId}`);
+
+                    // Close all other dropdowns
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        if (menu.id !== `dropdown-${commentId}`) {
+                            menu.style.display = 'none';
+                        }
+                    });
+
+                    if (dropdown) {
+                        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                    }
+                });
+            });
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.style.display = 'none';
+                });
+            });
+        });
+
+
+
+        // Ingredient management 
         const recipeId = '@Model.Id';
         let selectedIngredientId = null;
         let selectedIngredientName = null;
 
-        // Get elements
+        // Get elements - make sure these IDs match your HTML exactly
         const addIngredientBtn = document.getElementById('add-ingredient-btn');
         const searchContainer = document.getElementById('ingredient-search-container');
         const searchInput = document.getElementById('ingredient-search');
         const searchResults = document.getElementById('search-results');
         const quantityForm = document.getElementById('ingredient-quantity-form');
         const quantityInput = document.getElementById('ingredient-quantity');
-        const unitInput = document.getElementById('ingredient-unit');
         const confirmBtn = document.getElementById('confirm-add-ingredient');
         const cancelBtn = document.getElementById('cancel-add-ingredient');
         const ingredientsList = document.getElementById('ingredients-list');
+
+        console.log('Elements found:', {
+            addIngredientBtn: !!addIngredientBtn,
+            searchContainer: !!searchContainer,
+            searchInput: !!searchInput,
+            searchResults: !!searchResults,
+            quantityForm: !!quantityForm,
+            quantityInput: !!quantityInput,
+           
+            confirmBtn: !!confirmBtn,
+            cancelBtn: !!cancelBtn,
+            ingredientsList: !!ingredientsList
+        });
 
         let searchTimeout;
 
         // Show/hide search container with expand animation
         if (addIngredientBtn) {
             addIngredientBtn.addEventListener('click', function() {
-                console.log('Button clicked');
+                
                 searchContainer.classList.add('active');
                 addIngredientBtn.style.opacity = '0';
                 addIngredientBtn.style.pointerEvents = 'none';
@@ -472,11 +658,9 @@
         if (confirmBtn) {
             confirmBtn.addEventListener('click', async function() {
                 const quantity = parseFloat(quantityInput.value);
-                const unit = unitInput.value.trim();
+                console.log('Adding ingredient:', selectedIngredientId, quantity);
 
-                console.log('Adding ingredient:', selectedIngredientId, quantity, unit);
-
-                if (!selectedIngredientId || !quantity || !unit) {
+                if (!selectedIngredientId || !quantity) {
                     alert('Please fill in all fields');
                     return;
                 }
@@ -493,7 +677,6 @@
                             recipeId: recipeId,
                             ingredientId: selectedIngredientId,
                             quantity: quantity,
-                            unit: unit,
                             __RequestVerificationToken: token
                         })
                     });
@@ -502,7 +685,7 @@
                     console.log('Add result:', result);
 
                     if (result.success) {
-                        addIngredientToList(result.ingredientId, result.ingredientName, result.quantity, result.unit);
+                        addIngredientToList(result.ingredientId, result.ingredientName, result.quantity);
                         resetIngredientForm();
                     } else {
                         alert(result.message);
@@ -519,7 +702,7 @@
             li.className = 'recipe-ingredient-item';
             li.dataset.ingredientId = id;
             li.innerHTML = `
-                <span class="ingredient-name">${quantity} ${unit} ${name}</span>
+                <span class="ingredient-name">${quantity} g ${name}</span>
                 <button type="button" 
                         class="btn-delete-ingredient" 
                         data-ingredient-id="${id}"
@@ -538,7 +721,6 @@
             selectedIngredientName = null;
             searchInput.value = '';
             quantityInput.value = '';
-            unitInput.value = '';
             searchResults.innerHTML = '';
             searchResults.style.display = 'none';
             if (quantityForm) {

@@ -37,6 +37,7 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
 
         public List<string> IncludeIngredients { get; set; } = new();
         public List<string> ExcludeIngredients { get; set; } = new();
+        public bool ExcludeUserAllergies { get; set; } = false;
         public List<Guid> CategoryIds { get; set; } = new();
 
         public int PageNumber { get; set; } = 1;

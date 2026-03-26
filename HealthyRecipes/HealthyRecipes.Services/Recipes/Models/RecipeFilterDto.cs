@@ -26,6 +26,9 @@ namespace HealthyRecipes.Services.Recipes.Models
         public List<string> ExcludeIngredients { get; set; } = new();
         public List<Guid> CategoryIds { get; set; } = new();
 
+        public bool ExcludeUserAllergies { get; set; } = false;
+        public Guid? UserId { get; set; }
+
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 20;
         public string SortBy { get; set; } = "CreatedAt";

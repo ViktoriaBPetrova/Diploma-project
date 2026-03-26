@@ -606,22 +606,6 @@ textarea.form-control {
     }
 }
 
-/* ── Allergy Warning ──────────────────────────────── */
-.allergy-banner {
-    background: #FFF3CD;
-    border: 1.5px solid #FFD700;
-    border-radius: var(--radius);
-    padding: 14px 18px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    margin-bottom: var(--space-lg);
-}
-
-    .allergy-banner .icon {
-        font-size: 1.25rem;
-    }
-
 /* ── Difficulty Badge ─────────────────────────────── */
 .diff-easy {
     background: #E8F5E9;
