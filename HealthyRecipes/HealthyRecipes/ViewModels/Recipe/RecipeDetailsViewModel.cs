@@ -1,5 +1,5 @@
 using HealthyRecipes.Data.Enums;
-using HealthyRecipes.Services.Recommendations.Models;
+using HealthyRecipes.Services.Recommendations.NewFolder;
 using HealthyRecipes.Web.ViewModels.Recipe;
 
 namespace HealthyRecipes.Web.ViewModels.Recipe
@@ -26,6 +26,7 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         public IEnumerable<string> CategoryNames { get; set; } = new List<string>();
         public IEnumerable<RecipeIngredientViewModel> Ingredients { get; set; } = new List<RecipeIngredientViewModel>();
         public IEnumerable<CommentViewModel> Comments { get; set; } = new List<CommentViewModel>();
+        public int TotalCommentCount { get; set; }
         public CommentRatingFormViewModel? CurrentUserComment { get; set; }
         public bool HasAllergyConflict { get; set; }
         public IEnumerable<string> ConflictingIngredients { get; set; } = new List<string>();

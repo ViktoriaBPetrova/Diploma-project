@@ -1,4 +1,4 @@
-using HealthyRecipes.Services.Recommendations.Models;
+using HealthyRecipes.Services.Recommendations.NewFolder;
 
 namespace HealthyRecipes.Web.ViewModels.Recipe
 {
