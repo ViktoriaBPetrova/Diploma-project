@@ -2,8 +2,10 @@
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Api;
+using HealthyRecipes.Services.FileUploads;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.CommentRatings;
+using HealthyRecipes.Services.GroceryLists;
 using HealthyRecipes.Services.Ingredients;
 using HealthyRecipes.Services.MealPlanDays;
 using HealthyRecipes.Services.MealPlanFollowers;
@@ -19,6 +21,7 @@ using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Services.Statistics;
 using HealthyRecipes.Services.Statistics.Interfaces;
 using HealthyRecipes.Services.Statistics.Services;
+using HealthyRecipes.Services.StoreApis;
 using HealthyRecipes.Services.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -91,6 +94,24 @@ builder.Services.AddScoped<IMealPlanStatistics, MealPlanStatisticsService>();
 builder.Services.AddScoped<IUserStatistics, UserStatisticsService>();
 builder.Services.AddScoped<IMealPlanFollower, MealPlanFollowerService>();
 builder.Services.AddScoped<IRecommendation, RecommendationService>();
+builder.Services.AddScoped<IFileUpload, FileUploadService>();
+builder.Services.AddScoped<IGroceryList, GroceryListService>();
+builder.Services.AddScoped<MockStoreApiService>();
+builder.Services.AddScoped<PriceBarometerApiService>();
+builder.Services.AddHttpClient<PriceBarometerApiService>();
+builder.Services.AddScoped<HybridStoreApiService>();
+// OPTION C: Hybrid (RECOMMENDED - automatic fallback) (tries real API, falls back to mock)
+builder.Services.AddScoped<IStoreApi, HybridStoreApiService>();
+/*
+// OPTION A: Mock Only (for testing without API)
+builder.Services.AddScoped<IStoreApi, MockStoreApiService>();
+
+// OPTION B: Real API Only (production, no fallback)
+builder.Services.AddHttpClient<IStoreApi, SofiaSupermarketsApiService>();
+
+// OPTION C: Hybrid (RECOMMENDED - automatic fallback) (tries real API, falls back to mock)
+builder.Services.AddScoped<IStoreApi, HybridStoreApiService>();
+*/
 
 //Admin
 builder.Services.AddRazorPages(); // Add this if not present
