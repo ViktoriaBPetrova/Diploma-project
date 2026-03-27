@@ -16,7 +16,10 @@ namespace HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard
         // Recipes in this meal
         public IEnumerable<MealRecipeItemViewModel> Recipes { get; set; } = new List<MealRecipeItemViewModel>();
 
-        // Journal status (Phase 2 - placeholder for now)
+        // Journal status 
         public bool HasEntry { get; set; } = false;
+        public string? FeelingComment { get; set; }
+        public string? PhotoUrl { get; set; }
+        public DateTime? ConsumedAt { get; set; }
     }
 }

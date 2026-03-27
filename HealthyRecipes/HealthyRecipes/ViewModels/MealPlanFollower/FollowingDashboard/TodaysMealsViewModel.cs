@@ -15,5 +15,9 @@ namespace HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard
         public float Fat { get; set; }
 
         public IEnumerable<TodaysMealItemViewModel> Meals { get; set; } = new List<TodaysMealItemViewModel>();
+
+        public bool HasDayEntry { get; set; } = false;
+        public string? DayOverallFeeling { get; set; }
+        public DateTime? DayCompletedAt { get; set; }
     }
 }

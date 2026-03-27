@@ -1,4 +1,4 @@
-using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

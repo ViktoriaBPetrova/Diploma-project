@@ -132,9 +132,31 @@
                                 }
                             </div>
 
-                            <!-- Phase 2 Placeholder: Meal Journal -->
-                            <div class="meal-journal-placeholder">
-                                <p class="phase2-note">✨ Coming soon: Log how you felt after this meal and add a photo!</p>
+                            
+                            <div class="meal-journal-section">
+    @if (meal.HasEntry)
+    {
+        <!-- Show existing entry -->
+        <div class="meal-entry-display">
+            @if (!string.IsNullOrEmpty(meal.PhotoUrl))
+            {
+                <img src="@meal.PhotoUrl" alt="Meal photo" class="meal-photo" />
+            }
+            @if (!string.IsNullOrEmpty(meal.FeelingComment))
+            {
+                <p class="feeling-comment"><em>"@meal.FeelingComment"</em></p>
+            }
+            <p class="logged-time">Logged @meal.ConsumedAt?.ToString("h:mm tt")</p>
+            <button class="btn-ghost btn-sm" onclick="openLogMealModal('@meal.MealId', '@meal.Type', '@meal.FeelingComment', '@meal.PhotoUrl')">Edit</button>
+        </div>
+    }
+    else
+    {
+        <!-- Button to log meal -->
+        <button class="btn-primary btn-sm" onclick="openLogMealModal('@meal.MealId', '@meal.Type', '', '')">
+            📷 Log this meal
+        </button>
+    }
                             </div>
                         </div>
                     }
@@ -225,3 +247,48 @@
         <a asp-controller="MealPlan" asp-action="Index" class="quick-link">Browse More Meal Plans</a>
     </div>
 </div>
+
+<script>
+function openLogMealModal(mealId, mealType, existingComment, existingPhoto) {
+    // Populate modal with data
+    document.getElementById('logMealId').value = mealId;
+    document.getElementById('logMealType').textContent = mealType;
+    document.getElementById('logFeelingComment').value = existingComment || '';
+    
+    // Show modal (using your modal library)
+    $('#logMealModal').modal('show');
+}
+
+function submitMealLog() {
+    var formData = new FormData();
+    formData.append('mealId', document.getElementById('logMealId').value);
+    formData.append('feeling', document.getElementById('logFeelingComment').value);
+    
+    var photoInput = document.getElementById('logMealPhoto');
+    if (photoInput.files.length > 0) {
+        formData.append('photo', photoInput.files[0]);
+    }
+
+    fetch('@Url.Action("LogMealFeeling", "MealPlanFollower")', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Close modal and refresh page or update UI
+            $('#logMealModal').modal('hide');
+            location.reload();
+        } else {
+            alert(data.message || 'Failed to save meal entry');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving');
+    });
+}
+</script>

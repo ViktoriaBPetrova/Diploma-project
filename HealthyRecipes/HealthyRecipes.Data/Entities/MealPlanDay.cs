@@ -15,7 +15,7 @@ namespace HealthyRecipes.Data.Entities
             CreatedAt = DateTime.UtcNow;
             UpdatedAt = DateTime.UtcNow;
             Meals = new List<Meal>();
-
+            MealPlanDayEntries = new List<MealPlanDayEntry>();
         }
         public MealPlanDay(DateTime createdAt, Guid id) : this()
         {
@@ -54,6 +54,9 @@ namespace HealthyRecipes.Data.Entities
 
         // Day number in the meal plan
         public int DayNumber { get; /*private*/ set; } // chnge back later
+
+        // Navigation to mapping tables 
+        public IEnumerable<MealPlanDayEntry> MealPlanDayEntries { get; set; }
 
         // ---------- Soft Delete ----------
         public bool Deleted { get; set; } = false;

@@ -1,6 +1,7 @@
 ﻿using HealthyRecipes.Data.Configs;
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using HealthyRecipes.Data.Seeding;
 using HealthyRecipes.Data.Seeding.Identity;
 using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
+using System.Reflection.Emit;
 
 namespace HealthyRecipes.Data
 {
@@ -41,6 +43,8 @@ namespace HealthyRecipes.Data
 
         public DbSet<MealPlanCategory> MealPlanCategories { get; init; } = null!;
         public DbSet<MealPlanFollower> MealPlanFollowers { get; init; } = null!;
+        public DbSet<MealEntry> MealEntries { get; init; } = null!;
+        public DbSet<MealPlanDayEntry> MealPlanDayEntries { get; init; } = null!;
 
         public DbSet<SavedMealPlan> SavedMealPlans { get; init; } = null!;
         public DbSet<SavedRecipe> SavedRecipes { get; init; } = null!;
@@ -63,6 +67,8 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new MealPlanDayConfig());
             builder.ApplyConfiguration(new MealConfig());
             builder.ApplyConfiguration(new MealPlanFollowerConfig());
+            builder.ApplyConfiguration(new MealEntryConfig());
+            builder.ApplyConfiguration(new MealPlanDayEntryConfig());
 
             // USER SEEDING
             var users = UserSeeder.GenerateUsers().ToArray();
@@ -102,6 +108,8 @@ namespace HealthyRecipes.Data
             builder.Entity<Allergy>().HasData(AllergySeeder.GenerateAllergies().ToArray());
             builder.Entity<CommentRating>().HasData(CommentRatingSeeder.GenerateCommentRatings().ToArray());
             builder.Entity<MealPlanFollower>().HasData(MealPlanFollowerSeeder.GenerateMealPlanFollowers().ToArray());
+            builder.Entity<MealEntry>().HasData(MealEntrySeeder.GenerateMealEntries().ToArray());
+            builder.Entity<MealPlanDayEntry>().HasData(MealPlanDayEntrySeeder.GenerateMealPlanDayEntries().ToArray());
 
             //IDENTITY
             var roles = RoleSeeder.GenerateRoles().ToArray();

@@ -1,0 +1,47 @@
+@model HealthyRecipes.Web.ViewModels.MealPlanFollower.CompletionConsentViewModel
+@{
+    ViewData["Title"] = "Complete Meal Plan";
+}
+
+<div class="container-main">
+    <div class="follower-card-centered card">
+        <h2>🎉 Congratulations!</h2>
+        <p class="lead">You've completed <strong>@Model.MealPlanName</strong></p>
+
+        <div class="completion-stats">
+            <p>Started: @Model.StartedAt.ToString("MMM dd, yyyy")</p>
+            <p>Duration: @Model.DaysCount days</p>
+        </div>
+
+        <form asp-action="CompletionConsent" method="post" class="consent-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MealPlanId" />
+
+            <div class="consent-section">
+                <h3>Privacy Settings</h3>
+                <p>Choose how you'd like to share your achievement:</p>
+
+                <div class="consent-option">
+                    <input type="checkbox" asp-for="ShowOnProfileAsCompleted" id="showOnProfile" />
+                    <label for="showOnProfile">
+                        <strong>@Html.DisplayNameFor(m => m.ShowOnProfileAsCompleted)</strong>
+                        <span class="help-text">This plan will appear in your "Completed Plans" section visible to other users</span>
+                    </label>
+                </div>
+
+                <div class="consent-option">
+                    <input type="checkbox" asp-for="ShareJournalPublicly" id="shareJournal" />
+                    <label for="shareJournal">
+                        <strong>@Html.DisplayNameFor(m => m.ShareJournalPublicly)</strong>
+                        <span class="help-text">Your meal photos and comments will be visible to others viewing this plan</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary btn-full">Complete Plan</button>
+                <a asp-action="FollowingDashboard" class="btn-ghost btn-full-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

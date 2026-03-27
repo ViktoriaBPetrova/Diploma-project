@@ -1,4 +1,5 @@
 ﻿using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,8 @@ namespace HealthyRecipes.Data.Entities
             CreatedRecipes  = new List<Recipe>();
             CreatedIngredients  = new List<Ingredient>();
             CreatedMealPlans  = new List<MealPlan>();
+            MealPlanDayEntries = new List<MealPlanDayEntry>();
+            MealEntries = new List<MealEntry>();
         }
         public ApplicationUser(DateTime createdAt):this()
         {
@@ -64,7 +67,10 @@ namespace HealthyRecipes.Data.Entities
         public IEnumerable<Category> CreatedCategories { get; set; } 
         public IEnumerable<Recipe> CreatedRecipes { get; set; } 
         public IEnumerable<Ingredient> CreatedIngredients { get; set; } 
-        public IEnumerable<MealPlan> CreatedMealPlans { get; set; } 
+        public IEnumerable<MealPlan> CreatedMealPlans { get; set; }
+        public IEnumerable<MealPlanDayEntry> MealPlanDayEntries { get; set; }
+        public IEnumerable<MealEntry> MealEntries { get; set; }
+
 
         // ---------- Metadata ----------
         public bool Deleted { get; set; } = false;

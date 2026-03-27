@@ -318,6 +318,7 @@ namespace HealthyRecipes.Web.Controllers
             mealPlan.Name = vm.Name;
             mealPlan.Description = vm.Description;
             await _mealPlanService.UpdateMealPlanAsync(mealPlan);
+            
 
             return RedirectToAction(nameof(Details), new { id });
         }

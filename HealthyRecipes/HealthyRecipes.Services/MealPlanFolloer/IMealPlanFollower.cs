@@ -1,4 +1,4 @@
-using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using HealthyRecipes.Data.Enums;
 
 namespace HealthyRecipes.Services.MealPlanFollowers
@@ -46,5 +46,29 @@ namespace HealthyRecipes.Services.MealPlanFollowers
 
         /// Mark completion prompt as seen
         Task<bool> MarkCompletionPromptSeenAsync(Guid userId, Guid mealPlanId);
+
+        // COMPLETION CONSENT METHODS 
+
+        /// <summary>
+        /// Save user's completion consents (profile visibility + journal sharing).
+        /// Called during completion flow.
+        /// </summary>
+        Task<bool> SaveCompletionConsentsAsync(Guid userId, Guid mealPlanId, bool showOnProfile, bool shareJournal);
+
+        /// <summary>
+        /// Get completion count for a meal plan (users who completed it).
+        /// </summary>
+        Task<int> GetCompletionCountAsync(Guid mealPlanId);
+
+        /// <summary>
+        /// Get active follower count for a meal plan (currently following).
+        /// </summary>
+        Task<int> GetActiveFollowerCountAsync(Guid mealPlanId);
+
+        /// <summary>
+        /// Get users who completed the plan AND consented to profile display.
+        /// Returns showcase for meal plan details page.
+        /// </summary>
+        Task<IEnumerable<MealPlanFollower>> GetCompletedShowcaseAsync(Guid mealPlanId);
     }
 }

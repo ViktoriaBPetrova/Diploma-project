@@ -1,6 +1,6 @@
 using HealthyRecipes.Data.Enums;
 
-namespace HealthyRecipes.Data.Entities.MappingEntities
+namespace HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking
 {
     public class MealPlanFollower
     {
@@ -36,6 +36,9 @@ namespace HealthyRecipes.Data.Entities.MappingEntities
         public MealPlanFollowerStatus Status { get; set; }
         public string? DropoutReason { get; set; }
         public string? PauseReason { get; set; }
+        public bool ShowOnProfileAsCompleted { get; set; } = false;
+        public bool ShareJournalPublicly { get; set; } = false;
+        public DateTime? ConsentGivenAt { get; set; }
 
         // ---------- Metadata ----------
         public DateTime UpdatedAt { get; set; }

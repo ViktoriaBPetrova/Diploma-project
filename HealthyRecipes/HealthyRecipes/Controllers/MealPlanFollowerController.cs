@@ -1,11 +1,17 @@
 using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Services.MealEntries;
+using HealthyRecipes.Services.MealPlanDayEntries;
 using HealthyRecipes.Services.MealPlanFollowers;
 using HealthyRecipes.Services.MealPlans;
-using HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard;
 using HealthyRecipes.Web.ViewModels.MealPlanFollower;
+using HealthyRecipes.Web.ViewModels.MealPlanFollower.FollowingDashboard;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+
+
 
 namespace HealthyRecipes.Web.Controllers
 {
@@ -14,20 +20,26 @@ namespace HealthyRecipes.Web.Controllers
     {
         private readonly IMealPlanFollower _mealPlanFollowerService;
         private readonly IMealPlan _mealPlanService;
+        private readonly IMealEntry _mealEntryService;
+        private readonly IMealPlanDayEntry _mealPlanDayEntryService;
         private readonly UserManager<Data.Entities.ApplicationUser> _userManager;
 
         public MealPlanFollowerController(
+            IMealEntry mealEntryService,
+        IMealPlanDayEntry mealPlanDayEntryService,
             IMealPlanFollower mealPlanFollowerService,
             IMealPlan mealPlanService,
             UserManager<Data.Entities.ApplicationUser> userManager)
         {
+            _mealEntryService = mealEntryService ?? throw new ArgumentNullException(nameof(mealEntryService));
+            _mealPlanDayEntryService = mealPlanDayEntryService ?? throw new ArgumentNullException(nameof(mealPlanDayEntryService));
             _mealPlanFollowerService = mealPlanFollowerService ?? throw new ArgumentNullException(nameof(mealPlanFollowerService));
             _mealPlanService = mealPlanService ?? throw new ArgumentNullException(nameof(mealPlanService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        // ========== PHASE 1: NEW FOLLOWING DASHBOARD ==========
-        
+        // ========== NEW FOLLOWING DASHBOARD ==========
+
         // GET: /MealPlanFollower/FollowingDashboard
         public async Task<IActionResult> FollowingDashboard()
         {
@@ -48,7 +60,7 @@ namespace HealthyRecipes.Web.Controllers
                     var totalDays = activePlan.MealPlan.MealPlanDays.Count(d => !d.Deleted);
                     var daysRemaining = Math.Max(0, totalDays - daysFollowing);
                     var progressPercentage = totalDays > 0 ? (float)daysFollowing / totalDays * 100 : 0;
-                    var isOverdue = activePlan.ExpectedCompletionDate.HasValue && 
+                    var isOverdue = activePlan.ExpectedCompletionDate.HasValue &&
                                    DateTime.UtcNow > activePlan.ExpectedCompletionDate.Value;
 
                     viewModel.ActivePlan = new ActivePlanDetailViewModel
@@ -163,7 +175,7 @@ namespace HealthyRecipes.Web.Controllers
                     return RedirectToAction("Login", "Account");
 
                 await _mealPlanFollowerService.MarkCompletionPromptSeenAsync(user.Id, id);
-                
+
                 return RedirectToAction(nameof(FollowingDashboard));
             }
             catch (Exception ex)
@@ -173,7 +185,7 @@ namespace HealthyRecipes.Web.Controllers
             }
         }
 
-        // ========== UPDATED ACTIONS WITH PHASE 1 VALIDATION ==========
+        // ========== UPDATED ACTIONS WITH VALIDATION ==========
 
         // GET: /MealPlanFollower/StartFollowing/{id}
         public async Task<IActionResult> StartFollowing(Guid id)
@@ -579,5 +591,116 @@ namespace HealthyRecipes.Web.Controllers
                 return RedirectToAction("Index", "MealPlan");
             }
         }
+
+        /// <summary>
+        /// Shows completion consent form when user completes or drops a meal plan.
+        /// GET: /MealPlanFollower/CompletionConsent/{mealPlanId}
+        /// </summary>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> CompletionConsent(Guid mealPlanId)
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            try
+            {
+                var follower = await _mealPlanFollowerService.GetFollowerDetailsAsync(userId, mealPlanId);
+
+                if (follower == null)
+                {
+                    TempData["Error"] = "You are not following this meal plan.";
+                    return RedirectToAction("Index", "MealPlan");
+                }
+
+                // Only show consent form if they haven't given consent yet
+                if (follower.ConsentGivenAt != null)
+                {
+                    TempData["Info"] = "You have already provided your consent for this plan.";
+                    return RedirectToAction("ActiveMealPlans", "MealPlanFollower");
+                }
+
+                // Calculate DaysCount
+                var daysCount = follower.MealPlan?.MealPlanDays?.Count(d => !d.Deleted) ?? 0;
+
+                var viewModel = new CompletionConsentViewModel
+                {
+                    MealPlanId = mealPlanId,
+                    MealPlanName = follower.MealPlan?.Name ?? "Meal Plan",
+                    DaysCount = daysCount,
+                    StartedAt = follower.StartedAt,
+                    Status = follower.Status,
+                    CompletedAt = follower.CompletedAt
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred loading the consent form.";
+                return RedirectToAction("ActiveMealPlans", "MealPlanFollower");
+            }
+        }
+
+        /// <summary>
+        /// Processes completion consent form submission.
+        /// POST: /MealPlanFollower/CompletionConsent
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompletionConsent(CompletionConsentViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+            try
+            {
+                // Save consent choices
+                var consentSaved = await _mealPlanFollowerService.SaveCompletionConsentsAsync(
+                    userId,
+                    model.MealPlanId,
+                    model.ShowOnProfileAsCompleted,
+                    model.ShareJournalPublicly
+                );
+
+                if (!consentSaved)
+                {
+                    TempData["Error"] = "Failed to save your consent choices.";
+                    return View(model);
+                }
+
+                // If user consented to share journal publicly, bulk update all entry visibility
+                if (model.ShareJournalPublicly)
+                {
+                    await _mealEntryService.BulkUpdateVisibilityForMealPlanAsync(
+                        userId,
+                        model.MealPlanId,
+                        isPublic: true
+                    );
+
+                    await _mealPlanDayEntryService.BulkUpdateVisibilityForMealPlanAsync(
+                        userId,
+                        model.MealPlanId,
+                        isPublic: true
+                    );
+                }
+
+                TempData["Success"] = model.ShareJournalPublicly
+                    ? "Thank you for sharing your journey! Your progress is now visible to inspire others."
+                    : "Your privacy choices have been saved. Your journal entries remain private.";
+
+                return RedirectToAction("ActiveMealPlans", "MealPlanFollower");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while saving your choices.";
+                return View(model);
+            }
+        }
+  
     }
 }

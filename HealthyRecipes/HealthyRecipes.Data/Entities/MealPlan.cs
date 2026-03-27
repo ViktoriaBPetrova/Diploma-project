@@ -1,4 +1,5 @@
 ﻿using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
