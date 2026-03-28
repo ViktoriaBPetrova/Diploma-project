@@ -165,6 +165,55 @@ namespace HealthyRecipes.Web.Controllers
                     }
                 }
 
+                // Load ALL days with their meal entry status ==========
+                if (activePlan != null)
+                {
+                    var allDays = activePlan.MealPlan.MealPlanDays
+                        .Where(d => !d.Deleted)
+                        .OrderBy(d => d.DayNumber)
+                        .ToList();
+
+                    var pastDaysList = new List<PastDayViewModel>();
+                    var startDate = activePlan.StartedAt.Date;
+
+                    foreach (var day in allDays)
+                    {
+                        var dayDate = startDate.AddDays(day.DayNumber - 1);
+                        var isToday = dayDate.Date == DateTime.UtcNow.Date;
+                        var isFuture = dayDate.Date > DateTime.UtcNow.Date;
+
+                        // Get all meals for this day
+                        var dayMeals = day.Meals.Where(m => !m.Deleted).ToList();
+                        var mealIds = dayMeals.Select(m => m.Id).ToList();
+
+                        // Get meal entries for this day
+                        var dayMealEntries = await _mealEntryService.GetEntriesForMealsAsync(user.Id, mealIds);
+                        var loggedMealsCount = dayMealEntries.Count();
+
+                        // Get day reflection
+                        var dayEntry = await _mealPlanDayEntryService.GetEntryAsync(user.Id, day.Id);
+
+                        pastDaysList.Add(new PastDayViewModel
+                        {
+                            DayNumber = day.DayNumber,
+                            DayOfWeek = (Data.Enums.DayOfWeek)day.DayOfWeek,
+                            Date = dayDate,
+                            IsToday = isToday,
+                            IsFuture = isFuture,
+                            Calories = day.Calories,
+                            Protein = day.Protein,
+                            Carbs = day.Carbs,
+                            Fat = day.Fat,
+                            TotalMeals = dayMeals.Count,
+                            LoggedMeals = loggedMealsCount,
+                            HasDayReflection = dayEntry != null,
+                            DayReflection = dayEntry?.OverallFeeling
+                        });
+                    }
+
+                    viewModel.PastDays = pastDaysList;
+                }
+
                 // Get paused plans
                 var pausedPlans = await _mealPlanFollowerService.GetPausedFollowingPlansAsync(user.Id);
                 viewModel.PausedPlans = pausedPlans.Select(p => new PausedPlanItemViewModel
@@ -472,9 +521,9 @@ namespace HealthyRecipes.Web.Controllers
                             Carbs = f.MealPlan.Carbs,
                             Fat = f.MealPlan.Fat,
                             StartedAt = f.StartedAt,
-                            CompletedAt = f.CompletedAt,
                             Status = f.Status,
                             DropoutReason = f.DropoutReason,
+                            DroppedAt = f.UpdatedAt,
                             IsActive = f.IsActive,
                             DaysFollowing = (int)(DateTime.UtcNow - f.StartedAt).TotalDays,
                             CreatorName = f.MealPlan.User.UserName ?? "Unknown"
@@ -492,9 +541,9 @@ namespace HealthyRecipes.Web.Controllers
                             Carbs = f.MealPlan.Carbs,
                             Fat = f.MealPlan.Fat,
                             StartedAt = f.StartedAt,
-                            CompletedAt = f.CompletedAt,
                             Status = f.Status,
-                            DropoutReason = f.DropoutReason,
+                            PauseReason = f.PauseReason,
+                            PausedAt = f.UpdatedAt,
                             IsActive = f.IsActive,
                             DaysFollowing = (int)(DateTime.UtcNow - f.StartedAt).TotalDays,
                             CreatorName = f.MealPlan.User.UserName ?? "Unknown"
@@ -512,7 +561,7 @@ namespace HealthyRecipes.Web.Controllers
                             Carbs = f.MealPlan.Carbs,
                             Fat = f.MealPlan.Fat,
                             StartedAt = f.StartedAt,
-                            CompletedAt = f.CompletedAt,
+                            DroppedAt = f.UpdatedAt,
                             Status = f.Status,
                             DropoutReason = f.DropoutReason,
                             IsActive = f.IsActive,

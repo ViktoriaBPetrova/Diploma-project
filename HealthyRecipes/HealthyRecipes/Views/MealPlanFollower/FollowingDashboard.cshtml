@@ -3,13 +3,8 @@
     ViewData["Title"] = "My Following";
 }
 
-<div class="container-main">
-    <div class="page-header">
-        <h1 class="page-title">My Meal Plan Journey</h1>
-        <p class="page-subtitle">Track your progress and stay accountable</p>
-    </div>
-
-    @if (Model.ActivePlan != null)
+<div class="container">
+    @if (Model.ActivePlan != null && Model.TodaysSchedule != null)
     {
         <!-- Completion Alert -->
         @if (Model.ShowCompletionAlert)
@@ -20,11 +15,11 @@
                     <p>@Model.CompletionAlertMessage</p>
                 </div>
                 <div class="alert-actions">
-                    <form asp-action="CompletePlan" asp-route-id="@Model.ActivePlan.MealPlanId" method="post" style="display: inline;">
+                    <form asp-action="CompletePlan" asp-route-id="@Model.ActivePlan.MealPlanId" method="post">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-primary">✓ Mark Complete</button>
                     </form>
-                    <form asp-action="DismissCompletionAlert" asp-route-id="@Model.ActivePlan.MealPlanId" method="post" style="display: inline;">
+                    <form asp-action="DismissCompletionAlert" asp-route-id="@Model.ActivePlan.MealPlanId" method="post">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-ghost">Dismiss</button>
                     </form>
@@ -32,229 +27,290 @@
             </div>
         }
 
-        <!-- Active Plan Highlight -->
-        <div class="follower-active-plan-card card">
-            <div class="active-plan-header">
-                <div class="plan-title-section">
-                    <span class="follower-status-badge follower-status-active">Active</span>
-                    <h2 class="plan-name">@Model.ActivePlan.Name</h2>
-                    @if (!string.IsNullOrEmpty(Model.ActivePlan.Description))
-                    {
-                        <p class="plan-description">@Model.ActivePlan.Description</p>
-                    }
-                    <p class="plan-creator">Created by <strong>@Model.ActivePlan.CreatorName</strong></p>
-                </div>
-                <div class="plan-actions-section">
-                    <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-ghost btn-sm">View Full Plan</a>
-                    <a asp-action="PausePlan" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-ghost btn-sm">⏸️ Pause</a>
-                    <a asp-action="DropPlan" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-danger btn-sm">Drop Plan</a>
-                </div>
-            </div>
+        <!-- Two-Column Layout -->
+        <div class="follower-dashboard-layout">
+            
+            <!-- MAIN CONTENT (Left Column) -->
+            <div class="follower-main-content">
+                
+                <!-- Plan Header -->
+                <div class="card plan-header-card">
+                    <div class="card-body">
+                        <div class="plan-header-top">
+                            <div>
+                                <span class="follower-status-badge follower-status-active">Active</span>
+                                <h1 class="plan-header-title">@Model.ActivePlan.Name</h1>
+                                @if (!string.IsNullOrEmpty(Model.ActivePlan.Description))
+                                {
+                                    <p class="plan-header-description">@Model.ActivePlan.Description</p>
+                                }
+                                <p class="plan-header-creator">by <strong>@Model.ActivePlan.CreatorName</strong></p>
+                            </div>
+                            <div class="plan-header-actions">
+                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-ghost">View Full Plan</a>
+                                <a asp-action="PausePlan" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-ghost">⏸️ Pause</a>
+                                <a asp-action="DropPlan" asp-route-id="@Model.ActivePlan.MealPlanId" class="btn-danger">Drop Plan</a>
+                            </div>
+                        </div>
 
-            <!-- Progress Section -->
-            <div class="active-plan-progress">
-                <div class="progress-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Day</span>
-                        <span class="stat-value">@Model.ActivePlan.DaysFollowing of @Model.ActivePlan.TotalDays</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Remaining</span>
-                        <span class="stat-value">@Model.ActivePlan.DaysRemaining days</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Expected Completion</span>
-                        <span class="stat-value">@Model.ActivePlan.ExpectedCompletionDate.ToString("MMM dd, yyyy")</span>
-                    </div>
-                </div>
-                <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: @Model.ActivePlan.ProgressPercentage%"></div>
-                </div>
-                <p class="progress-percentage">@Model.ActivePlan.ProgressPercentage.ToString("F1")% Complete</p>
-            </div>
-
-            <!-- Nutrition Overview -->
-            <div class="active-plan-nutrition">
-                <h4>Daily Average Nutrition</h4>
-                <div class="macro-pills">
-                    <span class="macro-pill calories">@Model.ActivePlan.Calories.ToString("F0") cal</span>
-                    <span class="macro-pill protein">@Model.ActivePlan.Protein.ToString("F0")g protein</span>
-                    <span class="macro-pill carbs">@Model.ActivePlan.Carbs.ToString("F0")g carbs</span>
-                    <span class="macro-pill fat">@Model.ActivePlan.Fat.ToString("F0")g fat</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Today's Meals Section -->
-        @if (Model.TodaysSchedule != null)
-        {
-            <div class="follower-todays-schedule">
-                <div class="section-header">
-                    <h3 class="section-title">📅 Today's Meals - Day @Model.TodaysSchedule.CurrentDayNumber (@Model.TodaysSchedule.DayOfWeek)</h3>
-                </div>
-
-                <div class="todays-meals-grid">
-                    @foreach (var meal in Model.TodaysSchedule.Meals)
-                    {
-                        <div class="todays-meal-card card">
-                            <div class="meal-header">
-                                <h4 class="meal-type">@meal.Type</h4>
-                                <div class="meal-macros-compact">
-                                    <span>@meal.Calories.ToString("F0") cal</span>
-                                    <span>P: @meal.Protein.ToString("F0")g</span>
-                                    <span>C: @meal.Carbs.ToString("F0")g</span>
-                                    <span>F: @meal.Fat.ToString("F0")g</span>
+                        <!-- Progress Bar -->
+                        <div class="plan-progress-section">
+                            <div class="progress-stats-row">
+                                <div class="progress-stat">
+                                    <span class="stat-label">Day</span>
+                                    <span class="stat-value">@Model.ActivePlan.DaysFollowing of @Model.ActivePlan.TotalDays</span>
+                                </div>
+                                <div class="progress-stat">
+                                    <span class="stat-label">Remaining</span>
+                                    <span class="stat-value">@Model.ActivePlan.DaysRemaining days</span>
+                                </div>
+                                <div class="progress-stat">
+                                    <span class="stat-label">Expected Completion</span>
+                                    <span class="stat-value">@Model.ActivePlan.ExpectedCompletionDate.ToString("MMM dd, yyyy")</span>
                                 </div>
                             </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" style="width: @Model.ActivePlan.ProgressPercentage%"></div>
+                            </div>
+                            <p class="progress-percentage">@Model.ActivePlan.ProgressPercentage.ToString("F1")% Complete</p>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="meal-recipes">
-                                @foreach (var recipe in meal.Recipes)
-                                {
-                                    <div class="recipe-item">
-                                        @if (!string.IsNullOrEmpty(recipe.ImageUrl))
-                                        {
-                                            <img src="@recipe.ImageUrl" alt="@recipe.Name" class="recipe-thumb" />
-                                        }
-                                        <div class="recipe-info">
-                                            <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId" class="recipe-name">@recipe.Name</a>
-                                            @if (recipe.PrepTime.HasValue)
-                                            {
-                                                <p class="recipe-time">
-                                                    @if (recipe.PrepTime.HasValue)
+                <!-- All Days History -->
+                <div class="days-history-section">
+                    <h2 class="section-title">Your Journey</h2>
+                    
+                    <div class="days-timeline">
+                        @foreach (var day in Model.PastDays)
+                        {
+                            <div class="day-timeline-item @(day.IsToday ? "is-today" : "") @(day.IsFuture ? "is-future" : "") @(day.LoggedMeals == day.TotalMeals && day.HasDayReflection ? "is-complete" : "")">
+                                <div class="day-timeline-marker">
+                                    @if (day.LoggedMeals == day.TotalMeals && day.HasDayReflection)
+                                    {
+                                        <span class="day-marker-icon complete">✓</span>
+                                    }
+                                    else if (day.IsToday)
+                                    {
+                                        <span class="day-marker-icon today">●</span>
+                                    }
+                                    else if (day.IsFuture)
+                                    {
+                                        <span class="day-marker-icon future">○</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="day-marker-icon partial">◐</span>
+                                    }
+                                </div>
+                                
+                                <div class="day-timeline-content card">
+                                    <div class="card-body">
+                                        <div class="day-header-row">
+                                            <div>
+                                                <h3 class="day-title">
+                                                    Day @day.DayNumber - @day.DayOfWeek
+                                                    @if (day.IsToday)
                                                     {
-                                                        <span>Prep: @recipe.PrepTime min</span>
+                                                        <span class="day-badge today-badge">Today</span>
                                                     }
-                                                  
-                                                </p>
+                                                    @if (day.IsFuture)
+                                                    {
+                                                        <span class="day-badge future-badge">Upcoming</span>
+                                                    }
+                                                </h3>
+                                                <p class="day-date">@day.Date.ToString("MMM dd, yyyy")</p>
+                                            </div>
+                                            <div class="day-completion-circle">
+                                                <span class="completion-percentage">@day.CompletionPercentage%</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="day-stats-row">
+                                            <div class="day-stat">
+                                                <span class="stat-icon">🍽️</span>
+                                                <span>@day.LoggedMeals/@day.TotalMeals meals logged</span>
+                                            </div>
+                                            @if (day.HasDayReflection)
+                                            {
+                                                <div class="day-stat">
+                                                    <span class="stat-icon">📝</span>
+                                                    <span>Reflection added</span>
+                                                </div>
                                             }
                                         </div>
+
+                                        @if (!string.IsNullOrEmpty(day.DayReflection) && !day.IsFuture)
+                                        {
+                                            <div class="day-reflection-box">
+                                                <p class="reflection-text">"@day.DayReflection"</p>
+                                            </div>
+                                        }
+
+                                        <div class="macro-row">
+                                            <span class="macro-pill cal">🔥 @day.Calories.ToString("F0")</span>
+                                            <span class="macro-pill protein">P @day.Protein.ToString("F0")g</span>
+                                            <span class="macro-pill carbs">C @day.Carbs.ToString("F0")g</span>
+                                            <span class="macro-pill fat">F @day.Fat.ToString("F0")g</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- SIDEBAR (Right Column - Today's Meals) -->
+            <aside class="follower-sidebar">
+                <div class="sidebar-sticky">
+                    <div class="card sidebar-today-card">
+                        <div class="card-body">
+                            <h2 class="sidebar-title">📅 Today - Day @Model.TodaysSchedule.CurrentDayNumber</h2>
+                            <p class="sidebar-subtitle">@Model.TodaysSchedule.DayOfWeek</p>
+
+                            <!-- Today's Meals -->
+                            <div class="sidebar-meals">
+                                @foreach (var meal in Model.TodaysSchedule.Meals)
+                                {
+                                    <div class="sidebar-meal-item">
+                                        <h4 class="sidebar-meal-type">@meal.Type</h4>
+                                        
+                                        <div class="sidebar-meal-recipes">
+                                            @foreach (var recipe in meal.Recipes)
+                                            {
+                                                <div class="sidebar-recipe">
+                                                    @if (!string.IsNullOrEmpty(recipe.ImageUrl))
+                                                    {
+                                                        <img src="@recipe.ImageUrl" alt="@recipe.Name" class="sidebar-recipe-thumb" />
+                                                    }
+                                                    <div class="sidebar-recipe-info">
+                                                        <a asp-controller="Recipe" asp-action="Details" asp-route-id="@recipe.RecipeId" class="sidebar-recipe-name">@recipe.Name</a>
+                                                        @if (recipe.PrepTime.HasValue)
+                                                        {
+                                                            <span class="sidebar-recipe-time">⏱️ @recipe.PrepTime min</span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+
+                                        @if (meal.HasEntry)
+                                        {
+                                            <div class="sidebar-meal-logged">
+                                                <span class="logged-icon">✓</span>
+                                                <span>Logged @meal.ConsumedAt?.ToString("h:mm tt")</span>
+                                            </div>
+                                            <a asp-action="LogMeal" asp-route-mealId="@meal.MealId" class="btn-ghost btn-sidebar-sm">✏️ Edit</a>
+                                        }
+                                        else
+                                        {
+                                            <a asp-action="LogMeal" asp-route-mealId="@meal.MealId" class="btn-primary btn-sidebar-full">📷 Log Meal</a>
+                                        }
                                     </div>
                                 }
                             </div>
 
-                            <div class="meal-journal-section">
-                            @if (meal.HasEntry)
-                            {
-                                 <!-- Show existing entry -->
-                                <div class="meal-entry-display">
-                                    @if (!string.IsNullOrEmpty(meal.PhotoUrl))
-                                    {
-                                        <img src="@meal.PhotoUrl" alt="Meal photo" class="meal-photo" />
-                                    }
-                                    @if (!string.IsNullOrEmpty(meal.FeelingComment))
-                                    {
-                                        <p class="feeling-comment"><em>"@meal.FeelingComment"</em></p>
-                                    }
-                                        <p class="logged-time">Logged @meal.ConsumedAt?.ToString("h:mm tt")</p>
-                                    <a asp-action="LogMeal" asp-route-mealId="@meal.MealId" class="btn-ghost btn-sm">
-                                        ✏️ Edit Entry
-                                    </a>
-                                 </div>
-                            }
-                            else
-                            {
-                                 <!-- Button to log meal -->
-                                <a asp-action="LogMeal" asp-route-mealId="@meal.MealId" class="btn-primary btn-sm">
-                                    📷 Log this meal
-                                </a>
-                            }
+                            <!-- Day Totals -->
+                            <div class="sidebar-totals">
+                                <h4>Daily Totals</h4>
+                                <div class="macro-row">
+                                    <span class="macro-pill cal">🔥 @Model.TodaysSchedule.Calories.ToString("F0")</span>
+                                    <span class="macro-pill protein">P @Model.TodaysSchedule.Protein.ToString("F0")g</span>
+                                    <span class="macro-pill carbs">C @Model.TodaysSchedule.Carbs.ToString("F0")g</span>
+                                    <span class="macro-pill fat">F @Model.TodaysSchedule.Fat.ToString("F0")g</span>
+                                </div>
                             </div>
-                                         
-                        </div>
-                    }
-                </div>
 
-                <!-- Day Summary -->
-                <div class="day-summary card">
-                    <h4>Daily Totals</h4>
-                    <div class="macro-pills">
-                        <span class="macro-pill calories">@Model.TodaysSchedule.Calories.ToString("F0") cal</span>
-                        <span class="macro-pill protein">@Model.TodaysSchedule.Protein.ToString("F0")g protein</span>
-                        <span class="macro-pill carbs">@Model.TodaysSchedule.Carbs.ToString("F0")g carbs</span>
-                        <span class="macro-pill fat">@Model.TodaysSchedule.Fat.ToString("F0")g fat</span>
+                            <!-- Day Reflection -->
+                            <div class="sidebar-reflection">
+                                @if (Model.TodaysSchedule.HasDayEntry)
+                                {
+                                    <p class="sidebar-reflection-text">"@Model.TodaysSchedule.DayOverallFeeling"</p>
+                                    <a asp-action="LogDayReflection" asp-route-dayId="@Model.TodaysSchedule.MealPlanDayId" class="btn-ghost btn-sidebar-sm">✏️ Edit Reflection</a>
+                                }
+                                else
+                                {
+                                    <p class="sidebar-reflection-prompt">How was your day?</p>
+                                    <a asp-action="LogDayReflection" asp-route-dayId="@Model.TodaysSchedule.MealPlanDayId" class="btn-primary btn-sidebar-full">📝 Add Reflection</a>
+                                }
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <!-- Day Reflection Section -->
-<div class="day-reflection-section">
-    <h4>How was your day?</h4>
-    
-    @if (Model.TodaysSchedule.HasDayEntry)
-    {
-        <!-- Show existing day reflection -->
-        <div class="day-entry-display">
-            <p class="day-feeling"><em>"@Model.TodaysSchedule.DayOverallFeeling"</em></p>
-            <p class="logged-time">Logged @Model.TodaysSchedule.DayCompletedAt?.ToString("h:mm tt on MMM dd")</p>
-            <a asp-action="LogDayReflection" asp-route-mealPlanDayId="@Model.TodaysSchedule.MealPlanDayId" class="btn-ghost btn-sm">
-                ✏️ Edit Reflection
-            </a>
+            </aside>
         </div>
     }
     else
     {
-        <!-- Button to add day reflection -->
-        <p class="reflection-prompt">Take a moment to reflect on how you felt today overall.</p>
-        <a asp-action="LogDayReflection" asp-route-mealPlanDayId="@Model.TodaysSchedule.MealPlanDayId" class="btn-primary">
-            ✍️ Add Day Reflection
-        </a>
-    }
-</div>
-            </div>
-        }
-    }
-    else
-    {
-        <!-- No Active Plan -->
-        <div class="follower-empty-state card">
-            <div class="empty-icon">📋</div>
-            <h3>No Active Meal Plan</h3>
+        <!-- Empty State -->
+        <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h3>No active plan</h3>
             <p>You're not currently following any meal plan. Browse our collection to find your perfect plan!</p>
             <a asp-controller="MealPlan" asp-action="Index" class="btn-primary">Browse Meal Plans</a>
         </div>
     }
 
-    <!-- Paused Plans Section -->
+    <!-- Paused Plans Section (if any) -->
     @if (Model.PausedPlans.Any())
     {
         <div class="follower-paused-section">
-            <h3 class="section-title">⏸️ Paused Plans</h3>
-            <p class="section-subtitle">Resume when you're ready to continue</p>
+            <div class="section-header">
+                <h3 class="section-title">
+                    <span class="follower-status-badge follower-status-paused">Paused</span>
+                    Paused Plans (@Model.PausedPlans.Count())
+                </h3>
+                <p class="section-subtitle">Resume when you're ready to continue</p>
+            </div>
 
             <div class="paused-plans-grid">
                 @foreach (var plan in Model.PausedPlans)
                 {
-                    <div class="paused-plan-card card">
-                        <div class="card-header">
-                            <span class="follower-status-badge follower-status-paused">Paused</span>
-                            <h4>@plan.MealPlanName</h4>
-                        </div>
+                    <div class="card paused-plan-card">
+                        <div class="card-body">
+                            <h4 class="paused-plan-title">
+                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
+                            </h4>
+                            <span class="plan-card-creator">by @plan.CreatorName</span>
 
-                        @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
-                        {
-                            <p class="plan-description">@plan.MealPlanDescription</p>
-                        }
+                            @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
+                            {
+                                <p class="paused-plan-description">@plan.MealPlanDescription</p>
+                            }
 
-                        <div class="plan-meta">
-                            <p><strong>@plan.DaysCount</strong> days • By <strong>@plan.CreatorName</strong></p>
-                            <p class="pause-info">Paused @plan.PausedAt.ToString("MMM dd, yyyy")</p>
+                            <div class="paused-plan-meta">
+                                <div class="meta-row">
+                                    <span class="meta-label">Duration:</span>
+                                    <span class="meta-value">@plan.DaysCount days</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Paused:</span>
+                                    <span class="meta-value">@plan.PausedAt.ToString("MMM dd, yyyy")</span>
+                                </div>
+                            </div>
+
                             @if (!string.IsNullOrEmpty(plan.PauseReason))
                             {
-                                <p class="pause-reason"><em>"@plan.PauseReason"</em></p>
+                                <div class="pause-reason-box">
+                                    <strong>Reason:</strong> "@plan.PauseReason"
+                                </div>
                             }
-                        </div>
 
-                        <div class="macro-pills">
-                            <span class="macro-pill calories">@plan.Calories.ToString("F0") cal</span>
-                            <span class="macro-pill protein">@plan.Protein.ToString("F0")g P</span>
-                            <span class="macro-pill carbs">@plan.Carbs.ToString("F0")g C</span>
-                            <span class="macro-pill fat">@plan.Fat.ToString("F0")g F</span>
-                        </div>
+                            <div class="macro-row">
+                                <span class="macro-pill cal">🔥 @plan.Calories.ToString("F0")</span>
+                                <span class="macro-pill protein">P @plan.Protein.ToString("F0")g</span>
+                                <span class="macro-pill carbs">C @plan.Carbs.ToString("F0")g</span>
+                                <span class="macro-pill fat">F @plan.Fat.ToString("F0")g</span>
+                            </div>
 
-                        <div class="card-actions">
-                            <form asp-action="ResumePlan" asp-route-id="@plan.MealPlanId" method="post" style="display: inline;">
-                                @Html.AntiForgeryToken()
-                                <button type="submit" class="btn-primary btn-full">▶️ Resume Plan</button>
-                            </form>
-                            <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId" class="btn-ghost btn-full-secondary">View Details</a>
+                            <div class="paused-plan-actions">
+                                <form asp-action="ResumePlan" asp-route-id="@plan.MealPlanId" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-primary btn-action-full">▶️ Resume Plan</button>
+                                </form>
+                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId" class="btn-ghost btn-action-full">View Details</a>
+                            </div>
                         </div>
                     </div>
                 }
@@ -267,227 +323,4 @@
         <a asp-action="MyActivePlans" class="quick-link">View All My Plans (Active/Completed/Dropped)</a>
         <a asp-controller="MealPlan" asp-action="Index" class="quick-link">Browse More Meal Plans</a>
     </div>
-
-  
-<!-- Loading Overlay -->
-<div id="loadingOverlay" class="loading-overlay" style="display: none;">
-    <div class="loading-spinner"></div>
 </div>
-</div>
-
-<script>
-function openLogMealModal(mealId, mealType, existingComment, existingPhoto) {
-    // Populate modal with data
-    document.getElementById('logMealId').value = mealId;
-    document.getElementById('logMealType').textContent = mealType;
-    document.getElementById('logFeelingComment').value = existingComment || '';
-    
-    // Show modal (using your modal library)
-    $('#logMealModal').modal('show');
-}
-
-function submitMealLog() {
-    var formData = new FormData();
-    formData.append('mealId', document.getElementById('logMealId').value);
-    formData.append('feeling', document.getElementById('logFeelingComment').value);
-    
-    var photoInput = document.getElementById('logMealPhoto');
-    if (photoInput.files.length > 0) {
-        formData.append('photo', photoInput.files[0]);
-    }
-
-    fetch('@Url.Action("LogMealFeeling", "MealPlanFollower")', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Close modal and refresh page or update UI
-            $('#logMealModal').modal('hide');
-            location.reload();
-        } else {
-            alert(data.message || 'Failed to save meal entry');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred while saving');
-    });
-}
-
- // ========== MEAL LOGGING ==========
-    
-    function openLogMealModal(mealId, mealType, existingComment, existingPhoto) {
-        document.getElementById('modalMealId').value = mealId;
-        document.getElementById('mealModalTitle').textContent = `Log ${mealType}`;
-        document.getElementById('feelingComment').value = existingComment || '';
-        
-        // Show existing photo if present
-        if (existingPhoto) {
-            document.getElementById('photoPreview').innerHTML = 
-                `<img src="${existingPhoto}" alt="Current meal photo" style="max-width: 200px; border-radius: var(--radius);" />`;
-        } else {
-            document.getElementById('photoPreview').innerHTML = '';
-        }
-        
-        document.getElementById('logMealModal').style.display = 'flex';
-    }
-    
-    function closeLogMealModal() {
-        document.getElementById('logMealModal').style.display = 'none';
-        document.getElementById('logMealForm').reset();
-        document.getElementById('photoPreview').innerHTML = '';
-    }
-    
-    // Photo preview on file select
-    document.getElementById('mealPhoto')?.addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('photoPreview').innerHTML = 
-                    `<img src="${e.target.result}" alt="Preview" style="max-width: 200px; border-radius: var(--radius);" />`;
-            };
-            reader.readAsDataURL(file);
-        }
-    });
-    
-    async function submitMealLog() {
-        const mealId = document.getElementById('modalMealId').value;
-        const comment = document.getElementById('feelingComment').value;
-        const photoFile = document.getElementById('mealPhoto').files[0];
-        
-        // Show loading
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        
-        try {
-            let photoUrl = null;
-            
-            // Upload photo if provided
-            if (photoFile) {
-                const formData = new FormData();
-                formData.append('file', photoFile);
-                
-                const uploadResponse = await fetch('/api/upload/meal-photo', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (uploadResponse.ok) {
-                    const uploadResult = await uploadResponse.json();
-                    photoUrl = uploadResult.url;
-                }
-            }
-            
-            // Submit meal log
-            const response = await fetch('/MealPlanFollower/LogMeal', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
-                },
-                body: JSON.stringify({
-                    mealId: mealId,
-                    feelingComment: comment,
-                    photoUrl: photoUrl,
-                    consumedAt: new Date().toISOString()
-                })
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success) {
-                    // Reload page to show updated entry
-                    location.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } else {
-                alert('Failed to save meal log. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error logging meal:', error);
-            alert('An error occurred. Please try again.');
-        } finally {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-    }
-    
-    // ========== DAY REFLECTION ==========
-    
-    function openDayReflectionModal(mealPlanDayId, dayNumber, existingFeeling) {
-        document.getElementById('modalMealPlanDayId').value = mealPlanDayId;
-        document.getElementById('modalDayNumber').value = dayNumber;
-        document.getElementById('dayModalTitle').textContent = `Day ${dayNumber} Reflection`;
-        document.getElementById('overallFeeling').value = existingFeeling || '';
-        
-        document.getElementById('dayReflectionModal').style.display = 'flex';
-    }
-    
-    function closeDayReflectionModal() {
-        document.getElementById('dayReflectionModal').style.display = 'none';
-        document.getElementById('dayReflectionForm').reset();
-    }
-    
-    async function submitDayReflection() {
-        const mealPlanDayId = document.getElementById('modalMealPlanDayId').value;
-        const feeling = document.getElementById('overallFeeling').value;
-        
-        if (!feeling || feeling.trim() === '') {
-            alert('Please write something about how you felt today.');
-            return;
-        }
-        
-        // Show loading
-        document.getElementById('loadingOverlay').style.display = 'flex';
-        
-        try {
-            const response = await fetch('/MealPlanFollower/LogDayReflection', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
-                },
-                body: JSON.stringify({
-                    mealPlanDayId: mealPlanDayId,
-                    overallFeeling: feeling,
-                    completedAt: new Date().toISOString()
-                })
-            });
-            
-            if (response.ok) {
-                const result = await response.json();
-                if (result.success) {
-                    // Reload page to show updated reflection
-                    location.reload();
-                } else {
-                    alert('Error: ' + result.message);
-                }
-            } else {
-                alert('Failed to save reflection. Please try again.');
-            }
-        } catch (error) {
-            console.error('Error saving reflection:', error);
-            alert('An error occurred. Please try again.');
-        } finally {
-            document.getElementById('loadingOverlay').style.display = 'none';
-        }
-    }
-    
-    // Close modals on overlay click
-    window.onclick = function(event) {
-        const mealModal = document.getElementById('logMealModal');
-        const dayModal = document.getElementById('dayReflectionModal');
-        
-        if (event.target === mealModal) {
-            closeLogMealModal();
-        }
-        if (event.target === dayModal) {
-            closeDayReflectionModal();
-        }
-    };
-</script>

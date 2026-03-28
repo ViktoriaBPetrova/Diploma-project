@@ -1,4 +1,5 @@
 using HealthyRecipes.Data;
+using HealthyRecipes.Data.Enums;
 using HealthyRecipes.Services.Statistics.Interfaces;
 using HealthyRecipes.Services.Statistics.Models;
 using Microsoft.EntityFrameworkCore;
@@ -170,14 +171,11 @@ namespace HealthyRecipes.Services.Statistics
                     return 0;
 
                 var ratings = await _context.CommentRatings
-                    .Where(cr => userRecipeIds.Contains(cr.RecipeId) && !cr.Deleted)
-                    .Select(cr => (int)cr.Rating)
+                    .Where(cr => userRecipeIds.Contains(cr.RecipeId) && !cr.Deleted && cr.Rating.HasValue)
+                    .Select(cr => (int)cr.Rating.Value)
                     .ToListAsync();
 
-                if (!ratings.Any())
-                    return 0;
-
-                return ratings.Average();
+                return ratings.Any() ? ratings.Average() : 0;
             }
             catch (Exception ex)
             {

@@ -1,13 +1,14 @@
 @model HealthyRecipes.Web.ViewModels.MealPlanFollower.ActiveMealPlansViewModel
 @using HealthyRecipes.Data.Enums
 @{
-    ViewData["Title"] = "My Active Meal Plans";
+    ViewData["Title"] = "My Plans";
 }
 
 <div class="container">
+    <!-- Page Header -->
     <div class="page-header">
-        <h1>My Active Meal Plans</h1>
-        <p class="page-subtitle">Track your meal plan journey</p>
+        <h1>My Meal Plans</h1>
+        <p class="page-subtitle">Track all your meal plan progress</p>
     </div>
 
     @if (TempData["SuccessMessage"] != null)
@@ -30,18 +31,16 @@
             <div class="grid-2">
                 @foreach (var plan in Model.ActivePlans)
                 {
-                    <div class="card follower-plan-card">
-                        <div class="card-header">
-                            <h3>
-                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
-                            </h3>
-                            <span class="follower-creator-badge">by @plan.CreatorName</span>
-                        </div>
-
+                    <a asp-action="FollowingDashboard" class="card follower-plan-card clickable-card">
                         <div class="card-body">
+                            <div class="plan-card-header">
+                                <h3 class="plan-card-title">@plan.MealPlanName</h3>
+                                <span class="plan-card-creator">by @plan.CreatorName</span>
+                            </div>
+
                             @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
                             {
-                                <p>@plan.MealPlanDescription</p>
+                                <p class="plan-card-description">@plan.MealPlanDescription</p>
                             }
 
                             <div class="follower-plan-stats">
@@ -66,18 +65,11 @@
                                 <span class="macro-pill fat">F @Math.Round(plan.Fat / plan.DaysCount, 1)g</span>
                             </div>
 
-                            <div class="follower-plan-actions">
-                                <form asp-action="CompletePlan" asp-route-id="@plan.MealPlanId" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn-primary follower-btn-sm">✓ Complete</button>
-                                </form>
-                                <a asp-action="PausePlan" asp-route-id="@plan.MealPlanId" class="btn-ghost follower-btn-sm">
-                                    ⏸ Pause
-                                </a>
-                                <a asp-action="DropPlan" asp-route-id="@plan.MealPlanId" class="btn-danger follower-btn-sm">✕ Stop</a>
+                            <div class="plan-card-cta">
+                                <span class="cta-text">View Dashboard →</span>
                             </div>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         </section>
@@ -104,31 +96,49 @@
                 @foreach (var plan in Model.PausedPlans)
                 {
                     <div class="card follower-plan-card paused">
-                        <div class="card-header">
-                            <h3>
-                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
-                            </h3>
-                            <span class="follower-creator-badge">by @plan.CreatorName</span>
-                        </div>
-
                         <div class="card-body">
+                            <div class="plan-card-header">
+                                <h3 class="plan-card-title">
+                                    <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
+                                </h3>
+                                <span class="plan-card-creator">by @plan.CreatorName</span>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
+                            {
+                                <p class="plan-card-description">@plan.MealPlanDescription</p>
+                            }
+
                             <div class="follower-plan-stats">
-                                <div class="follower-stat-row">
-                                    <span class="label">Started:</span>
-                                    <span class="value">@plan.StartedAt.ToString("MMM dd, yyyy")</span>
-                                </div>
                                 <div class="follower-stat-row">
                                     <span class="label">Duration:</span>
                                     <span class="value">@plan.DaysCount days</span>
                                 </div>
+                                <div class="follower-stat-row">
+                                    <span class="label">Paused:</span>
+                                    <span class="value">@plan.PausedAt?.ToString("MMM dd, yyyy")</span>
+                                </div>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(plan.PauseReason))
+                            {
+                                <div class="pause-reason-box">
+                                    <strong>Reason:</strong> "@plan.PauseReason"
+                                </div>
+                            }
+
+                            <div class="macro-row">
+                                <span class="macro-pill cal">🔥 @Math.Round(plan.Calories / plan.DaysCount, 0)</span>
+                                <span class="macro-pill protein">P @Math.Round(plan.Protein / plan.DaysCount, 1)g</span>
+                                <span class="macro-pill carbs">C @Math.Round(plan.Carbs / plan.DaysCount, 1)g</span>
+                                <span class="macro-pill fat">F @Math.Round(plan.Fat / plan.DaysCount, 1)g</span>
                             </div>
 
                             <div class="follower-plan-actions">
                                 <form asp-action="ResumePlan" asp-route-id="@plan.MealPlanId" method="post">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn-primary follower-btn-sm">▶ Resume</button>
+                                    <button type="submit" class="btn-primary follower-btn-sm">▶️ Resume</button>
                                 </form>
-                                <a asp-action="DropPlan" asp-route-id="@plan.MealPlanId" class="btn-danger follower-btn-sm">✕ Stop</a>
                             </div>
                         </div>
                     </div>
@@ -149,19 +159,20 @@
                 @foreach (var plan in Model.CompletedPlans)
                 {
                     <div class="card follower-plan-card completed">
-                        <div class="card-header">
-                            <h3>
-                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
-                            </h3>
-                            <span class="follower-creator-badge">by @plan.CreatorName</span>
-                        </div>
-
                         <div class="card-body">
+                            <div class="plan-card-header">
+                                <h3 class="plan-card-title">
+                                    <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
+                                </h3>
+                                <span class="plan-card-creator">by @plan.CreatorName</span>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
+                            {
+                                <p class="plan-card-description">@plan.MealPlanDescription</p>
+                            }
+
                             <div class="follower-plan-stats">
-                                <div class="follower-stat-row">
-                                    <span class="label">Started:</span>
-                                    <span class="value">@plan.StartedAt.ToString("MMM dd, yyyy")</span>
-                                </div>
                                 <div class="follower-stat-row">
                                     <span class="label">Completed:</span>
                                     <span class="value">@plan.CompletedAt?.ToString("MMM dd, yyyy")</span>
@@ -173,7 +184,14 @@
                             </div>
 
                             <div class="follower-completion-badge">
-                                ✓ Completed
+                                ✓ Successfully Completed
+                            </div>
+
+                            <div class="macro-row">
+                                <span class="macro-pill cal">🔥 @Math.Round(plan.Calories / plan.DaysCount, 0)</span>
+                                <span class="macro-pill protein">P @Math.Round(plan.Protein / plan.DaysCount, 1)g</span>
+                                <span class="macro-pill carbs">C @Math.Round(plan.Carbs / plan.DaysCount, 1)g</span>
+                                <span class="macro-pill fat">F @Math.Round(plan.Fat / plan.DaysCount, 1)g</span>
                             </div>
                         </div>
                     </div>
@@ -188,37 +206,42 @@
         <section class="follower-plans-section">
             <h2 class="follower-section-title">
                 <span class="follower-status-badge follower-status-dropped">Dropped</span>
-                Previously Dropped (@Model.DroppedPlans.Count())
+                Dropped Plans (@Model.DroppedPlans.Count())
             </h2>
             <div class="grid-2">
                 @foreach (var plan in Model.DroppedPlans)
                 {
                     <div class="card follower-plan-card dropped">
-                        <div class="card-header">
-                            <h3>
-                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
-                            </h3>
-                            <span class="follower-creator-badge">by @plan.CreatorName</span>
-                        </div>
-
                         <div class="card-body">
+                            <div class="plan-card-header">
+                                <h3 class="plan-card-title">
+                                    <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.MealPlanId">@plan.MealPlanName</a>
+                                </h3>
+                                <span class="plan-card-creator">by @plan.CreatorName</span>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(plan.MealPlanDescription))
+                            {
+                                <p class="plan-card-description">@plan.MealPlanDescription</p>
+                            }
+
                             <div class="follower-plan-stats">
                                 <div class="follower-stat-row">
-                                    <span class="label">Started:</span>
-                                    <span class="value">@plan.StartedAt.ToString("MMM dd, yyyy")</span>
+                                    <span class="label">Dropped:</span>
+                                    <span class="value">@plan.DroppedAt?.ToString("MMM dd, yyyy")</span>
                                 </div>
-                                @if (!string.IsNullOrEmpty(plan.DropoutReason))
-                                {
-                                    <div class="follower-stat-row">
-                                        <span class="label">Reason:</span>
-                                        <span class="value">@plan.DropoutReason</span>
-                                    </div>
-                                }
+                                <div class="follower-stat-row">
+                                    <span class="label">Followed for:</span>
+                                    <span class="value">@plan.DaysFollowing days</span>
+                                </div>
                             </div>
 
-                            <div class="follower-plan-actions">
-                                <a asp-action="StartFollowing" asp-route-id="@plan.MealPlanId" class="btn-primary follower-btn-sm">Start Again</a>
-                            </div>
+                            @if (!string.IsNullOrEmpty(plan.DropoutReason))
+                            {
+                                <div class="pause-reason-box">
+                                    <strong>Reason:</strong> "@plan.DropoutReason"
+                                </div>
+                            }
                         </div>
                     </div>
                 }

@@ -22,8 +22,13 @@ namespace HealthyRecipes.Web.ViewModels.MealPlanFollower
         public float Fat { get; set; }
         public DateTime StartedAt { get; set; }
         public DateTime? CompletedAt { get; set; }
+        public DateTime? DroppedAt { get; set; }
+        public DateTime? PausedAt { get; set; }
+
         public MealPlanFollowerStatus Status { get; set; }
         public string? DropoutReason { get; set; }
+        public string? PauseReason { get; set; }
+
         public bool IsActive { get; set; }
         public int DaysFollowing { get; set; }
         public string CreatorName { get; set; } = null!;
