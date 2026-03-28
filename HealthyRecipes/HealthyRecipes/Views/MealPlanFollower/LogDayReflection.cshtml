@@ -1,0 +1,50 @@
+@model HealthyRecipes.Web.ViewModels.MealPlanFollower.LogDayReflectionViewModel
+@{
+    ViewData["Title"] = "Day Reflection";
+}
+
+<div class="container-main">
+    <div class="page-header">
+        <h1 class="page-title">Daily Reflection</h1>
+        <p class="page-subtitle">Take a moment to reflect on how your day went</p>
+    </div>
+
+    <div class="card">
+        <form asp-action="LogDayReflection" method="post" class="day-reflection-form">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="MealPlanDayId" />
+
+            <div class="reflection-intro">
+                <p>How did you feel overall today? Consider:</p>
+                <ul class="reflection-prompts">
+                    <li>Energy levels throughout the day</li>
+                    <li>How the meals satisfied you</li>
+                    <li>Any challenges you faced</li>
+                    <li>What you're proud of</li>
+                    <li>What you'd do differently tomorrow</li>
+                </ul>
+            </div>
+
+            <!-- Overall Feeling -->
+            <div class="form-group">
+                <label asp-for="OverallFeeling" class="form-label"></label>
+                <textarea asp-for="OverallFeeling" 
+                          class="form-control" 
+                          rows="6" 
+                          placeholder="Reflect on your day..."></textarea>
+                <span asp-validation-for="OverallFeeling" class="text-danger"></span>
+                <small class="form-text">Max 1000 characters</small>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">Save Reflection</button>
+                <a asp-action="FollowingDashboard" class="btn-ghost">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

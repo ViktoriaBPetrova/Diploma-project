@@ -30,21 +30,30 @@ namespace HealthyRecipes.Web.ViewModels.MealPlanFollower
 
     /// <summary>
     /// ViewModel for logging a meal (photo + feeling comment).
-    /// Used in AJAX modal on the Following Dashboard.
+    /// Used in dedicated LogMeal view (not AJAX modal).
     /// </summary>
     public class LogMealViewModel
     {
         [Required]
         public Guid MealId { get; set; }
 
+        [MaxLength(500, ErrorMessage = "Comment cannot exceed 500 characters")]
+        [Display(Name = "How did you feel after this meal?")]
         public string? FeelingComment { get; set; }
+
+        // For file upload (similar to Recipe)
+        [Display(Name = "Meal Photo")]
+        public IFormFile? PhotoFile { get; set; }
+
+        // For preserving existing photo URL
         public string? PhotoUrl { get; set; }
+
         public DateTime? ConsumedAt { get; set; }
     }
 
     /// <summary>
     /// ViewModel for end-of-day reflection.
-    /// Used in AJAX modal on the Following Dashboard.
+    /// Used in dedicated LogDayReflection view.
     /// </summary>
     public class LogDayReflectionViewModel
     {
@@ -52,13 +61,14 @@ namespace HealthyRecipes.Web.ViewModels.MealPlanFollower
         public Guid MealPlanDayId { get; set; }
 
         [MaxLength(1000, ErrorMessage = "Reflection cannot exceed 1000 characters")]
+        [Display(Name = "How did you feel overall today?")]
         public string? OverallFeeling { get; set; }
 
         public DateTime? CompletedAt { get; set; }
     }
 
     /// <summary>
-    /// Response DTO for AJAX meal logging.
+    /// Response DTO for meal logging (if we need AJAX later).
     /// </summary>
     public class MealEntryResponseDto
     {
@@ -68,7 +78,7 @@ namespace HealthyRecipes.Web.ViewModels.MealPlanFollower
     }
 
     /// <summary>
-    /// Response DTO for AJAX day reflection logging.
+    /// Response DTO for day reflection logging (if we need AJAX later).
     /// </summary>
     public class DayEntryResponseDto
     {

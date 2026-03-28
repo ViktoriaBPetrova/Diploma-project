@@ -250,6 +250,10 @@ namespace HealthyRecipes.Web.Controllers
                 });
             }
 
+            var activeFollowerCount = await _mealPlanFollowerService.GetActiveFollowerCountAsync(id);
+            var completedFollowerCount = await _mealPlanFollowerService.GetCompletionCountAsync(id);
+            var completedShowcase = await _mealPlanFollowerService.GetCompletedShowcaseAsync(id);
+
             var vm = new MealPlanDetailsViewModel
             {
                 Id = mealPlan.Id,
@@ -262,7 +266,18 @@ namespace HealthyRecipes.Web.Controllers
                 IsSaved = isSaved,
                 IsOwner = mealPlan.UserId == user.Id,
                 IsFollowing = isFollowing,
-                Days = dayVms
+                Days = dayVms,
+
+                // NEW: Follower statistics
+                ActiveFollowerCount = activeFollowerCount,
+                CompletedFollowerCount = completedFollowerCount,
+                CompletedShowcase = completedShowcase.Select(f => new CompletedUserViewModel
+                {
+                    UserId = f.UserId,
+                    UserName = f.User?.UserName ?? "Unknown",
+                    CompletedAt = f.CompletedAt ?? DateTime.UtcNow,
+                    HasPublicJournal = f.ShareJournalPublicly
+                })
             };
 
             return View(vm);

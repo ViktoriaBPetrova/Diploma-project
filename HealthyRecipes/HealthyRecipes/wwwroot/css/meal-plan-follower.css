@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   MEAL PLAN FOLLOWER STYLES - PHASE 1
+   MEAL PLAN FOLLOWER STYLES 
    ═══════════════════════════════════════════════════════════ */
 
 /* ── Common Follower Styles ─────────────────────────────────── */
@@ -36,7 +36,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   PHASE 1: FOLLOWING DASHBOARD STYLES
+  FOLLOWING DASHBOARD STYLES
    ══════════════════════════════════════════════════════════ */
 
 /* ── Completion Alert ───────────────────────────────────────── */
@@ -823,5 +823,184 @@
     .follower-quick-links {
         flex-direction: column;
         gap: 12px;
+    }
+}
+
+/* ========== ADD TO meal-plan-follower.css ========== */
+
+/* Meal Journal Section */
+.meal-journal-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.meal-entry-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.meal-photo {
+    width: 100%;
+    max-width: 400px;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feeling-comment {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--charcoal);
+    font-style: italic;
+}
+
+.logged-time {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+/* Day Reflection Section */
+.day-reflection-section {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    background: rgba(163, 177, 138, 0.08); /* Sage tint */
+    border-radius: var(--radius);
+}
+
+.day-entry-display {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.day-feeling {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--charcoal);
+    font-style: italic;
+}
+
+.reflection-prompt {
+    margin-bottom: 0.75rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+}
+
+/* LogMeal & LogDayReflection Forms */
+.meal-log-form,
+.day-reflection-form {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.current-photo {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: rgba(163, 177, 138, 0.05);
+    border-radius: var(--radius);
+}
+
+.current-label {
+    font-weight: 500;
+    color: var(--forest);
+    margin-bottom: 0.5rem;
+}
+
+.meal-photo-preview {
+    max-width: 300px;
+    width: 100%;
+    border-radius: var(--radius);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 0.5rem;
+}
+
+.upload-note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+}
+
+.photo-preview {
+    margin-top: 1rem;
+}
+
+.preview-label {
+    font-weight: 500;
+    color: var(--forest);
+    margin-bottom: 0.5rem;
+}
+
+.reflection-intro {
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: rgba(163, 177, 138, 0.08);
+    border-radius: var(--radius);
+}
+
+    .reflection-intro p {
+        font-weight: 500;
+        color: var(--forest);
+        margin-bottom: 0.5rem;
+    }
+
+.reflection-prompts {
+    list-style-position: inside;
+    color: var(--charcoal);
+}
+
+    .reflection-prompts li {
+        margin-bottom: 0.25rem;
+        font-size: 0.95rem;
+    }
+
+/* File Input Styling */
+.file-input {
+    padding: 0.5rem;
+}
+
+    .file-input::-webkit-file-upload-button {
+        padding: 0.5rem 1rem;
+        border: none;
+        background: var(--forest);
+        color: var(--parchment);
+        border-radius: var(--radius);
+        cursor: pointer;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+        .file-input::-webkit-file-upload-button:hover {
+            background: #3d5a2f;
+        }
+
+/* Form Group Spacing */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--forest);
+    font-weight: 500;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .meal-log-form,
+    .day-reflection-form {
+        max-width: 100%;
+    }
+
+    .meal-photo-preview {
+        max-width: 100%;
     }
 }

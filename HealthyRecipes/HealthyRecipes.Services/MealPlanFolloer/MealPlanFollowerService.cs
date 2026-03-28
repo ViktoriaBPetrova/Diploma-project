@@ -364,6 +364,9 @@ namespace HealthyRecipes.Services.MealPlanFollowers
                         .ThenInclude(mp => mp.User)
                     .Include(mpf => mpf.MealPlan)
                         .ThenInclude(mp => mp.MealPlanDays)
+                        .ThenInclude(mpd => mpd.Meals)
+                    .ThenInclude(m => m.RecipeMeals)
+                        .ThenInclude(rm => rm.Recipe)
                     .FirstOrDefaultAsync(mpf => mpf.UserId == userId
                                              && mpf.IsActive
                                              && mpf.Status == MealPlanFollowerStatus.Active
@@ -449,7 +452,7 @@ namespace HealthyRecipes.Services.MealPlanFollowers
             }
         }
 
-        // ========== PHASE 2: COMPLETION CONSENT METHODS ==========
+        // ========== COMPLETION CONSENT METHODS ==========
 
         public async Task<bool> SaveCompletionConsentsAsync(Guid userId, Guid mealPlanId, bool showOnProfile, bool shareJournal)
         {
@@ -533,6 +536,27 @@ namespace HealthyRecipes.Services.MealPlanFollowers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting completed showcase for meal plan {MealPlanId}", mealPlanId);
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateFollowerAsync(MealPlanFollower follower)
+        {
+            try
+            {
+                follower.UpdatedAt = DateTime.UtcNow;
+                _context.Set<MealPlanFollower>().Update(follower);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Updated MealPlanFollower for user {UserId}, plan {MealPlanId}",
+                    follower.UserId, follower.MealPlanId);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error updating MealPlanFollower for user {UserId}, plan {MealPlanId}",
+                    follower.UserId, follower.MealPlanId);
                 throw;
             }
         }

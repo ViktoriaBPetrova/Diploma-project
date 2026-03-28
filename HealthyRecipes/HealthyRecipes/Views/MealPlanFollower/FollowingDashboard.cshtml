@@ -132,32 +132,34 @@
                                 }
                             </div>
 
-                            
                             <div class="meal-journal-section">
-    @if (meal.HasEntry)
-    {
-        <!-- Show existing entry -->
-        <div class="meal-entry-display">
-            @if (!string.IsNullOrEmpty(meal.PhotoUrl))
-            {
-                <img src="@meal.PhotoUrl" alt="Meal photo" class="meal-photo" />
-            }
-            @if (!string.IsNullOrEmpty(meal.FeelingComment))
-            {
-                <p class="feeling-comment"><em>"@meal.FeelingComment"</em></p>
-            }
-            <p class="logged-time">Logged @meal.ConsumedAt?.ToString("h:mm tt")</p>
-            <button class="btn-ghost btn-sm" onclick="openLogMealModal('@meal.MealId', '@meal.Type', '@meal.FeelingComment', '@meal.PhotoUrl')">Edit</button>
-        </div>
-    }
-    else
-    {
-        <!-- Button to log meal -->
-        <button class="btn-primary btn-sm" onclick="openLogMealModal('@meal.MealId', '@meal.Type', '', '')">
-            📷 Log this meal
-        </button>
-    }
+                            @if (meal.HasEntry)
+                            {
+                                 <!-- Show existing entry -->
+                                <div class="meal-entry-display">
+                                    @if (!string.IsNullOrEmpty(meal.PhotoUrl))
+                                    {
+                                        <img src="@meal.PhotoUrl" alt="Meal photo" class="meal-photo" />
+                                    }
+                                    @if (!string.IsNullOrEmpty(meal.FeelingComment))
+                                    {
+                                        <p class="feeling-comment"><em>"@meal.FeelingComment"</em></p>
+                                    }
+                                        <p class="logged-time">Logged @meal.ConsumedAt?.ToString("h:mm tt")</p>
+                                    <a asp-action="LogMeal" asp-route-mealId="@meal.MealId" class="btn-ghost btn-sm">
+                                        ✏️ Edit Entry
+                                    </a>
+                                 </div>
+                            }
+                            else
+                            {
+                                 <!-- Button to log meal -->
+                                <a asp-action="LogMeal" asp-route-mealId="@meal.MealId" class="btn-primary btn-sm">
+                                    📷 Log this meal
+                                </a>
+                            }
                             </div>
+                                         
                         </div>
                     }
                 </div>
@@ -171,12 +173,31 @@
                         <span class="macro-pill carbs">@Model.TodaysSchedule.Carbs.ToString("F0")g carbs</span>
                         <span class="macro-pill fat">@Model.TodaysSchedule.Fat.ToString("F0")g fat</span>
                     </div>
-                    
-                    <!-- Phase 2 Placeholder: Day Reflection -->
-                    <div class="day-reflection-placeholder">
-                        <p class="phase2-note">✨ Coming soon: At the end of the day, reflect on how you felt overall!</p>
-                    </div>
                 </div>
+                <!-- Day Reflection Section -->
+<div class="day-reflection-section">
+    <h4>How was your day?</h4>
+    
+    @if (Model.TodaysSchedule.HasDayEntry)
+    {
+        <!-- Show existing day reflection -->
+        <div class="day-entry-display">
+            <p class="day-feeling"><em>"@Model.TodaysSchedule.DayOverallFeeling"</em></p>
+            <p class="logged-time">Logged @Model.TodaysSchedule.DayCompletedAt?.ToString("h:mm tt on MMM dd")</p>
+            <a asp-action="LogDayReflection" asp-route-mealPlanDayId="@Model.TodaysSchedule.MealPlanDayId" class="btn-ghost btn-sm">
+                ✏️ Edit Reflection
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Button to add day reflection -->
+        <p class="reflection-prompt">Take a moment to reflect on how you felt today overall.</p>
+        <a asp-action="LogDayReflection" asp-route-mealPlanDayId="@Model.TodaysSchedule.MealPlanDayId" class="btn-primary">
+            ✍️ Add Day Reflection
+        </a>
+    }
+</div>
             </div>
         }
     }
@@ -246,6 +267,12 @@
         <a asp-action="MyActivePlans" class="quick-link">View All My Plans (Active/Completed/Dropped)</a>
         <a asp-controller="MealPlan" asp-action="Index" class="quick-link">Browse More Meal Plans</a>
     </div>
+
+  
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+    <div class="loading-spinner"></div>
+</div>
 </div>
 
 <script>
@@ -291,4 +318,176 @@ function submitMealLog() {
         alert('An error occurred while saving');
     });
 }
+
+ // ========== MEAL LOGGING ==========
+    
+    function openLogMealModal(mealId, mealType, existingComment, existingPhoto) {
+        document.getElementById('modalMealId').value = mealId;
+        document.getElementById('mealModalTitle').textContent = `Log ${mealType}`;
+        document.getElementById('feelingComment').value = existingComment || '';
+        
+        // Show existing photo if present
+        if (existingPhoto) {
+            document.getElementById('photoPreview').innerHTML = 
+                `<img src="${existingPhoto}" alt="Current meal photo" style="max-width: 200px; border-radius: var(--radius);" />`;
+        } else {
+            document.getElementById('photoPreview').innerHTML = '';
+        }
+        
+        document.getElementById('logMealModal').style.display = 'flex';
+    }
+    
+    function closeLogMealModal() {
+        document.getElementById('logMealModal').style.display = 'none';
+        document.getElementById('logMealForm').reset();
+        document.getElementById('photoPreview').innerHTML = '';
+    }
+    
+    // Photo preview on file select
+    document.getElementById('mealPhoto')?.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('photoPreview').innerHTML = 
+                    `<img src="${e.target.result}" alt="Preview" style="max-width: 200px; border-radius: var(--radius);" />`;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    async function submitMealLog() {
+        const mealId = document.getElementById('modalMealId').value;
+        const comment = document.getElementById('feelingComment').value;
+        const photoFile = document.getElementById('mealPhoto').files[0];
+        
+        // Show loading
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        try {
+            let photoUrl = null;
+            
+            // Upload photo if provided
+            if (photoFile) {
+                const formData = new FormData();
+                formData.append('file', photoFile);
+                
+                const uploadResponse = await fetch('/api/upload/meal-photo', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (uploadResponse.ok) {
+                    const uploadResult = await uploadResponse.json();
+                    photoUrl = uploadResult.url;
+                }
+            }
+            
+            // Submit meal log
+            const response = await fetch('/MealPlanFollower/LogMeal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify({
+                    mealId: mealId,
+                    feelingComment: comment,
+                    photoUrl: photoUrl,
+                    consumedAt: new Date().toISOString()
+                })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    // Reload page to show updated entry
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } else {
+                alert('Failed to save meal log. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error logging meal:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    }
+    
+    // ========== DAY REFLECTION ==========
+    
+    function openDayReflectionModal(mealPlanDayId, dayNumber, existingFeeling) {
+        document.getElementById('modalMealPlanDayId').value = mealPlanDayId;
+        document.getElementById('modalDayNumber').value = dayNumber;
+        document.getElementById('dayModalTitle').textContent = `Day ${dayNumber} Reflection`;
+        document.getElementById('overallFeeling').value = existingFeeling || '';
+        
+        document.getElementById('dayReflectionModal').style.display = 'flex';
+    }
+    
+    function closeDayReflectionModal() {
+        document.getElementById('dayReflectionModal').style.display = 'none';
+        document.getElementById('dayReflectionForm').reset();
+    }
+    
+    async function submitDayReflection() {
+        const mealPlanDayId = document.getElementById('modalMealPlanDayId').value;
+        const feeling = document.getElementById('overallFeeling').value;
+        
+        if (!feeling || feeling.trim() === '') {
+            alert('Please write something about how you felt today.');
+            return;
+        }
+        
+        // Show loading
+        document.getElementById('loadingOverlay').style.display = 'flex';
+        
+        try {
+            const response = await fetch('/MealPlanFollower/LogDayReflection', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                },
+                body: JSON.stringify({
+                    mealPlanDayId: mealPlanDayId,
+                    overallFeeling: feeling,
+                    completedAt: new Date().toISOString()
+                })
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                if (result.success) {
+                    // Reload page to show updated reflection
+                    location.reload();
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } else {
+                alert('Failed to save reflection. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error saving reflection:', error);
+            alert('An error occurred. Please try again.');
+        } finally {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+    }
+    
+    // Close modals on overlay click
+    window.onclick = function(event) {
+        const mealModal = document.getElementById('logMealModal');
+        const dayModal = document.getElementById('dayReflectionModal');
+        
+        if (event.target === mealModal) {
+            closeLogMealModal();
+        }
+        if (event.target === dayModal) {
+            closeDayReflectionModal();
+        }
+    };
 </script>

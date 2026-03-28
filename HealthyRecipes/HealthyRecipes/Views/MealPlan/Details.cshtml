@@ -140,6 +140,72 @@
         </div>
     </div>
 
+    <!-- Follower Statistics Section -->
+<div class="meal-plan-stats-section card">
+    <h3>Community Stats</h3>
+    
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <span class="stat-value">@Model.ActiveFollowerCount</span>
+                <span class="stat-label">Currently Following</span>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-content">
+                <span class="stat-value">@Model.CompletedFollowerCount</span>
+                <span class="stat-label">Completed</span>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.CompletedShowcase.Any())
+    {
+        <div class="success-stories">
+            <h4>Success Stories</h4>
+            <p class="section-subtitle">People who completed this plan and shared their journey</p>
+            
+            <div class="showcase-grid">
+                @foreach (var user in Model.CompletedShowcase.Take(6))
+                {
+                    <div class="showcase-card">
+                        <div class="showcase-header">
+                            <span class="showcase-icon">🎉</span>
+                            <a asp-controller="User" 
+                               asp-action="Profile" 
+                               asp-route-id="@user.UserId" 
+                               class="showcase-username">
+                                @user.UserName
+                            </a>
+                        </div>
+                        <p class="showcase-date">Completed @user.CompletedAt.ToString("MMM dd, yyyy")</p>
+                        
+                        @if (user.HasPublicJournal)
+                        {
+                            <a asp-action="PublicJournal" 
+                               asp-route-userId="@user.UserId" 
+                               asp-route-mealPlanId="@Model.Id" 
+                               class="btn-ghost btn-sm">
+                                📖 View Journey
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+            
+            @if (Model.CompletedShowcase.Count() > 6)
+            {
+                <p class="more-link">
+                    And @(Model.CompletedShowcase.Count() - 6) more...
+                </p>
+            }
+        </div>
+    }
+</div>
+
     <!-- Weekly Plan Grid -->
     <div class="weekly-plan">
         <h2 class="section-title">Weekly Meal Plan</h2>

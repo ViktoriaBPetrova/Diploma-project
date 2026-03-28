@@ -1,4 +1,5 @@
 using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Services.FileUploads;
 using HealthyRecipes.Services.MealEntries;
 using HealthyRecipes.Services.MealPlanDayEntries;
 using HealthyRecipes.Services.MealPlanFollowers;
@@ -22,6 +23,7 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IMealPlan _mealPlanService;
         private readonly IMealEntry _mealEntryService;
         private readonly IMealPlanDayEntry _mealPlanDayEntryService;
+        private readonly IFileUpload _fileUploadService;
         private readonly UserManager<Data.Entities.ApplicationUser> _userManager;
 
         public MealPlanFollowerController(
@@ -29,16 +31,18 @@ namespace HealthyRecipes.Web.Controllers
         IMealPlanDayEntry mealPlanDayEntryService,
             IMealPlanFollower mealPlanFollowerService,
             IMealPlan mealPlanService,
+            IFileUpload fileUploadService,
             UserManager<Data.Entities.ApplicationUser> userManager)
         {
             _mealEntryService = mealEntryService ?? throw new ArgumentNullException(nameof(mealEntryService));
             _mealPlanDayEntryService = mealPlanDayEntryService ?? throw new ArgumentNullException(nameof(mealPlanDayEntryService));
             _mealPlanFollowerService = mealPlanFollowerService ?? throw new ArgumentNullException(nameof(mealPlanFollowerService));
             _mealPlanService = mealPlanService ?? throw new ArgumentNullException(nameof(mealPlanService));
+            _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
-        // ========== NEW FOLLOWING DASHBOARD ==========
+        // ========== FOLLOWING DASHBOARD ==========
 
         // GET: /MealPlanFollower/FollowingDashboard
         public async Task<IActionResult> FollowingDashboard()
@@ -92,13 +96,18 @@ namespace HealthyRecipes.Web.Controllers
                     // Get today's meals (calculate which day user is on)
                     var currentDayNumber = Math.Min(daysFollowing + 1, totalDays);
                     var todaysPlanDay = activePlan.MealPlan.MealPlanDays
-                        .Where(d => !d.Deleted)
-                        .OrderBy(d => d.DayNumber)
-                        .Skip(currentDayNumber - 1)
+                        .Where(d => !d.Deleted && d.DayNumber == currentDayNumber)
                         .FirstOrDefault();
 
                     if (todaysPlanDay != null)
                     {
+                        //Load existing meal entries for today's meals
+                        var mealIds = todaysPlanDay.Meals.Where(m => !m.Deleted).Select(m => m.Id).ToList();
+                        var mealEntries = await _mealEntryService.GetEntriesForMealsAsync(user.Id, mealIds);
+
+                        // NEW: Load day reflection if exists
+                        var dayEntry = await _mealPlanDayEntryService.GetEntryAsync(user.Id, todaysPlanDay.Id);
+
                         viewModel.TodaysSchedule = new TodaysMealsViewModel
                         {
                             CurrentDayNumber = currentDayNumber,
@@ -108,30 +117,49 @@ namespace HealthyRecipes.Web.Controllers
                             Protein = todaysPlanDay.Protein,
                             Carbs = todaysPlanDay.Carbs,
                             Fat = todaysPlanDay.Fat,
+
+                            // NEW: Map day reflection data
+                            HasDayEntry = dayEntry != null,
+                            DayOverallFeeling = dayEntry?.OverallFeeling,
+                            DayCompletedAt = dayEntry?.CompletedAt,
+
                             Meals = todaysPlanDay.Meals
                                 .Where(m => !m.Deleted)
                                 .OrderBy(m => m.Type)
-                                .Select(m => new TodaysMealItemViewModel
+                                .Select(m =>
                                 {
-                                    MealId = m.Id,
-                                    Type = m.Type,
-                                    Calories = m.Calories,
-                                    Protein = m.Protein,
-                                    Carbs = m.Carbs,
-                                    Fat = m.Fat,
-                                    Recipes = m.RecipeMeals
-                                        .Where(rm => !rm.Deleted && rm.Recipe != null)
-                                        .Select(rm => new MealRecipeItemViewModel
-                                        {
-                                            RecipeId = rm.RecipeId,
-                                            Name = rm.Recipe.Title,
-                                            ImageUrl = rm.Recipe.ImageUrl,
-                                            PrepTime = rm.Recipe.PrepTime,
-                                            Calories = rm.Recipe.Calories,
-                                            Protein = rm.Recipe.Protein,
-                                            Carbs = rm.Recipe.Carbs,
-                                            Fat = rm.Recipe.Fat
-                                        })
+                                    // NEW: Find existing entry for this meal
+                                    var existingEntry = mealEntries.FirstOrDefault(e => e.MealId == m.Id);
+
+                                    return new TodaysMealItemViewModel
+                                    {
+                                        MealId = m.Id,
+                                        Type = m.Type,
+                                        Calories = m.Calories,
+                                        Protein = m.Protein,
+                                        Carbs = m.Carbs,
+                                        Fat = m.Fat,
+
+                                        // NEW: Map meal entry data
+                                        HasEntry = existingEntry != null,
+                                        FeelingComment = existingEntry?.FeelingComment,
+                                        PhotoUrl = existingEntry?.PhotoUrl,
+                                        ConsumedAt = existingEntry?.ConsumedAt,
+
+                                        Recipes = m.RecipeMeals
+                                            .Where(rm => !rm.Deleted && rm.Recipe != null)
+                                            .Select(rm => new MealRecipeItemViewModel
+                                            {
+                                                RecipeId = rm.RecipeId,
+                                                Name = rm.Recipe.Title,
+                                                ImageUrl = rm.Recipe.ImageUrl,
+                                                PrepTime = rm.Recipe.PrepTime,
+                                                Calories = rm.Recipe.Calories,
+                                                Protein = rm.Recipe.Protein,
+                                                Carbs = rm.Recipe.Carbs,
+                                                Fat = rm.Recipe.Fat
+                                            })
+                                    };
                                 })
                         };
                     }
@@ -156,32 +184,10 @@ namespace HealthyRecipes.Web.Controllers
 
                 return View(viewModel);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 TempData["ErrorMessage"] = "An error occurred while loading your following dashboard.";
                 return RedirectToAction("Index", "MealPlan");
-            }
-        }
-
-        // POST: /MealPlanFollower/DismissCompletionAlert/{id}
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DismissCompletionAlert(Guid id)
-        {
-            try
-            {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return RedirectToAction("Login", "Account");
-
-                await _mealPlanFollowerService.MarkCompletionPromptSeenAsync(user.Id, id);
-
-                return RedirectToAction(nameof(FollowingDashboard));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "An error occurred.";
-                return RedirectToAction(nameof(FollowingDashboard));
             }
         }
 
@@ -260,36 +266,8 @@ namespace HealthyRecipes.Web.Controllers
             }
         }
 
-        // POST: /MealPlanFollower/CompletePlan/{id}
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CompletePlan(Guid id)
-        {
-            try
-            {
-                var user = await _userManager.GetUserAsync(User);
-                if (user == null)
-                    return RedirectToAction("Login", "Account");
 
-                var success = await _mealPlanFollowerService.CompleteMealPlanAsync(user.Id, id);
 
-                if (success)
-                {
-                    TempData["SuccessMessage"] = "Congratulations! You've completed this meal plan!";
-                }
-                else
-                {
-                    TempData["ErrorMessage"] = "Could not mark meal plan as completed.";
-                }
-
-                return RedirectToAction(nameof(MyActivePlans));
-            }
-            catch (Exception ex)
-            {
-                TempData["ErrorMessage"] = "An error occurred while completing the meal plan.";
-                return RedirectToAction(nameof(MyActivePlans));
-            }
-        }
 
         // GET: /MealPlanFollower/DropPlan/{id}
         public async Task<IActionResult> DropPlan(Guid id)
@@ -701,6 +679,275 @@ namespace HealthyRecipes.Web.Controllers
                 return View(model);
             }
         }
-  
+
+
+
+        // ========== MEAL LOGGING ACTIONS ==========
+
+        /// <summary>
+        /// Shows meal logging form
+        /// GET: /MealPlanFollower/LogMeal/{mealId}
+        /// </summary>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> LogMeal(Guid mealId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            try
+            {
+                // Get existing entry if any
+                var existingEntry = await _mealEntryService.GetEntryAsync(user.Id, mealId);
+
+                var viewModel = new LogMealViewModel
+                {
+                    MealId = mealId,
+                    FeelingComment = existingEntry?.FeelingComment,
+                    PhotoUrl = existingEntry?.PhotoUrl,
+                    ConsumedAt = existingEntry?.ConsumedAt
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred loading the meal log form.";
+                return RedirectToAction("FollowingDashboard");
+            }
+        }
+
+        /// <summary>
+        /// Processes meal logging form submission
+        /// POST: /MealPlanFollower/LogMeal
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogMeal(LogMealViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            try
+            {
+                string? photoUrl = model.PhotoUrl; // Keep existing if no new photo
+
+                // Upload new photo if provided
+                if (model.PhotoFile != null)
+                {
+                    // Delete old photo if exists
+                    if (!string.IsNullOrEmpty(model.PhotoUrl))
+                    {
+                        await _fileUploadService.DeleteFileAsync(model.PhotoUrl);
+                    }
+
+                    // Upload new photo
+                    photoUrl = await _fileUploadService.UploadImageAsync(model.PhotoFile, "meal-entries");
+
+                    if (photoUrl == null)
+                    {
+                        ModelState.AddModelError("PhotoFile", "Invalid image file. Please upload a valid image (max 5MB).");
+                        return View(model);
+                    }
+                }
+
+                // Save meal entry
+                var entry = await _mealEntryService.UpsertMealEntryAsync(
+                    user.Id,
+                    model.MealId,
+                    model.FeelingComment,
+                    photoUrl
+
+                );
+
+                if (entry == null)
+                {
+                    TempData["Error"] = "Failed to save meal entry.";
+                    return View(model);
+                }
+
+                TempData["Success"] = "Meal logged successfully!";
+                return RedirectToAction("FollowingDashboard");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while saving the meal entry.";
+                return View(model);
+            }
+        }
+
+        // ========== DAY REFLECTION ACTIONS ==========
+
+        /// <summary>
+        /// Shows day reflection form
+        /// GET: /MealPlanFollower/LogDayReflection/{mealPlanDayId}
+        /// </summary>
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> LogDayReflection(Guid mealPlanDayId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            try
+            {
+                // Get existing entry if any
+                var existingEntry = await _mealPlanDayEntryService.GetEntryAsync(user.Id, mealPlanDayId);
+
+                var viewModel = new LogDayReflectionViewModel
+                {
+                    MealPlanDayId = mealPlanDayId,
+                    OverallFeeling = existingEntry?.OverallFeeling,
+                    CompletedAt = existingEntry?.CompletedAt
+                };
+
+                return View(viewModel);
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred loading the reflection form.";
+                return RedirectToAction("FollowingDashboard");
+            }
+        }
+
+        /// <summary>
+        /// Processes day reflection form submission
+        /// POST: /MealPlanFollower/LogDayReflection
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> LogDayReflection(LogDayReflectionViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            try
+            {
+                var entry = await _mealPlanDayEntryService.UpsertDayEntryAsync(
+                    user.Id,
+                    model.MealPlanDayId,
+                    model.OverallFeeling
+
+                );
+
+                if (entry == null)
+                {
+                    TempData["Error"] = "Failed to save day reflection.";
+                    return View(model);
+                }
+
+                TempData["Success"] = "Day reflection saved successfully!";
+                return RedirectToAction("FollowingDashboard");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while saving the reflection.";
+                return View(model);
+            }
+        }
+
+        /// <summary>
+        /// Marks plan as complete and redirects to consent form.
+        /// POST: /MealPlanFollower/CompletePlan/{id}
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompletePlan(Guid id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            try
+            {
+
+                var follower = await _mealPlanFollowerService.GetFollowerDetailsAsync(user.Id, id);
+
+                if (follower == null)
+                {
+                    TempData["Error"] = "You are not following this meal plan.";
+                    return RedirectToAction("FollowingDashboard");
+                }
+
+                var success = await _mealPlanFollowerService.CompleteMealPlanAsync(user.Id, id);
+
+                if (success)
+                {
+                    TempData["SuccessMessage"] = "Congratulations! You've completed this meal plan!";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Could not mark meal plan as completed.";
+                }
+
+                // Update status to Completed
+                follower.Status = Data.Enums.MealPlanFollowerStatus.Completed;
+                follower.CompletedAt = DateTime.UtcNow;
+                follower.IsActive = false;
+                follower.UpdatedAt = DateTime.UtcNow;
+
+                await _mealPlanFollowerService.UpdateFollowerAsync(follower);
+
+                // Redirect to consent form
+                return RedirectToAction("CompletionConsent", new { mealPlanId = id });
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred while completing the plan.";
+                return RedirectToAction("FollowingDashboard");
+            }
+        }
+
+        /// <summary>
+        /// Dismisses the completion alert without completing the plan.
+        /// POST: /MealPlanFollower/DismissCompletionAlert/{id}
+        /// </summary>
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DismissCompletionAlert(Guid id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+                return RedirectToAction("Login", "Account");
+
+            try
+            {
+                var follower = await _mealPlanFollowerService.GetFollowerDetailsAsync(user.Id, id);
+
+                if (follower == null)
+                {
+                    TempData["Error"] = "You are not following this meal plan.";
+                    return RedirectToAction("FollowingDashboard");
+                }
+
+                await _mealPlanFollowerService.MarkCompletionPromptSeenAsync(user.Id, id);
+
+                TempData["Info"] = "You can mark the plan as complete whenever you're ready.";
+                return RedirectToAction("FollowingDashboard");
+            }
+            catch (Exception)
+            {
+                TempData["Error"] = "An error occurred.";
+                return RedirectToAction("FollowingDashboard");
+            }
+        }
     }
 }

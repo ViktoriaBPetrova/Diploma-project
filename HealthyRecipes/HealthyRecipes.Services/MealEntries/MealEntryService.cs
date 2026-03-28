@@ -37,7 +37,7 @@ namespace HealthyRecipes.Services.MealEntries
                     existingEntry.UpdatedAt = DateTime.UtcNow;
 
                     await _context.SaveChangesAsync();
-                    _logger.LogInformation("Updated meal entry {EntryId} for user {UserId} and meal {MealId}", 
+                    _logger.LogInformation("Updated meal entry {EntryId} for user {UserId} and meal {MealId}",
                         existingEntry.Id, userId, mealId);
                     return existingEntry.Id;
                 }
@@ -54,7 +54,7 @@ namespace HealthyRecipes.Services.MealEntries
                     await _context.Set<MealEntry>().AddAsync(newEntry);
                     await _context.SaveChangesAsync();
 
-                    _logger.LogInformation("Created meal entry {EntryId} for user {UserId} and meal {MealId}", 
+                    _logger.LogInformation("Created meal entry {EntryId} for user {UserId} and meal {MealId}",
                         newEntry.Id, userId, mealId);
                     return newEntry.Id;
                 }
@@ -88,8 +88,8 @@ namespace HealthyRecipes.Services.MealEntries
             {
                 return await _context.Set<MealEntry>()
                     .Include(me => me.Meal)
-                    .Where(me => me.UserId == userId 
-                              && me.Meal.MealPlanDayId == mealPlanDayId 
+                    .Where(me => me.UserId == userId
+                              && me.Meal.MealPlanDayId == mealPlanDayId
                               && !me.Deleted)
                     .OrderBy(me => me.Meal.Type)
                     .ToListAsync();
@@ -108,8 +108,8 @@ namespace HealthyRecipes.Services.MealEntries
                 return await _context.Set<MealEntry>()
                     .Include(me => me.Meal)
                         .ThenInclude(m => m.MealPlanDay)
-                    .Where(me => me.UserId == userId 
-                              && me.Meal.MealPlanDay.MealPlanId == mealPlanId 
+                    .Where(me => me.UserId == userId
+                              && me.Meal.MealPlanDay.MealPlanId == mealPlanId
                               && !me.Deleted)
                     .OrderBy(me => me.Meal.MealPlanDay.DayNumber)
                         .ThenBy(me => me.Meal.Type)
@@ -176,8 +176,8 @@ namespace HealthyRecipes.Services.MealEntries
             try
             {
                 var entries = await _context.Set<MealEntry>()
-                    .Where(me => me.UserId == userId 
-                              && me.Meal.MealPlanDay.MealPlanId == mealPlanId 
+                    .Where(me => me.UserId == userId
+                              && me.Meal.MealPlanDay.MealPlanId == mealPlanId
                               && !me.Deleted)
                     .ToListAsync();
 
@@ -188,7 +188,7 @@ namespace HealthyRecipes.Services.MealEntries
                 }
 
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Bulk updated visibility for {Count} meal entries in plan {MealPlanId} to {IsPublic}", 
+                _logger.LogInformation("Bulk updated visibility for {Count} meal entries in plan {MealPlanId} to {IsPublic}",
                     entries.Count, mealPlanId, isPublic);
 
                 return entries.Count;
@@ -196,6 +196,26 @@ namespace HealthyRecipes.Services.MealEntries
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error bulk updating visibility for meal plan {MealPlanId}", mealPlanId);
+                throw;
+            }
+        }
+
+        
+        public async Task<IEnumerable<MealEntry>> GetEntriesForMealsAsync(Guid userId, IEnumerable<Guid> mealIds)
+        {
+            try
+            {
+                return await _context.Set<MealEntry>()
+                    .Where(e => e.UserId == userId
+                             && mealIds.Contains(e.MealId)
+                             && !e.Deleted)
+                    .OrderBy(e => e.ConsumedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting meal entries for user {UserId}, meals {MealIds}",
+                    userId, string.Join(",", mealIds));
                 throw;
             }
         }

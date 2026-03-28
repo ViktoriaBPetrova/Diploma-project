@@ -70,5 +70,11 @@ namespace HealthyRecipes.Services.MealPlanFollowers
         /// Returns showcase for meal plan details page.
         /// </summary>
         Task<IEnumerable<MealPlanFollower>> GetCompletedShowcaseAsync(Guid mealPlanId);
+
+        /// <summary>
+        /// Updates an existing MealPlanFollower record.
+        /// Used for status changes, completion, consent updates, etc.
+        /// </summary>
+        Task<bool> UpdateFollowerAsync(MealPlanFollower follower);
     }
 }

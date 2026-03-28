@@ -40,5 +40,10 @@ namespace HealthyRecipes.Services.MealEntries
         /// Called when user changes consent after completion.
         /// </summary>
         Task<int> BulkUpdateVisibilityForMealPlanAsync(Guid userId, Guid mealPlanId, bool isPublic);
+
+        /// <summary>
+        /// Gets all meal entries for a list of meal IDs (for loading today's logged meals).
+        /// </summary>
+        Task<IEnumerable<MealEntry>> GetEntriesForMealsAsync(Guid userId, IEnumerable<Guid> mealIds);
     }
 }

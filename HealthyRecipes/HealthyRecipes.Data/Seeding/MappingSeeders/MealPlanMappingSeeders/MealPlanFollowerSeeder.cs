@@ -8,7 +8,7 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
 {
 
     /// <summary>
-    /// Generates MealPlanFollower seed data with Phase 2 consent fields.
+    /// Generates MealPlanFollower seed data with  consent fields.
     /// Users follow OTHER people's meal plans, not their own.
     /// 
     /// Following relationships:
@@ -21,7 +21,8 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
     {
         public static IEnumerable<MealPlanFollower> GenerateMealPlanFollowers()
         {
-            DateTime seedingDate = new DateTime(2025, 4, 20);
+            // Updated seeding date to March 28, 2026
+            DateTime seedingDate = new DateTime(2026, 3, 28);
 
             IEnumerable<MealPlanFollower> mealPlanFollowers = new List<MealPlanFollower>()
             {
@@ -30,18 +31,18 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
                 new MealPlanFollower(
                     Guid.Parse(UserConstants.User2Id), // Sarah
                     Guid.Parse(MealPlanConstants.UserMealPlanId), // John's Lean Bulk Plan (5 days)
-                    seedingDate.AddDays(-10) // Started 10 days ago
+                    seedingDate.AddDays(-10) // Started 9 days ago (March 18)
                 )
                 {
                     IsActive = false,
                     Status = MealPlanFollowerStatus.Completed,
-                    CompletedAt = seedingDate.AddDays(-5), // Completed 5 days ago
-                    ExpectedCompletionDate = seedingDate.AddDays(-10).AddDays(5), // Started -10, plan is 5 days = -5
+                    CompletedAt = seedingDate.AddDays(-6), // Completed 5 days ago (March 22)
+                    ExpectedCompletionDate = seedingDate.AddDays(-6), // Started -10, plan is 5 days = March 22
                     HasSeenCompletionPrompt = true,
                     // Sarah chose to share publicly
                     ShowOnProfileAsCompleted = true,
                     ShareJournalPublicly = true,
-                    ConsentGivenAt = seedingDate.AddDays(-5).AddHours(2) // 2 hours after completion
+                    ConsentGivenAt = seedingDate.AddDays(-6).AddHours(21).AddMinutes(30) // 2 hours after completion
                 },
  
                 // ========== MIKE FOLLOWS SARAH'S PLANT-BASED WEEK ==========
@@ -49,18 +50,18 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
                 new MealPlanFollower(
                     Guid.Parse(UserConstants.User3Id), // Mike
                     Guid.Parse(MealPlanConstants.SarahMealPlanId), // Sarah's Plant-Based Week (5 days)
-                    seedingDate.AddDays(-8) // Started 8 days ago
+                    seedingDate.AddDays(-8) // Started 7 days ago (March 20)
                 )
                 {
                     IsActive = false,
                     Status = MealPlanFollowerStatus.Dropped, // Dropped after Day 2
                     DropoutReason = "Plant-based diet wasn't compatible with my marathon training needs. Low energy on runs.",
-                    ExpectedCompletionDate = seedingDate.AddDays(-8).AddDays(5), // Started -8, plan is 5 days = -3
+                    ExpectedCompletionDate = seedingDate.AddDays(-4), // Started -8, plan is 5 days = March 24
                     HasSeenCompletionPrompt = true,
                     //Mike keeps everything private
                     ShowOnProfileAsCompleted = false,
                     ShareJournalPublicly = false,
-                    ConsentGivenAt = seedingDate.AddDays(-6).AddHours(1) // Dropped on Day 2
+                    ConsentGivenAt = seedingDate.AddDays(-7).AddHours(21) // Dropped on Day 2 (March 22)
                 },
  
                 // ========== EMMA FOLLOWS JOHN'S LEAN BULK PLAN ==========
@@ -68,12 +69,12 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
                 new MealPlanFollower(
                     Guid.Parse(UserConstants.User4Id), // Emma
                     Guid.Parse(MealPlanConstants.UserMealPlanId), // John's Lean Bulk Plan (5 days)
-                    seedingDate.AddDays(-3) // Started 3 days ago
+                    seedingDate.AddDays(-2) // Started 2 days ago (March 26)
                 )
                 {
                     IsActive = true,
                     Status = MealPlanFollowerStatus.Active,
-                    ExpectedCompletionDate = seedingDate.AddDays(-3).AddDays(5), // Started -3, plan is 5 days = +2
+                    ExpectedCompletionDate = seedingDate.AddDays(-2).AddDays(4), // Started -3, plan is 5 days = March 30
                     HasSeenCompletionPrompt = false,
                     // (not set yet - plan not completed)
                     ShowOnProfileAsCompleted = false,
@@ -86,12 +87,12 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders
                 new MealPlanFollower(
                     Guid.Parse(UserConstants.UserId), // John
                     Guid.Parse(MealPlanConstants.EmmaMealPlanId), // Emma's Balanced Nutrition Guide (5 days)
-                    seedingDate.AddDays(-3) // Started 3 days ago
+                    seedingDate.AddDays(-2) // Started 2 days ago (March 26)
                 )
                 {
                     IsActive = true,
                     Status = MealPlanFollowerStatus.Active,
-                    ExpectedCompletionDate = seedingDate.AddDays(-3).AddDays(5), // Started -3, plan is 5 days = +2
+                    ExpectedCompletionDate = seedingDate.AddDays(-2).AddDays(4), // Started -3, plan is 5 days = March 30
                     HasSeenCompletionPrompt = false,
                     // (not set yet - plan not completed)
                     ShowOnProfileAsCompleted = false,
