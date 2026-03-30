@@ -33,7 +33,7 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IRecipeIngredient _recipeIngredientService;
         private readonly IRecipeCategory _recipeCategoryService;
         private readonly ICommentRating _commentRatingService;
-        private readonly ISavedRecipe _savedRecipeService;
+        private readonly ISavedIngredients _savedRecipeService;
         private readonly IAllergy _allergyService;
         private readonly IRecipeStatistics _recipeStatisticsService;
         private readonly IRecommendation _recommendationService;
@@ -51,7 +51,7 @@ namespace HealthyRecipes.Web.Controllers
             IRecipeIngredient recipeIngredientService,
             IRecipeCategory recipeCategoryService,
             ICommentRating commentRatingService,
-            ISavedRecipe savedRecipeService,
+            ISavedIngredients savedRecipeService,
             IAllergy allergyService,
             IRecipeStatistics recipeStatisticsService,
             IRecommendation recommendationService,
@@ -93,7 +93,7 @@ namespace HealthyRecipes.Web.Controllers
                 }
 
                 // Map ViewModel to DTO
-                var filterDto = new RecipeFilterDto
+                var filterDto = new IngredientFilterDto
                 {
                     SearchTerm = filter.SearchTerm,
                     MinCalories = filter.MinCalories,
@@ -231,6 +231,7 @@ namespace HealthyRecipes.Web.Controllers
             }
         }
 
+      
         // GET: /Recipe/Details/{id}
         public async Task<IActionResult> Details(Guid id)
         {
@@ -318,27 +319,6 @@ namespace HealthyRecipes.Web.Controllers
             };
 
             return View(vm);
-        }
-
-        // GET: /Recipe/SearchIngredients
-        [HttpGet]
-        public async Task<IActionResult> SearchIngredients(string term)
-        {
-            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
-            {
-                return Json(new List<object>());
-            }
-
-            var ingredients = await _ingredientService.SearchIngredientsAsync(term);
-
-            var results = ingredients.Select(i => new
-            {
-                id = i.Id.ToString(),
-                name = i.Name,
-                caloriesPer100g = i.CaloriesPer100g
-            }).ToList();
-
-            return Json(results);
         }
 
         // GET: /Recipe/Create
@@ -850,6 +830,44 @@ namespace HealthyRecipes.Web.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // GET: /Recipe/SearchIngredients?term=chicken
+        // Used for autocomplete in Recipe Details, Create, Edit pages
+        [HttpGet]
+        public async Task<IActionResult> SearchIngredients([FromQuery] string term)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(term))
+                    return Json(new List<object>());
+
+                var user = await _userManager.GetUserAsync(User);
+
+                // This method checks DB first, then API automatically - user sees combined results
+                var ingredients = await _ingredientService.SearchIngredientsWithApiAsync(
+                    term,
+                    maxResults: 10,
+                    userId: user?.Id
+                );
+
+                var results = ingredients.Select(i => new
+                {
+                    id = i.Id,
+                    name = i.Name,
+                    brand = i.Brand,
+                    caloriesPer100g = i.CaloriesPer100g, // Match the JS expectation (line 626)
+                    proteinPer100g = i.ProteinPer100g,
+                    carbsPer100g = i.CarbsPer100g,
+                    fatPer100g = i.FatPer100g
+                }).ToList();
+
+                return Json(results);
+            }
+            catch (Exception)
+            {
+                return Json(new List<object>());
             }
         }
 

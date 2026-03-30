@@ -13,12 +13,12 @@ namespace HealthyRecipes.Web.Controllers
     {
 
         private readonly IRecipe _recipeService;
-        private readonly ISavedRecipe _savedRecipeService;
+        private readonly ISavedIngredients _savedRecipeService;
         private readonly UserManager<ApplicationUser> _userManager;
 
         public ApiController(
             IRecipe recipeService,
-            ISavedRecipe savedRecipeService,
+            ISavedIngredients savedRecipeService,
             UserManager<ApplicationUser> userManager)
         {
             _recipeService = recipeService;

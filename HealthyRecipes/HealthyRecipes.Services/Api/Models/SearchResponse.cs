@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace HealthyRecipes.Services.Api.Models
 {
-    public class ApiResponse
+    public class SearchResponse
     {
-        public int Status { get; set; }
-        public string StatusVerbose { get; set; } = string.Empty;
-        public Product? Product { get; set; }
+        public int Count { get; set; }
+        public int Page { get; set; }
+        public List<Product> Products { get; set; } = new();
     }
 }
