@@ -1,5 +1,4 @@
 using HealthyRecipes.Data.Entities;
-using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.GroceryLists;
 using HealthyRecipes.Services.MealPlanDays;
@@ -8,10 +7,7 @@ using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.MealPlans.Models;
 using HealthyRecipes.Services.Meals;
 using HealthyRecipes.Services.RecipeMeals;
-using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.SavedMealPlans;
-using HealthyRecipes.Services.SavedRecipes;
-using HealthyRecipes.Services.Users;
 using HealthyRecipes.Web.Models.MealPlan;
 using HealthyRecipes.Web.ViewModels.MealPlan;
 using Microsoft.AspNetCore.Authorization;

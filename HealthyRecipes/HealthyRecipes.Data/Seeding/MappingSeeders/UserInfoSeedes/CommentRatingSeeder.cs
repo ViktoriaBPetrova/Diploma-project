@@ -219,7 +219,80 @@ namespace HealthyRecipes.Data.Seeding.MappingSeeders.UserInfoSeedes
                     Comment = CommentRatingConstants.Reply5Text,
                     ParentCommentId = Guid.Parse(CommentRatingConstants.Comment11Id), // Reply to Sarah's comment
                     IsPinned = false
-                }
+                },
+
+                // ========== PROBLEMATIC COMMENTS (for Admin Moderation Testing) ==========
+ 
+// Spam Comment 1: Mike posts spam on Grilled Salmon - Will be auto-flagged (PENDING)
+new CommentRating(RecipeConstants.GrilledSalmonQuinoaId, UserConstants.User3Id, seedingDate.AddDays(1))
+{
+    Id = Guid.Parse(CommentRatingConstants.SpamComment1Id),
+    Rating = CommentRatingConstants.SpamComment1Rating,
+    Comment = CommentRatingConstants.SpamComment1Text,
+    ParentCommentId = null,
+    IsPinned = false
+},
+ 
+// Spam Comment 2: Sarah posts promotional spam on Buddha Bowl - Will be user-reported (PENDING)
+new CommentRating(RecipeConstants.BuddhaBowlId, UserConstants.User2Id, seedingDate.AddDays(1).AddHours(2))
+{
+    Id = Guid.Parse(CommentRatingConstants.SpamComment2Id),
+    Rating = null,
+    Comment = CommentRatingConstants.SpamComment2Text,
+    ParentCommentId = null,
+    IsPinned = false
+},
+ 
+// Harassment Comment: Mike harasses Sarah on Chicken Rice Bowl - Will be reported (UNDER REVIEW)
+// This is a reply to Sarah's Comment8
+new CommentRating(RecipeConstants.ChickenRiceBowlId, UserConstants.User3Id, seedingDate.AddDays(1).AddHours(4))
+{
+    Id = Guid.Parse(CommentRatingConstants.HarassmentComment1Id),
+    Rating = null,
+    Comment = CommentRatingConstants.HarassmentComment1Text,
+    ParentCommentId = Guid.Parse(CommentRatingConstants.Comment8Id), // Reply to Sarah's comment
+    IsPinned = false
+},
+ 
+// Misinformation Comment: Mike posts dangerous health claims on Grilled Salmon - Will be resolved (USER WARNED)
+new CommentRating(RecipeConstants.GrilledSalmonQuinoaId, UserConstants.User3Id, seedingDate.AddDays(1).AddHours(6))
+{
+    Id = Guid.Parse(CommentRatingConstants.MisinfoComment1Id),
+    Rating = CommentRatingConstants.MisinfoComment1Rating,
+    Comment = CommentRatingConstants.MisinfoComment1Text,
+    ParentCommentId = null,
+    IsPinned = false
+},
+ 
+// Mild Negative Comment: Sarah posts mildly negative comment on Overnight Oats - Will be under review
+new CommentRating(RecipeConstants.OvernightOatsId, UserConstants.User2Id, seedingDate.AddDays(1).AddHours(8))
+{
+    Id = Guid.Parse(CommentRatingConstants.MildNegativeComment1Id),
+    Rating = CommentRatingConstants.MildNegativeComment1Rating,
+    Comment = CommentRatingConstants.MildNegativeComment1Text,
+    ParentCommentId = null,
+    IsPinned = false
+},
+ 
+// Toxic Comment: Mike posts multiple banned words on Mediterranean Salad - Will be auto-flagged (PENDING)
+new CommentRating(RecipeConstants.MediterraneanSaladId, UserConstants.User3Id, seedingDate.AddDays(1).AddHours(10))
+{
+    Id = Guid.Parse(CommentRatingConstants.ToxicComment1Id),
+    Rating = CommentRatingConstants.ToxicComment1Rating,
+    Comment = CommentRatingConstants.ToxicComment1Text,
+    ParentCommentId = null,
+    IsPinned = false
+},
+ 
+// Promotional Comment: Sarah posts self-promotion on Veggie Omelette - Will be user-reported
+new CommentRating(RecipeConstants.VeggieOmeletteId, UserConstants.User2Id, seedingDate.AddDays(1).AddHours(12))
+{
+    Id = Guid.Parse(CommentRatingConstants.PromoComment1Id),
+    Rating = CommentRatingConstants.PromoComment1Rating,
+    Comment = CommentRatingConstants.PromoComment1Text,
+    ParentCommentId = null,
+    IsPinned = false
+}
 
 
             };

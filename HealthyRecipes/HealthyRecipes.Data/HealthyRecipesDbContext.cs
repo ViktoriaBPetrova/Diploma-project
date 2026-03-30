@@ -1,8 +1,11 @@
 ﻿using HealthyRecipes.Data.Configs;
+using HealthyRecipes.Data.Configurations.Admin;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Data.Entities.Admin;
 using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using HealthyRecipes.Data.Seeding;
+using HealthyRecipes.Data.Seeding.Admin;
 using HealthyRecipes.Data.Seeding.Identity;
 using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanFollowerSeeders;
 using HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanMappingSeeders;
@@ -52,9 +55,15 @@ namespace HealthyRecipes.Data
         public DbSet<Allergy> Allergies { get; init; } = null!;
         public DbSet<CommentRating> CommentRatings { get; init; } = null!;
 
+        //Admin Moderation
+        public DbSet<ActivityLog> ActivityLogs { get; set; } = null!;
+        public DbSet<BannedWord> BannedWords { get; set; } = null!;
+        public DbSet<FlaggedContent> FlaggedContents { get; set; } = null!;
+        public DbSet<UserWarning> UserWarnings { get; set; } = null!;
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            
+
             builder.ApplyConfiguration(new ApplicationUserConfig());
             builder.ApplyConfiguration(new RecipeCategoryConfig());
             builder.ApplyConfiguration(new MealPlanCategoryConfig());
@@ -69,6 +78,10 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new MealPlanFollowerConfig());
             builder.ApplyConfiguration(new MealEntryConfig());
             builder.ApplyConfiguration(new MealPlanDayEntryConfig());
+            builder.ApplyConfiguration(new ActivityLogConfiguration());
+            builder.ApplyConfiguration(new BannedWordConfiguration());
+            builder.ApplyConfiguration(new FlaggedContentConfiguration());
+            builder.ApplyConfiguration(new UserWarningConfiguration());
 
             // USER SEEDING
             var users = UserSeeder.GenerateUsers().ToArray();
@@ -118,7 +131,27 @@ namespace HealthyRecipes.Data
             var userRoles = UserRoleSeeder.GenerateUserRoles().ToArray();
             builder.Entity<IdentityUserRole<Guid>>().HasData(userRoles);
 
+
+            //ADMIN
+            //BannedWords (no dependencies)
+            var bannedWords = BannedWordSeeder.GenerateBannedWords().ToArray();
+            builder.Entity<BannedWord>().HasData(bannedWords);
+
+            
+            //FlaggedContent (depends on Users - already seeded)
+            FlaggedContentSeeder.SeedFlaggedContent(builder);
+
+            
+            //UserWarnings (depends on Users and FlaggedContent)
+            UserWarningSeeder.SeedUserWarnings(builder);
+
+            
+            //ActivityLogs (depends on Users - already seeded)
+            ActivityLogSeeder.SeedActivityLogs(builder);
+            
             base.OnModelCreating(builder);
+
+           
 
         }
     }

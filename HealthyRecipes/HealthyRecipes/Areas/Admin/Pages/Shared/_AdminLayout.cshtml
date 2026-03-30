@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Admin Panel</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/admin-moderation.css" asp-append-version="true" />
 </head>
 <body>
     <header class="admin-header">
@@ -31,6 +32,15 @@
                 </a>
                 <a asp-page="/Reports/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Reports") == true ? "active" : "")">
                     📈 Reports
+                </a>
+                <a asp-page="/ActivityLogs/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Logs") == true ? "active" : "")">
+                    📋 Activity Logs
+                </a>
+                <a asp-page="/BannedWords/Index" asp-area="Admin" class="admin-nav-link">
+                    🚫 Banned Words
+                </a>
+                <a asp-page="/FlaggedContent/Index" asp-area="Admin" class="admin-nav-link">
+                    ⚠️ Flagged Content
                 </a>
             </div>
 

@@ -31,7 +31,11 @@
                     <a asp-controller="MealPlanFollower" asp-action="MyActivePlans" asp-area="">My Active Plans</a>
                     <a asp-controller="MealPlanFollower" asp-action="FollowingDashboard">Following</a>
                     <a asp-controller="Recipe" asp-action="Recommended" class="nav-link">For You</a>
-                }    
+                }  
+                @if (User.Identity?.AuthenticationType == "Admin")
+                {
+                    <a asp-area="Admin" asp-page="Index" class="nav-link">Dashboard</a>
+                }
                 <a asp-controller="Recipe" asp-action="Index">Recipes</a>
                 <a asp-controller="MealPlan" asp-action="Index">Meal Plans</a>
                 <a asp-controller="Ingredient" asp-action="Index">Ingredients</a>

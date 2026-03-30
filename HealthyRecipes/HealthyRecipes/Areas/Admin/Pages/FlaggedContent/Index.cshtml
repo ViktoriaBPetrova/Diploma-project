@@ -1,0 +1,198 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.FlaggedContent.IndexModel
+@using HealthyRecipes.Data.Entities.Admin
+@{
+    ViewData["Title"] = "Flagged Content";
+}
+
+<div class="page-header">
+    <h1>Flagged Content Review</h1>
+    <p>Review and moderate flagged content</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-label">⚠️ Pending Review</div>
+        <div class="stat-value" style="color: #f59e0b;">@Model.ViewModel.PendingCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Total Flags</div>
+        <div class="stat-value">@Model.ViewModel.TotalCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Current Filter</div>
+        <div class="stat-value" style="font-size: 1.25rem;">
+            @(Model.ViewModel.Filter.Status?.ToString() ?? "All")
+        </div>
+    </div>
+</div>
+
+<div class="admin-card" style="margin-bottom: 24px;">
+    <h3>Filters</h3>
+    <form method="get" class="filter-form">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" class="form-control">
+                    <option value="">All Statuses</option>
+                    @foreach (FlagStatus status in Enum.GetValues(typeof(FlagStatus)))
+                    {
+                        <option value="@((int)status)" selected="@(Model.ViewModel.Filter.Status == status)">
+                            @status.ToString()
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Reason</label>
+                <select name="reason" class="form-control">
+                    <option value="">All Reasons</option>
+                    @foreach (FlagReason reason in Enum.GetValues(typeof(FlagReason)))
+                    {
+                        <option value="@((int)reason)" selected="@(Model.ViewModel.Filter.Reason == reason)">
+                            @reason.ToString()
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Content Type</label>
+                <select name="contentType" class="form-control">
+                    <option value="">All Types</option>
+                    <option value="Comment" selected="@(Model.ViewModel.Filter.ContentType == "Comment")">Comment</option>
+                    <option value="Recipe" selected="@(Model.ViewModel.Filter.ContentType == "Recipe")">Recipe</option>
+                    <option value="MealPlan" selected="@(Model.ViewModel.Filter.ContentType == "MealPlan")">Meal Plan</option>
+                </select>
+            </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 12px;">
+            <button type="submit" class="btn-primary">Apply Filters</button>
+            <a asp-area="Admin" asp-page="/FlaggedContent/Index" class="btn-ghost">Clear Filters</a>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <h3>Flagged Content (@Model.ViewModel.TotalCount items)</h3>
+
+    @if (Model.ViewModel.Items.Any())
+    {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Content Type</th>
+                    <th>Preview</th>
+                    <th>Author</th>
+                    <th>Reason</th>
+                    <th>Reported By</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ViewModel.Items)
+                {
+                    <tr>
+                        <td style="white-space: nowrap;">
+                            @item.CreatedAt.ToString("MMM dd, yyyy")
+                            <div style="font-size: 0.85rem; color: #666;">@item.CreatedAt.ToString("HH:mm")</div>
+                        </td>
+                        <td>
+                            <span class="badge-sm">@item.ContentType</span>
+                        </td>
+                        <td style="max-width: 300px;">
+                            <div style="font-size: 0.9rem; line-height: 1.4;">
+                                @item.ContentPreview
+                            </div>
+                            @if (!string.IsNullOrEmpty(item.MatchedBannedWords))
+                            {
+                                <div style="margin-top: 4px; font-size: 0.85rem; color: #dc2626;">
+                                    🚫 Matched: <strong>@item.MatchedBannedWords</strong>
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            <div>@item.ContentAuthorName</div>
+                            <div style="font-size: 0.85rem; color: #666;">@item.ContentAuthorEmail</div>
+                        </td>
+                        <td>
+                            <strong>@item.ReasonDisplay</strong>
+                            @if (!string.IsNullOrEmpty(item.Details))
+                            {
+                                <div style="font-size: 0.85rem; color: #666; margin-top: 2px;">
+                                    @item.Details
+                                </div>
+                            }
+                        </td>
+                        <td>
+                            @if (item.IsAutoFlagged)
+                            {
+                                <span style="color: #666; font-style: italic;">Auto-flagged</span>
+                            }
+                            else
+                            {
+                                <span>@item.ReportedByUserName</span>
+                            }
+                        </td>
+                        <td>
+                            <span class="status-badge @item.StatusBadgeClass">
+                                @item.StatusDisplay
+                            </span>
+                        </td>
+                        <td>
+                            <a asp-page="/FlaggedContent/Review" asp-route-id="@item.Id" class="btn-action">
+                                Review
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (Model.ViewModel.TotalPages > 1)
+        {
+            <div class="pagination" style="margin-top: 24px;">
+                @if (Model.ViewModel.CurrentPage > 1)
+                {
+                    <a asp-page="/FlaggedContent/Index" 
+                       asp-route-page="@(Model.ViewModel.CurrentPage - 1)"
+                       asp-route-status="@Model.ViewModel.Filter.Status"
+                       asp-route-reason="@Model.ViewModel.Filter.Reason"
+                       asp-route-contentType="@Model.ViewModel.Filter.ContentType"
+                       class="pagination-btn">← Previous</a>
+                }
+
+                <span class="pagination-info">
+                    Page @Model.ViewModel.CurrentPage of @Model.ViewModel.TotalPages
+                </span>
+
+                @if (Model.ViewModel.CurrentPage < Model.ViewModel.TotalPages)
+                {
+                    <a asp-page="/FlaggedContent/Index" 
+                       asp-route-page="@(Model.ViewModel.CurrentPage + 1)"
+                       asp-route-status="@Model.ViewModel.Filter.Status"
+                       asp-route-reason="@Model.ViewModel.Filter.Reason"
+                       asp-route-contentType="@Model.ViewModel.Filter.ContentType"
+                       class="pagination-btn">Next →</a>
+                }
+            </div>
+        }
+    }
+    else
+    {
+        <p style="text-align: center; color: #666; padding: 40px;">
+            @if (Model.ViewModel.Filter.Status == FlagStatus.Pending)
+            {
+                <span>🎉 No pending flags! All clear.</span>
+            }
+            else
+            {
+                <span>No flagged content found matching your filters.</span>
+            }
+        </p>
+    }
+</div>

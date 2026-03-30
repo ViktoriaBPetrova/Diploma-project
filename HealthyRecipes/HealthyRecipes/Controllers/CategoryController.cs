@@ -4,7 +4,7 @@ using HealthyRecipes.Web.ViewModels.Category;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using HealthyRecipes.Web.ViewModels.Category;
+
 
 namespace HealthyRecipes.Web.Controllers
 {

@@ -1,11 +1,11 @@
 using HealthyRecipes.Data.Entities;
-using HealthyRecipes.Services.Users;
-using HealthyRecipes.Services.Recipes;
-using HealthyRecipes.Services.MealPlans;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using HealthyRecipes.Services.MealPlans;
+using HealthyRecipes.Services.Recipes;
+using HealthyRecipes.Services.Users;
 
 namespace HealthyRecipes.Web.Areas.Admin.Pages.Users
 {

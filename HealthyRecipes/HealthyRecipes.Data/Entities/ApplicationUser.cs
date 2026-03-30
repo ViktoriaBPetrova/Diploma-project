@@ -1,4 +1,5 @@
-﻿using HealthyRecipes.Data.Entities.MappingEntities;
+﻿using HealthyRecipes.Data.Entities.Admin;
+using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
 using Microsoft.AspNetCore.Identity;
 using System;
@@ -29,6 +30,13 @@ namespace HealthyRecipes.Data.Entities
             CreatedMealPlans  = new List<MealPlan>();
             MealPlanDayEntries = new List<MealPlanDayEntry>();
             MealEntries = new List<MealEntry>();
+            ActivityLogs = new List<ActivityLog>();
+            CreatedBannedWords = new List<BannedWord>();
+            FlaggedContentAsAuthor = new List<FlaggedContent>();
+            FlaggedContentReported = new List<FlaggedContent>();
+            FlaggedContentReviewed = new List<FlaggedContent>();
+            WarningsReceived = new List<UserWarning>();
+            WarningsIssued = new List<UserWarning>();
         }
         public ApplicationUser(DateTime createdAt):this()
         {
@@ -70,6 +78,13 @@ namespace HealthyRecipes.Data.Entities
         public IEnumerable<MealPlan> CreatedMealPlans { get; set; }
         public IEnumerable<MealPlanDayEntry> MealPlanDayEntries { get; set; }
         public IEnumerable<MealEntry> MealEntries { get; set; }
+        public IEnumerable<ActivityLog> ActivityLogs { get; set; }
+        public IEnumerable<BannedWord> CreatedBannedWords { get; set; }
+        public IEnumerable<FlaggedContent> FlaggedContentAsAuthor { get; set; }
+        public IEnumerable<FlaggedContent> FlaggedContentReported { get; set; }
+        public IEnumerable<FlaggedContent> FlaggedContentReviewed { get; set; } 
+        public IEnumerable<UserWarning> WarningsReceived { get; set; } 
+        public IEnumerable<UserWarning> WarningsIssued { get; set; }
 
 
         // ---------- Metadata ----------

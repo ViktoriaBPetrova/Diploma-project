@@ -1,0 +1,322 @@
+/* Admin Moderation Styles */
+
+/* Status badges for different severity levels */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.status-info {
+    background: #e0f2fe;
+    color: #0369a1;
+}
+
+.status-low {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.status-medium {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-high {
+    background: #fed7aa;
+    color: #c2410c;
+}
+
+.status-critical {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Severity badges for banned words */
+.severity-low {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.severity-medium {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.severity-high {
+    background: #fed7aa;
+    color: #c2410c;
+}
+
+.severity-critical {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+/* Flag status badges */
+.status-pending {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.status-review {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-resolved {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.status-dismissed {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+/* Other status badges */
+.status-active {
+    background: #d1fae5;
+    color: #047857;
+}
+
+.status-inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.status-deleted {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+/* Small badges */
+.badge-sm {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* Filter form styling */
+.filter-form {
+    padding: 16px;
+    background: #fafaf9;
+    border-radius: 8px;
+}
+
+.filter-form .form-group {
+    margin-bottom: 0;
+}
+
+.filter-form label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #44403c;
+    margin-bottom: 4px;
+}
+
+/* Alert messages */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 0.9rem;
+}
+
+.alert-success {
+    background: #d1fae5;
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+}
+
+.alert-warning {
+    background: #fef3c7;
+    color: #78350f;
+    border: 1px solid #fcd34d;
+}
+
+.alert-danger {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fca5a5;
+}
+
+/* Admin table enhancements */
+.admin-table {
+    font-size: 0.9rem;
+}
+
+.admin-table th {
+    font-weight: 600;
+    color: #44403c;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.025em;
+}
+
+.admin-table td {
+    vertical-align: top;
+}
+
+.admin-table code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85em;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    background: var(--parchment);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--charcoal);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.pagination-btn:hover {
+    background: var(--forest);
+    color: white;
+    border-color: var(--forest);
+}
+
+.pagination-info {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Stat cards for admin dashboard */
+.stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: #666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--forest);
+}
+
+/* Action buttons */
+.btn-action {
+    padding: 6px 12px;
+    background: var(--parchment);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--charcoal);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.btn-action:hover {
+    background: var(--sage);
+    border-color: var(--forest);
+}
+
+.btn-action.btn-danger {
+    background: #fef2f2;
+    border-color: #fca5a5;
+    color: #dc2626;
+}
+
+.btn-action.btn-danger:hover {
+    background: #fee2e2;
+    border-color: #dc2626;
+}
+
+/* Page header styling */
+.page-header {
+    margin-bottom: 32px;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: var(--forest);
+    margin: 0 0 8px 0;
+}
+
+.page-header p {
+    color: #666;
+    margin: 0;
+    font-size: 1rem;
+}
+
+/* Form control overrides for admin */
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--forest);
+    box-shadow: 0 0 0 3px rgba(45, 80, 22, 0.1);
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: var(--charcoal);
+    font-size: 0.9rem;
+}
+
+/* Highlighted content for flagged items */
+.content-preview {
+    background: #fafaf9;
+    padding: 12px;
+    border-left: 3px solid var(--border);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    max-width: 600px;
+}
+
+.content-preview.flagged {
+    border-left-color: #f59e0b;
+    background: #fffbeb;
+}
+
+/* Admin stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+}

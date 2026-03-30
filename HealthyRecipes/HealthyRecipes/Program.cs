@@ -1,5 +1,8 @@
 ﻿using HealthyRecipes.Data;
 using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Services.Admin;
+using HealthyRecipes.Services.Admin.Helpers;
+using HealthyRecipes.Services.Admin.Interfaces;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Api;
 using HealthyRecipes.Services.Categories;
@@ -99,6 +102,15 @@ builder.Services.AddScoped<IMealEntry, MealEntryService>();
 builder.Services.AddScoped<IMealPlanDayEntry, MealPlanDayEntryService>();
 builder.Services.AddScoped<IRecommendation, RecommendationService>();
 builder.Services.AddScoped<IFileUpload, FileUploadService>();
+// Admin Moderation Services
+builder.Services.AddScoped<IActivityLog, ActivityLogService>();
+builder.Services.AddScoped<IContentFilter, ContentFilterService>();
+builder.Services.AddScoped<IFlaggedContent, FlaggedContentService>();
+builder.Services.AddScoped<IUserModeration, UserModerationService>();
+builder.Services.AddScoped<ActivityLogHelper>();
+// Required for activity logging
+builder.Services.AddHttpContextAccessor();
+//GroceryList API
 builder.Services.AddScoped<IGroceryList, GroceryListService>();
 builder.Services.AddScoped<MockStoreApiService>();
 builder.Services.AddScoped<PriceBarometerApiService>();

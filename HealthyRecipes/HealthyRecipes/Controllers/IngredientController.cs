@@ -1,8 +1,8 @@
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Enums;
-using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.Ingredients;
+using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Web.ViewModels.Ingredient;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;

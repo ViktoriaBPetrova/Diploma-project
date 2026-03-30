@@ -1,0 +1,164 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.BannedWords.IndexModel
+@using HealthyRecipes.Data.Entities.Admin
+@{
+    ViewData["Title"] = "Banned Words Management";
+}
+
+<div class="page-header">
+    <h1>Banned Words Management</h1>
+    <p>Manage the content filtering dictionary</p>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-label">Total Words</div>
+        <div class="stat-value">@Model.ViewModel.TotalCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Active</div>
+        <div class="stat-value" style="color: var(--forest);">@Model.ViewModel.ActiveCount</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Inactive</div>
+        <div class="stat-value" style="color: #999;">@Model.ViewModel.InactiveCount</div>
+    </div>
+</div>
+
+<div class="admin-card" style="margin-bottom: 24px;">
+    <h3>Add New Banned Word</h3>
+    <form method="post" asp-page-handler="Create">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 2fr auto; gap: 12px; align-items: end;">
+            <div class="form-group">
+                <label asp-for="CreateModel.Word">Word or Phrase</label>
+                <input asp-for="CreateModel.Word" class="form-control" placeholder="Enter word to ban..." required />
+                <span asp-validation-for="CreateModel.Word" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CreateModel.Severity">Severity</label>
+                <select asp-for="CreateModel.Severity" class="form-control">
+                    @foreach (WordSeverity severity in Enum.GetValues(typeof(WordSeverity)))
+                    {
+                        <option value="@severity">@severity</option>
+                    }
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <div style="display: flex; align-items: center; height: 40px;">
+                    <input asp-for="CreateModel.IsRegexPattern" type="checkbox" style="margin-right: 8px;" />
+                    <label asp-for="CreateModel.IsRegexPattern" style="margin: 0; font-weight: normal;">Regex</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="CreateModel.Description">Description (optional)</label>
+                <input asp-for="CreateModel.Description" class="form-control" placeholder="Why is this banned..." />
+            </div>
+
+            <div>
+                <button type="submit" class="btn-primary" style="height: 40px;">Add Word</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="admin-card">
+    <h3>Banned Words (@Model.ViewModel.TotalCount)</h3>
+
+    @if (Model.ViewModel.Words.Any())
+    {
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Word/Pattern</th>
+                    <th>Severity</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th>Added By</th>
+                    <th>Date Added</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var word in Model.ViewModel.Words.OrderByDescending(w => w.IsActive).ThenBy(w => w.Word))
+                {
+                    <tr style="@(!word.IsActive ? "opacity: 0.5;" : "")">
+                        <td>
+                            <code style="background: #f5f5f5; padding: 2px 6px; border-radius: 4px;">@word.Word</code>
+                        </td>
+                        <td>
+                            <span class="status-badge @word.SeverityBadgeClass">
+                                @word.SeverityDisplay
+                            </span>
+                        </td>
+                        <td>
+                            @if (word.IsRegexPattern)
+                            {
+                                <span class="badge-sm" style="background: #e3f2fd; color: #1976d2;">Regex</span>
+                            }
+                            else
+                            {
+                                <span class="badge-sm" style="background: #f5f5f5; color: #666;">Exact</span>
+                            }
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(word.Description))
+                            {
+                                <span>@word.Description</span>
+                            }
+                            else
+                            {
+                                <span style="color: #999;">—</span>
+                            }
+                        </td>
+                        <td>@word.CreatedByUserName</td>
+                        <td>@word.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            @if (word.IsActive)
+                            {
+                                <span class="status-badge status-active">Active</span>
+                            }
+                            else
+                            {
+                                <span class="status-badge status-inactive">Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            <div style="display: flex; gap: 8px;">
+                                <form method="post" asp-page-handler="ToggleStatus" asp-route-id="@word.Id" style="display: inline;">
+                                    <button type="submit" class="btn-action">
+                                        @(word.IsActive ? "Disable" : "Enable")
+                                    </button>
+                                </form>
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@word.Id" style="display: inline;">
+                                    <button type="submit" class="btn-action btn-danger" onclick="return confirm('Delete this banned word?')">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p style="text-align: center; color: #666; padding: 40px;">No banned words configured yet.</p>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

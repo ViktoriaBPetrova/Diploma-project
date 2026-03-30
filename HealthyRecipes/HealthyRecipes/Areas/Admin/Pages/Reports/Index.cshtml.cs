@@ -1,9 +1,9 @@
 using HealthyRecipes.Data;
-using HealthyRecipes.Services.Users;
-using HealthyRecipes.Services.Recipes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using HealthyRecipes.Services.Recipes;
+using HealthyRecipes.Services.Users;
 
 namespace HealthyRecipes.Web.Areas.Admin.Pages.Reports
 {

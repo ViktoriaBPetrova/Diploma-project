@@ -4,6 +4,7 @@ using HealthyRecipes.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyRecipes.Data.Migrations
 {
     [DbContext(typeof(HealthyRecipesDbContext))]
-    partial class HealthyRecipesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260330010234_AddSeedUserWarnings")]
+    partial class AddSeedUserWarnings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,144 +80,6 @@ namespace HealthyRecipes.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ActivityLogs");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            ActivityType = 1,
-                            ChangesSummary = "Created new recipe: Healthy Chicken & Rice Bowl",
-                            CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("f2d6e3b9-9d5a-4b28-9c6f-8e0f3a7b6101"),
-                            EntityName = "Healthy Chicken & Rice Bowl",
-                            EntityType = "Recipe",
-                            IpAddress = "192.168.1.10",
-                            Severity = 1,
-                            UserId = new Guid("e8a7c3b4-1f5d-4a6c-9b2e-7c3d5f8a9b01")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000002"),
-                            ActivityType = 1,
-                            ChangesSummary = "Created new recipe: Grilled Salmon with Lemon Quinoa",
-                            CreatedAt = new DateTime(2025, 4, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("a3c7d4e5-8f9a-4b1c-2d3e-4f5a6b7c8d9e"),
-                            EntityName = "Grilled Salmon with Lemon Quinoa",
-                            EntityType = "Recipe",
-                            IpAddress = "192.168.1.11",
-                            Severity = 1,
-                            UserId = new Guid("e7a1c5d6-4b8f-4c9e-9d5a-0e6f8b2c3d34")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000003"),
-                            ActivityType = 2,
-                            ChangesSummary = "Updated recipe: Changed prep time from 25 to 30 minutes",
-                            CreatedAt = new DateTime(2025, 5, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("f2d6e3b9-9d5a-4b28-9c6f-8e0f3a7b6101"),
-                            EntityName = "Healthy Chicken & Rice Bowl",
-                            EntityType = "Recipe",
-                            IpAddress = "192.168.1.10",
-                            Severity = 2,
-                            UserId = new Guid("e8a7c3b4-1f5d-4a6c-9b2e-7c3d5f8a9b01")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000004"),
-                            ActivityType = 9,
-                            ChangesSummary = "Posted comment on recipe: Grilled Salmon with Lemon Quinoa",
-                            CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("10000000-0000-0000-0000-000000000009"),
-                            EntityName = "Comment on Grilled Salmon with Lemon Quinoa",
-                            EntityType = "Comment",
-                            IpAddress = "192.168.1.13",
-                            Severity = 1,
-                            UserId = new Guid("c5e8a3b4-2f6d-4a7c-9b3e-8c4d6f9a0b12")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000005"),
-                            ActivityType = 9,
-                            ChangesSummary = "Posted comment on recipe: Healthy Chicken & Rice Bowl",
-                            CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            EntityName = "Comment on Healthy Chicken & Rice Bowl",
-                            EntityType = "Comment",
-                            IpAddress = "192.168.1.12",
-                            Severity = 1,
-                            UserId = new Guid("d6f9b4c5-3a7e-4b8d-9c4f-9d5e7a1b2c23")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000006"),
-                            ActivityType = 15,
-                            ChangesSummary = "Banned words detected: spam, scam",
-                            CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            EntityName = "Comment flagged for banned words",
-                            EntityType = "Comment",
-                            IpAddress = "192.168.1.50",
-                            Severity = 4
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000007"),
-                            ActivityType = 18,
-                            ChangesSummary = "Content auto-flagged for containing banned words (spam, scam)",
-                            CreatedAt = new DateTime(2026, 2, 24, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Deleted = false,
-                            EntityId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            EntityName = "Flagged comment for admin review",
-                            EntityType = "Comment",
-                            IpAddress = "192.168.1.50",
-                            Severity = 4
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000008"),
-                            ActivityType = 6,
-                            ChangesSummary = "Admin user logged in successfully",
-                            CreatedAt = new DateTime(2026, 2, 26, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Deleted = false,
-                            EntityId = new Guid("b4f6d2c1-3a8e-4b9c-9d0f-5a6b7c8d9e02"),
-                            EntityName = "user@nutritrack.com",
-                            EntityType = "User",
-                            IpAddress = "192.168.1.1",
-                            Severity = 1,
-                            UserId = new Guid("b4f6d2c1-3a8e-4b9c-9d0f-5a6b7c8d9e02")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000009"),
-                            ActivityType = 8,
-                            ChangesSummary = "Failed login attempt - incorrect password",
-                            CreatedAt = new DateTime(2026, 2, 27, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Deleted = false,
-                            EntityName = "unknown@example.com",
-                            EntityType = "User",
-                            IpAddress = "192.168.1.99",
-                            Severity = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000010"),
-                            ActivityType = 12,
-                            ChangesSummary = "Rated recipe: 5 stars (Delicious)",
-                            CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Deleted = false,
-                            EntityId = new Guid("a3c7d4e5-8f9a-4b1c-2d3e-4f5a6b7c8d9e"),
-                            EntityName = "Grilled Salmon with Lemon Quinoa",
-                            EntityType = "Recipe",
-                            IpAddress = "192.168.1.13",
-                            Severity = 1,
-                            UserId = new Guid("c5e8a3b4-2f6d-4a7c-9b3e-8c4d6f9a0b12")
-                        });
                 });
 
             modelBuilder.Entity("HealthyRecipes.Data.Entities.Admin.BannedWord", b =>

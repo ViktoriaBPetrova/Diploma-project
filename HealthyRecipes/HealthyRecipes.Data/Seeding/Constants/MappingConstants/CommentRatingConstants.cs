@@ -123,5 +123,42 @@ namespace HealthyRecipes.Data.Seeding.Constants.MappingConstants
 
         // Reply 5: Mike (author) replies to Sarah on Chicken Stir-Fry
         public const string Reply5Text = "Love that tofu swap idea! I've tried it with tempeh too and it works great.";
+
+        // ========== PROBLEMATIC COMMENT IDs (New - for moderation testing) ==========
+        public const string SpamComment1Id = "30000000-0000-0000-0000-000000000001";
+        public const string SpamComment2Id = "30000000-0000-0000-0000-000000000002";
+        public const string HarassmentComment1Id = "30000000-0000-0000-0000-000000000003";
+        public const string MisinfoComment1Id = "30000000-0000-0000-0000-000000000004";
+        public const string MildNegativeComment1Id = "30000000-0000-0000-0000-000000000005";
+        public const string ToxicComment1Id = "30000000-0000-0000-0000-000000000006";
+        public const string PromoComment1Id = "30000000-0000-0000-0000-000000000007";
+
+        // ========== PROBLEMATIC COMMENT TEXT ==========
+
+        // Spam Comment 1 - Contains "spam" and "scam" (Critical severity)
+        public const Rating SpamComment1Rating = Rating.Disgusting;
+        public const string SpamComment1Text = "This recipe is spam! Total scam, don't try it! Visit my website for real recipes!";
+
+        // Spam Comment 2 - Promotional link spam
+        public const string SpamComment2Text = "Check out my website for weight loss pills! www.spam-site.com - Get 50% off today!";
+
+        // Harassment Comment - Contains "idiot" and "stupid" (High severity)
+        public const string HarassmentComment1Text = "You're such an idiot for not liking this recipe. Stupid people like you shouldn't be commenting on food.";
+
+        // Misinformation Comment - Dangerous health claims
+        public const Rating MisinfoComment1Rating = Rating.Delicious;
+        public const string MisinfoComment1Text = "This salmon recipe will cure your diabetes! No need for insulin anymore! I threw away my medication after eating this!";
+
+        // Mild Negative Comment - Contains "lame" and "sucks" (Low severity)
+        public const Rating MildNegativeComment1Rating = Rating.Disgusting;
+        public const string MildNegativeComment1Text = "This recipe is lame and totally sucks. What a waste of time. Not worth trying at all.";
+
+        // Toxic Comment - Multiple banned words: "fake", "clickbait", "spam", "hate"
+        public const Rating ToxicComment1Rating = Rating.Disgusting;
+        public const string ToxicComment1Text = "Fake news! This is clickbait garbage. Pure spam. I hate it! Don't believe these lies!";
+
+        // Promotional Comment - Self-promotion spam
+        public const Rating PromoComment1Rating = Rating.Tasty;
+        public const string PromoComment1Text = "Good recipe but mine is better! Follow my Instagram @fitnessguru for REAL healthy recipes. Link in bio!";
     }
 }
