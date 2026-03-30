@@ -1,4 +1,4 @@
-/* Admin Moderation Styles */
+﻿/* Admin Moderation Styles */
 
 /* Status badges for different severity levels */
 .status-badge {
@@ -404,3 +404,173 @@
     background: #e5e7eb;
     color: #374151;
 }
+
+
+
+/* ── Admin Header & Navigation (matching main site style) ─── */
+.admin-header {
+    background: rgba(249,245,239,0.95);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0 var(--space-lg);
+}
+
+.admin-nav-container {
+    max-width: 1160px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-xl);
+    height: 64px;
+}
+
+.admin-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-family: var(--font-display);
+    font-size: 1.375rem;
+    color: var(--forest);
+    font-weight: 700;
+}
+
+.brand-icon {
+    font-size: 1.5rem;
+}
+
+.admin-nav {
+    display: flex;
+    gap: var(--space-lg);
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+    .admin-nav::-webkit-scrollbar {
+        display: none;
+    }
+
+.admin-nav-link {
+    font-size: 0.9375rem;
+    color: var(--mid);
+    font-weight: 500;
+    transition: color 0.2s;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+    .admin-nav-link:hover {
+        color: var(--forest);
+    }
+
+    .admin-nav-link.active {
+        color: var(--forest);
+        font-weight: 600;
+    }
+
+.admin-user-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.back-to-site {
+    font-size: 0.9rem;
+    color: var(--mid);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+    .back-to-site:hover {
+        color: var(--forest);
+    }
+
+.admin-user-email {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--sage);
+}
+
+/* Admin Main Content */
+.admin-content {
+    padding: var(--space-xl) 0;
+    background: var(--cream);
+    min-height: calc(100vh - 64px);
+}
+
+.admin-container {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-nav {
+        display: none;
+    }
+
+    .admin-user-email {
+        display: none;
+    }
+}
+
+/*Flagged content Review*/
+
+.detail-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    min-width: 150px;
+    color: #666;
+    font-weight: 500;
+}
+
+.action-link {
+    display: block;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: #f9fafb;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+    .action-link:hover {
+        background: #e5e7eb;
+    }
+
+.back-link {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #6b7280;
+    text-decoration: none;
+}
+
+    .back-link:hover {
+        color: #374151;
+    }
+
+.badge-danger {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #dc2626;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+

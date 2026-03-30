@@ -21,6 +21,7 @@ using HealthyRecipes.Services.RecipeIngredients;
 using HealthyRecipes.Services.RecipeMeals;
 using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.Recommendations;
+using HealthyRecipes.Services.SavedIngredients;
 using HealthyRecipes.Services.SavedMealPlans;
 using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Services.Statistics;
@@ -75,10 +76,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient<IApi, ApiService>(client => //A bIg pROBlEM ask MISTUR
 {
     client.BaseAddress = new Uri("https://world.openfoodfacts.org/");
-    client.DefaultRequestHeaders.Add("User-Agent", "HealthyRecipesApp"); // Optional but recommended
-    client.Timeout = TimeSpan.FromSeconds(30); // Optional
+    client.DefaultRequestHeaders.Add("User-Agent", "HealthyRecipes/1.0");
 });
-
 // ─── Application Services ─────────────────────────────────────────────────────
 builder.Services.AddScoped<IRecipe, RecipeService>();
 builder.Services.AddScoped<IIngredient, IngredientService>();
@@ -89,8 +88,9 @@ builder.Services.AddScoped<IMeal, MealService>();
 builder.Services.AddScoped<IUser, UserService>();
 builder.Services.AddScoped<IAllergy, AllergyService>();
 builder.Services.AddScoped<ICommentRating, CommentRatingService>();
-builder.Services.AddScoped<ISavedRecipe, SavedRecipeService>();
+builder.Services.AddScoped<ISavedIngredients, SavedRecipeService>();
 builder.Services.AddScoped<ISavedMealPlan, SavedMealPlanService>();
+builder.Services.AddScoped<ISavedIngredient, SavedIngredientService>();
 builder.Services.AddScoped<IRecipeIngredient, RecipeIngredientService>();
 builder.Services.AddScoped<IRecipeCategory, RecipeCategoryService>();
 builder.Services.AddScoped<IRecipeMeal, RecipeMealService>();

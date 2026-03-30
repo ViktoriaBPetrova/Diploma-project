@@ -1,0 +1,339 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.ActivityLogs.DetailsModel
+@using HealthyRecipes.Data.Entities.Admin
+@{
+    ViewData["Title"] = "Activity Log Details";
+}
+
+<div class="page-header">
+    <a asp-page="/ActivityLogs/Index" class="back-link">← Back to Activity Logs</a>
+    <h1>Activity Log Details</h1>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Left Column: Activity Information -->
+    <div>
+        <!-- Basic Info -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <h3>Activity Information</h3>
+            
+            <div class="detail-row">
+                <span class="detail-label">Activity Type:</span>
+                <strong style="color: var(--forest);">@Model.ViewModel.ActivityType</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Entity Type:</span>
+                <span class="badge-sm">@Model.ViewModel.EntityType</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Entity Name:</span>
+                <strong>@Model.ViewModel.EntityName</strong>
+            </div>
+
+            @if (Model.ViewModel.EntityId.HasValue)
+            {
+                <div class="detail-row">
+                    <span class="detail-label">Entity ID:</span>
+                    <code style="font-size: 0.85rem;">@Model.ViewModel.EntityId</code>
+                </div>
+            }
+
+            <div class="detail-row">
+                <span class="detail-label">Timestamp:</span>
+                <span>@Model.ViewModel.CreatedAt.ToString("MMMM dd, yyyy 'at' HH:mm:ss")</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Severity:</span>
+                <span class="severity-badge severity-@Model.ViewModel.Severity.ToString().ToLower()">
+                    @Model.ViewModel.Severity
+                </span>
+            </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <h3>User Information</h3>
+            
+            <div class="detail-row">
+                <span class="detail-label">Username:</span>
+                <strong>@Model.ViewModel.UserName</strong>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Email:</span>
+                <span>@Model.ViewModel.UserEmail</span>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ViewModel.IpAddress))
+            {
+                <div class="detail-row">
+                    <span class="detail-label">IP Address:</span>
+                    <code>@Model.ViewModel.IpAddress</code>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(Model.ViewModel.UserAgent))
+            {
+                <div class="detail-row">
+                    <span class="detail-label">User Agent:</span>
+                    <span style="font-size: 0.85rem; word-break: break-word;">@Model.ViewModel.UserAgent</span>
+                </div>
+            }
+        </div>
+
+        <!-- Changes Summary -->
+        @if (!string.IsNullOrEmpty(Model.ViewModel.ChangesSummary))
+        {
+            <div class="admin-card">
+                <h3>Changes Summary</h3>
+                <p style="margin: 0; line-height: 1.6;">@Model.ViewModel.ChangesSummary</p>
+            </div>
+        }
+    </div>
+
+    <!-- Right Column: Change Details -->
+    <div>
+        @if (Model.Changes.Any())
+        {
+            <!-- Side-by-Side Comparison -->
+            <div class="admin-card">
+                <h3>Detailed Changes</h3>
+                <p style="color: #666; font-size: 0.9rem; margin-bottom: 16px;">
+                    Fields that changed are highlighted in yellow
+                </p>
+
+                <div class="changes-table">
+                    @foreach (var change in Model.Changes)
+                    {
+                        <div class="change-row @(change.HasChanged ? "change-row-modified" : "")">
+                            <div class="change-field-name">
+                                @change.FieldName
+                                @if (change.HasChanged)
+                                {
+                                    <span class="change-indicator">✎ Changed</span>
+                                }
+                            </div>
+                            
+                            <div class="change-values">
+                                <!-- Old Value -->
+                                <div class="change-value old-value">
+                                    <div class="change-value-label">Before:</div>
+                                    <div class="change-value-content">
+                                        @if (change.OldValue.Length > 100)
+                                        {
+                                            <details>
+                                                <summary>@change.OldValue.Substring(0, 100)... (click to expand)</summary>
+                                                <div style="margin-top: 8px; white-space: pre-wrap;">@change.OldValue</div>
+                                            </details>
+                                        }
+                                        else
+                                        {
+                                            <span>@change.OldValue</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Arrow -->
+                                @if (change.HasChanged)
+                                {
+                                    <div class="change-arrow">→</div>
+                                }
+
+                                <!-- New Value -->
+                                <div class="change-value new-value">
+                                    <div class="change-value-label">After:</div>
+                                    <div class="change-value-content">
+                                        @if (change.NewValue.Length > 100)
+                                        {
+                                            <details>
+                                                <summary>@change.NewValue.Substring(0, 100)... (click to expand)</summary>
+                                                <div style="margin-top: 8px; white-space: pre-wrap;">@change.NewValue</div>
+                                            </details>
+                                        }
+                                        else
+                                        {
+                                            <span>@change.NewValue</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+        else if (!string.IsNullOrEmpty(Model.ViewModel.OldValue) || !string.IsNullOrEmpty(Model.ViewModel.NewValue))
+        {
+            <!-- Raw JSON Display (if parsing failed) -->
+            <div class="admin-card">
+                <h3>Raw Values</h3>
+
+                @if (!string.IsNullOrEmpty(Model.ViewModel.OldValue))
+                {
+                    <div style="margin-bottom: 16px;">
+                        <strong style="display: block; margin-bottom: 8px;">Old Value:</strong>
+                        <pre style="background: #f9fafb; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem;">@Model.ViewModel.OldValue</pre>
+                    </div>
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ViewModel.NewValue))
+                {
+                    <div>
+                        <strong style="display: block; margin-bottom: 8px;">New Value:</strong>
+                        <pre style="background: #f9fafb; padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem;">@Model.ViewModel.NewValue</pre>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- No Detail Changes -->
+            <div class="admin-card">
+                <div style="text-align: center; padding: 40px; color: #666;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">📋</div>
+                    <p style="margin: 0;">No detailed change information available for this activity.</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px;">
+                        This typically occurs for @Model.ViewModel.ActivityType.ToString() activities.
+                    </p>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .back-link {
+        display: inline-block;
+        margin-bottom: 12px;
+        color: #6b7280;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        color: #374151;
+    }
+
+    .detail-row {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        min-width: 140px;
+        color: #666;
+        font-weight: 500;
+    }
+
+    .badge-sm {
+        padding: 4px 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .severity-badge {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+    }
+    .severity-info { background: #dbeafe; color: #1e40af; }
+    .severity-low { background: #d1fae5; color: #065f46; }
+    .severity-medium { background: #fef3c7; color: #92400e; }
+    .severity-high { background: #fee2e2; color: #991b1b; }
+    .severity-critical { background: #fecaca; color: #7f1d1d; }
+
+    /* Changes Table */
+    .changes-table {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .change-row {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 16px;
+        background: white;
+    }
+
+    .change-row-modified {
+        background: #fef9e7;
+        border-color: #fbbf24;
+    }
+
+    .change-field-name {
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .change-indicator {
+        font-size: 0.75rem;
+        background: #fbbf24;
+        color: #78350f;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 500;
+    }
+
+    .change-values {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 12px;
+        align-items: start;
+    }
+
+    .change-value {
+        background: #f9fafb;
+        padding: 12px;
+        border-radius: 6px;
+        min-height: 60px;
+    }
+
+    .change-value-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #666;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+
+    .change-value-content {
+        font-size: 0.9rem;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .old-value {
+        border-left: 3px solid #dc2626;
+    }
+
+    .new-value {
+        border-left: 3px solid #10b981;
+    }
+
+    .change-arrow {
+        color: #6b7280;
+        font-size: 1.5rem;
+        align-self: center;
+    }
+
+    /* Details/Summary for long values */
+    details summary {
+        cursor: pointer;
+        color: var(--sage);
+        font-weight: 500;
+    }
+    details summary:hover {
+        text-decoration: underline;
+    }
+</style>

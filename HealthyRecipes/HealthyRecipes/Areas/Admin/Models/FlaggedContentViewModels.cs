@@ -12,7 +12,6 @@ namespace HealthyRecipes.Web.Areas.Admin.Models
 
         // Stats
         public int PendingCount { get; set; }
-        public int UnderReviewCount { get; set; }
         public int ResolvedCount { get; set; }
 
         // Filters

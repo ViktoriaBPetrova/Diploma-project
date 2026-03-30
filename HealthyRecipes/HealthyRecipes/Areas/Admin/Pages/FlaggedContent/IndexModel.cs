@@ -99,7 +99,6 @@ namespace HealthyRecipes.Web.Areas.Admin.Pages.FlaggedContent
             return status switch
             {
                 FlagStatus.Pending => "status-pending",
-                FlagStatus.UnderReview => "status-review",
                 FlagStatus.Resolved => "status-resolved",
                 FlagStatus.Dismissed => "status-dismissed",
                 _ => "status-pending"

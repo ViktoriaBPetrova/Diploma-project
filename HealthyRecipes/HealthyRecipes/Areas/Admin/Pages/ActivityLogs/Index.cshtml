@@ -88,6 +88,7 @@
                     <th>Details</th>
                     <th>Severity</th>
                     <th>IP Address</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -126,6 +127,18 @@
                         </td>
                         <td>
                             @(log.IpAddress ?? "—")
+                        </td>
+                        <td>
+                            @if (log.HasDetails)
+                            {
+                                <a asp-page="/ActivityLogs/Details" asp-route-id="@log.Id" class="btn-action">
+                                    View Details
+                                </a>
+                            }
+                            else
+                            {
+                                <span style="color: #999;">—</span>
+                            }
                         </td>
                     </tr>
                 }

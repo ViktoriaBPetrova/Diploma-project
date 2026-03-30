@@ -13,42 +13,40 @@
             <div class="admin-brand">
                 <a asp-page="/Index" asp-area="Admin">
                     <span class="brand-icon">🛡️</span>
-                    <span class="brand-text">NutriTrack Admin</span>
+                    <span class="brand-text">NutriTrack</span>
                 </a>
             </div>
             
             <div class="admin-nav-links">
                 <a asp-page="/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")">
-                    📊 Dashboard
+                    Dashboard
                 </a>
                 <a asp-page="/Users/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Users") == true ? "active" : "")">
-                    👥 Users
+                    Users
                 </a>
                 <a asp-page="/Recipes/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Recipes") == true ? "active" : "")">
-                    🍳 Recipes
+                    Recipes
                 </a>
                 <a asp-page="/MealPlans/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("MealPlans") == true ? "active" : "")">
-                    📅 Meal Plans
+                    Meal Plans
                 </a>
                 <a asp-page="/Reports/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Reports") == true ? "active" : "")">
-                    📈 Reports
+                    Reports
                 </a>
                 <a asp-page="/ActivityLogs/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Logs") == true ? "active" : "")">
-                    📋 Activity Logs
+                    Activity Logs
                 </a>
-                <a asp-page="/BannedWords/Index" asp-area="Admin" class="admin-nav-link">
-                    🚫 Banned Words
+                <a asp-page="/BannedWords/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("BannedWords") == true ? "active" : "")">
+                    Banned Words
                 </a>
-                <a asp-page="/FlaggedContent/Index" asp-area="Admin" class="admin-nav-link">
-                    ⚠️ Flagged Content
+                <a asp-page="/FlaggedContent/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("FlaggedContent") == true ? "active" : "")">
+                    Flagged Content
                 </a>
             </div>
 
-            <div class="admin-user-menu">
-                <a asp-controller="Home" asp-action="Index" asp-area="" class="btn-ghost-sm">
-                    ← Back to Site
-                </a>
-                <span class="admin-user-name">@User.Identity?.Name</span>
+            <div class="admin-user-section">
+                <a href="/" class="back-to-site">← Back to Site</a>
+                <span class="admin-user-email">@User.Identity?.Name</span>
             </div>
         </nav>
     </header>

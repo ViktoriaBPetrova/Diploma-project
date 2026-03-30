@@ -16,7 +16,7 @@
         <!-- Content Details -->
         <div class="admin-card" style="margin-bottom: 24px;">
             <h3>Content Details</h3>
-            
+
             <div class="detail-row">
                 <span class="detail-label">Content Type:</span>
                 <span class="badge-sm">@Model.ViewModel.ContentType</span>
@@ -64,7 +64,7 @@
         <!-- Flag Details -->
         <div class="admin-card" style="margin-bottom: 24px;">
             <h3>Flag Details</h3>
-            
+
             <div class="detail-row">
                 <span class="detail-label">Reason:</span>
                 <strong style="color: #dc2626;">@Model.ViewModel.Reason</strong>
@@ -98,32 +98,51 @@
         {
             <div class="admin-card">
                 <h3>Take Action</h3>
-                
+
                 <form method="post" asp-page-handler="Resolve">
                     <input type="hidden" asp-for="Input.Id" />
 
                     <div class="form-group">
-                        <label asp-for="Input.Resolution">Resolution</label>
-                        <select asp-for="Input.Resolution" class="form-control" required>
-                            <option value="">Select resolution...</option>
-                            @foreach (FlagResolution resolution in Enum.GetValues(typeof(FlagResolution)))
-                            {
-                                <option value="@((int)resolution)">@resolution.ToString()</option>
-                            }
+                        <label asp-for="Input.Resolution">Resolution Action <span style="color: #dc2626;">*</span></label>
+                        <select asp-for="Input.Resolution" class="form-control" required id="resolutionSelect">
+                            <option value="">Select action...</option>
+                            <option value="@((int)FlagResolution.ContentRemoved)">🗑️ Remove Content (soft delete)</option>
+                            <option value="@((int)FlagResolution.ContentEdited)">✏️ Edit Content (navigate to edit page)</option>
+                            <option value="@((int)FlagResolution.UserWarned)">⚠️ Warn User Only</option>
+                            <option value="@((int)FlagResolution.NoActionNeeded)">✓ No Action Needed</option>
                         </select>
+                    </div>
+
+                    <!-- Action Explanations -->
+                    <div id="actionExplanation" style="display: none; padding: 12px; background: #f0f9ff; border-left: 3px solid #3b82f6; margin-bottom: 16px; border-radius: 4px;">
+                        <div id="explainRemove" style="display: none;">
+                            <strong>Remove Content:</strong> The content will be <strong>soft deleted</strong> (hidden from users but preserved in database). This happens automatically when you click Resolve.
+                        </div>
+                        <div id="explainEdit" style="display: none;">
+                            <strong>Edit Content:</strong> After resolving, you'll be redirected to the edit page where you can modify the content to remove inappropriate parts.
+                        </div>
+                        <div id="explainWarn" style="display: none;">
+                            <strong>Warn User Only:</strong> The content stays visible, but the user receives a warning. Enable the checkbox below to issue the warning.
+                        </div>
+                        <div id="explainNoAction" style="display: none;">
+                            <strong>No Action Needed:</strong> The content is fine (false positive). The flag will be marked as resolved with no changes.
+                        </div>
                     </div>
 
                     <div class="form-group">
                         <label asp-for="Input.AdminNotes">Admin Notes (optional)</label>
-                        <textarea asp-for="Input.AdminNotes" class="form-control" rows="3" 
+                        <textarea asp-for="Input.AdminNotes" class="form-control" rows="3"
                                   placeholder="Internal notes about this resolution..."></textarea>
                     </div>
 
                     <div class="form-group">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                            <input type="checkbox" asp-for="Input.IssueWarning" />
+                            <input type="checkbox" asp-for="Input.IssueWarning" id="issueWarningCheck" />
                             <span>Issue warning to content author</span>
                         </label>
+                        <small class="form-text" style="margin-left: 28px; color: #666;">
+                            Recommended for "Warn User Only" or when content is removed
+                        </small>
                     </div>
 
                     <div id="warning-fields" style="display: none; margin-left: 28px; padding: 12px; background: #fef3c7; border-radius: 6px;">
@@ -138,12 +157,12 @@
                         </div>
                         <div class="form-group">
                             <label asp-for="Input.WarningReason">Warning Reason</label>
-                            <input asp-for="Input.WarningReason" class="form-control" />
+                            <input asp-for="Input.WarningReason" class="form-control" placeholder="E.g., Use of inappropriate language" />
                         </div>
                     </div>
 
                     <div style="display: flex; gap: 12px; margin-top: 24px;">
-                        <button type="submit" class="btn-primary">✓ Resolve</button>
+                        <button type="submit" class="btn-primary">✓ Resolve & Execute Action</button>
                         <button type="button" class="btn-ghost" onclick="dismissFlag()">Dismiss as False Positive</button>
                     </div>
                 </form>
@@ -181,7 +200,7 @@
         <!-- Author Info -->
         <div class="admin-card" style="margin-bottom: 24px;">
             <h3>Content Author</h3>
-            
+
             <div style="margin-bottom: 12px;">
                 <div style="font-weight: 600; font-size: 1.1rem;">@Model.ViewModel.ContentAuthorName</div>
                 <div style="color: #666; font-size: 0.9rem;">@Model.ViewModel.ContentAuthorEmail</div>
@@ -200,7 +219,7 @@
                 </div>
             </div>
 
-            <a asp-page="/UserModeration/Details" asp-route-userId="@Model.ViewModel.ContentAuthorId" 
+            <a asp-controller="User" asp-action="Profile" asp-route-id="@Model.ViewModel.ContentAuthorId"
                class="btn-ghost" style="width: 100%; text-align: center;">
                 View Full Profile →
             </a>
@@ -208,12 +227,23 @@
 
         <!-- Quick Actions -->
         <div class="admin-card">
-            <h3>Quick Actions</h3>
-            
-            <a href="#" class="action-link">🔗 View Original Content</a>
-            <a href="#" class="action-link">📧 Email Author</a>
-            <a asp-page="/ActivityLogs/Index" asp-route-userId="@Model.ViewModel.ContentAuthorId" 
-               class="action-link">📊 View Activity History</a>
+            <h3>Quick Links</h3>
+
+            <a asp-page="/ActivityLogs/Index" asp-route-userId="@Model.ViewModel.ContentAuthorId"
+               class="action-link">📊 View User Activity</a>
+
+            @if (!string.IsNullOrEmpty(Model.ViewInContextUrl))
+            {
+                <a href="@Model.ViewInContextUrl" class="action-link" target="_blank">
+                    🔗 View in Context
+                </a>
+            }
+            else
+            {
+                <div class="action-link" style="opacity: 0.5; cursor: not-allowed;">
+                    🔗 View in Context (unavailable)
+                </div>
+            }
         </div>
     </div>
 </div>
@@ -227,16 +257,45 @@
 @section Scripts {
     <script>
         // Show/hide warning fields
-        document.querySelector('[name="Input.IssueWarning"]').addEventListener('change', function() {
+        document.getElementById('issueWarningCheck').addEventListener('change', function() {
             document.getElementById('warning-fields').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Show explanation based on selected resolution
+        document.getElementById('resolutionSelect').addEventListener('change', function() {
+            const value = this.value;
+            const explanationDiv = document.getElementById('actionExplanation');
+
+            // Hide all explanations
+            document.getElementById('explainRemove').style.display = 'none';
+            document.getElementById('explainEdit').style.display = 'none';
+            document.getElementById('explainWarn').style.display = 'none';
+            document.getElementById('explainNoAction').style.display = 'none';
+
+            if (value) {
+                explanationDiv.style.display = 'block';
+
+                // Show relevant explanation
+                if (value == '@((int)FlagResolution.ContentRemoved)') {
+                    document.getElementById('explainRemove').style.display = 'block';
+                } else if (value == '@((int)FlagResolution.ContentEdited)') {
+                    document.getElementById('explainEdit').style.display = 'block';
+                } else if (value == '@((int)FlagResolution.UserWarned)') {
+                    document.getElementById('explainWarn').style.display = 'block';
+                } else if (value == '@((int)FlagResolution.NoActionNeeded)') {
+                    document.getElementById('explainNoAction').style.display = 'block';
+                }
+            } else {
+                explanationDiv.style.display = 'none';
+            }
         });
 
         // Dismiss function
         function dismissFlag() {
-            if (confirm('Dismiss this flag as a false positive? This action can be reviewed later.')) {
+            if (confirm('Dismiss this flag as a false positive?')) {
                 const notes = prompt('Optional: Add a note about why this is being dismissed:');
                 if (notes !== null) {
-                    document.getElementById('dismissNotes').value = notes;
+                    document.getElementById('dismissNotes').value = notes || '';
                     document.getElementById('dismissForm').submit();
                 }
             }
@@ -244,48 +303,4 @@
     </script>
 }
 
-<style>
-    .detail-row {
-        display: flex;
-        padding: 12px 0;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .detail-row:last-child {
-        border-bottom: none;
-    }
-    .detail-label {
-        min-width: 150px;
-        color: #666;
-        font-weight: 500;
-    }
-    .action-link {
-        display: block;
-        padding: 10px 12px;
-        margin-bottom: 8px;
-        background: #f9fafb;
-        border-radius: 6px;
-        text-decoration: none;
-        color: #374151;
-        transition: all 0.2s;
-    }
-    .action-link:hover {
-        background: #e5e7eb;
-    }
-    .back-link {
-        display: inline-block;
-        margin-bottom: 12px;
-        color: #6b7280;
-        text-decoration: none;
-    }
-    .back-link:hover {
-        color: #374151;
-    }
-    .badge-danger {
-        display: inline-block;
-        padding: 4px 8px;
-        background: #dc2626;
-        color: white;
-        border-radius: 4px;
-        font-size: 0.85rem;
-    }
-</style>
+
