@@ -1,6 +1,7 @@
 ﻿using HealthyRecipes.Data.Entities.Admin;
 using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
+using HealthyRecipes.Data.Entities.MappingEntities.User_Info;
 using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace HealthyRecipes.Data.Entities
             Allergies = new List<Allergy>();
             SavedRecipes  = new List<SavedRecipe>();
             SavedMealPlans = new List<SavedMealPlan>();
+            SavedIngredients = new List<SavedIngredient>();
             MealPlansFollowed = new List<MealPlanFollower>();
             CommentRatings  = new List<CommentRating>();
            
@@ -67,6 +69,7 @@ namespace HealthyRecipes.Data.Entities
         public IEnumerable<Allergy> Allergies { get; set; }
         public IEnumerable<SavedRecipe> SavedRecipes { get; set; }
         public IEnumerable<SavedMealPlan> SavedMealPlans { get; set; }
+        public IEnumerable<SavedIngredient> SavedIngredients { get; set; }
         public IEnumerable<CommentRating> CommentRatings { get; set; }
         public IEnumerable<MealPlanFollower> MealPlansFollowed { get; set; }
         

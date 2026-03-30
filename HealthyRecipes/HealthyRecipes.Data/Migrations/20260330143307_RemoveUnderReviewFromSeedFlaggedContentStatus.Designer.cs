@@ -4,6 +4,7 @@ using HealthyRecipes.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyRecipes.Data.Migrations
 {
     [DbContext(typeof(HealthyRecipesDbContext))]
-    partial class HealthyRecipesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260330143307_RemoveUnderReviewFromSeedFlaggedContentStatus")]
+    partial class RemoveUnderReviewFromSeedFlaggedContentStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3156,33 +3159,6 @@ namespace HealthyRecipes.Data.Migrations
                         });
                 });
 
-            modelBuilder.Entity("HealthyRecipes.Data.Entities.MappingEntities.User_Info.SavedIngredient", b =>
-                {
-                    b.Property<Guid>("IngredientId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("IngredientId", "UserId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("SavedIngredients");
-                });
-
             modelBuilder.Entity("HealthyRecipes.Data.Entities.Meal", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5565,25 +5541,6 @@ namespace HealthyRecipes.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("HealthyRecipes.Data.Entities.MappingEntities.User_Info.SavedIngredient", b =>
-                {
-                    b.HasOne("HealthyRecipes.Data.Entities.Ingredient", "Ingredient")
-                        .WithMany("SavedIngredients")
-                        .HasForeignKey("IngredientId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HealthyRecipes.Data.Entities.ApplicationUser", "User")
-                        .WithMany("SavedIngredients")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Ingredient");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("HealthyRecipes.Data.Entities.Meal", b =>
                 {
                     b.HasOne("HealthyRecipes.Data.Entities.MealPlanDay", "MealPlanDay")
@@ -5752,8 +5709,6 @@ namespace HealthyRecipes.Data.Migrations
 
                     b.Navigation("MealPlansFollowed");
 
-                    b.Navigation("SavedIngredients");
-
                     b.Navigation("SavedMealPlans");
 
                     b.Navigation("SavedRecipes");
@@ -5775,8 +5730,6 @@ namespace HealthyRecipes.Data.Migrations
                     b.Navigation("Allergies");
 
                     b.Navigation("RecipeIngredients");
-
-                    b.Navigation("SavedIngredients");
                 });
 
             modelBuilder.Entity("HealthyRecipes.Data.Entities.MappingEntities.CommentRating", b =>

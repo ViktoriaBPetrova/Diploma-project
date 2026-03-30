@@ -62,7 +62,6 @@ namespace HealthyRecipes.Data.Entities.Admin
     public enum FlagStatus
     {
         Pending = 1,
-        UnderReview = 2,
         Resolved = 3,
         Dismissed = 4
     }

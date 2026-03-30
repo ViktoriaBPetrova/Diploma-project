@@ -72,6 +72,22 @@ namespace HealthyRecipes.Services.CommentRatings
             }
         }
 
+        public async Task<CommentRating?> GetCommentRatingByIdAsync(Guid commentID)
+        {
+            try
+            {
+                return await _context.CommentRatings
+                    .Include(cr => cr.User)
+                    .Include(cr => cr.Recipe)
+                    .FirstOrDefaultAsync(cr => cr.Id == commentID && !cr.Deleted);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving comment rating");
+                throw;
+            }
+        }
+
         public async Task<IEnumerable<CommentRating>> GetRatingsByRecipeAsync(Guid recipeId)
         {
             try
@@ -223,6 +239,31 @@ namespace HealthyRecipes.Services.CommentRatings
 
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Comment {CommentId} deleted by user {UserId}", commentId, userId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting comment");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteCommentByAdminAsync(Guid commentId)
+        {
+            try
+            {
+                var comment = await _context.CommentRatings
+                    .FirstOrDefaultAsync(cr => cr.Id == commentId && !cr.Deleted);
+
+                if (comment == null)
+                    return false;
+
+                comment.Deleted = true;
+                comment.DeletedAt = DateTime.UtcNow;
+                comment.UpdatedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Comment {CommentId} deleted by admin", commentId);
                 return true;
             }
             catch (Exception ex)

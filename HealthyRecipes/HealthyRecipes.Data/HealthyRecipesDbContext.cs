@@ -4,6 +4,7 @@ using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Entities.Admin;
 using HealthyRecipes.Data.Entities.MappingEntities;
 using HealthyRecipes.Data.Entities.MappingEntities.MealPlanTracking;
+using HealthyRecipes.Data.Entities.MappingEntities.User_Info;
 using HealthyRecipes.Data.Seeding;
 using HealthyRecipes.Data.Seeding.Admin;
 using HealthyRecipes.Data.Seeding.Identity;
@@ -51,6 +52,7 @@ namespace HealthyRecipes.Data
 
         public DbSet<SavedMealPlan> SavedMealPlans { get; init; } = null!;
         public DbSet<SavedRecipe> SavedRecipes { get; init; } = null!;
+        public DbSet<SavedIngredient> SavedIngredients { get; init; } = null!;
 
         public DbSet<Allergy> Allergies { get; init; } = null!;
         public DbSet<CommentRating> CommentRatings { get; init; } = null!;
@@ -71,6 +73,7 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new RecipeMealConfig());
             builder.ApplyConfiguration(new SavedRecipeConfig());
             builder.ApplyConfiguration(new SavedMealPlanConfig());
+            builder.ApplyConfiguration(new SavedIngredientConfig());
             builder.ApplyConfiguration(new AllergyConfig());
             builder.ApplyConfiguration(new CommentRatingConfig());
             builder.ApplyConfiguration(new MealPlanDayConfig());
@@ -82,6 +85,7 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new BannedWordConfiguration());
             builder.ApplyConfiguration(new FlaggedContentConfiguration());
             builder.ApplyConfiguration(new UserWarningConfiguration());
+            
 
             // USER SEEDING
             var users = UserSeeder.GenerateUsers().ToArray();

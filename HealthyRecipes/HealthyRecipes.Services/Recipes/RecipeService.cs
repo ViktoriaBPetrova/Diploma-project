@@ -276,7 +276,7 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        public async Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(RecipeFilterDto filter)
+        public async Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(IngredientFilterDto filter)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));

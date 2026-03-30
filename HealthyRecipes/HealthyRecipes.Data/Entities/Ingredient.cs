@@ -1,4 +1,5 @@
 ﻿using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Data.Entities.MappingEntities.User_Info;
 using HealthyRecipes.Data.Enums;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace HealthyRecipes.Data.Entities
             UpdatedAt = DateTime.UtcNow;
             RecipeIngredients = new List<RecipeIngredient>();
             Allergies = new List<Allergy>();
+            SavedIngredients = new List<SavedIngredient>();
         }
         public Ingredient(DateTime createdAt, Guid id) : this()
         {
@@ -55,7 +57,9 @@ namespace HealthyRecipes.Data.Entities
         public ApplicationUser? User { get; set; }
 
         // ---------- Navigation Collections ----------
-        public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; } 
+        public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; }
+        public IEnumerable<SavedIngredient> SavedIngredients { get; set; }
+
         public IEnumerable<Allergy> Allergies { get; set; }
 
 

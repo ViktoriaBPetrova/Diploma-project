@@ -1,19 +1,19 @@
 using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Services.Ingredients.Models;
 
 namespace HealthyRecipes.Services.Ingredients
 {
     public interface IIngredient
     {
 
-        Task<Guid> CreateIngredientAsync(Ingredient ingredient);
+        Task<Ingredient?> CreateIngredientAsync(Ingredient ingredient);
 
 
         Task<Ingredient?> GetIngredientByIdAsync(Guid id);
 
-
-        Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(bool includeDeleted = false);
-
+        Task<Ingredient?> GetIngredientByNameAsync(string name);
+        Task<IEnumerable<Ingredient>> SearchIngredientAsync(string searchTerm);
 
         Task<IEnumerable<Ingredient>> GetIngredientsBySourceAsync(Source source);
 
@@ -24,6 +24,15 @@ namespace HealthyRecipes.Services.Ingredients
 
         Task<bool> RestoreIngredientAsync(Guid id);
 
-        Task<IEnumerable<Ingredient>> SearchIngredientsAsync(string searchTerm);
+        Task<IEnumerable<Ingredient>> GetAllIngredientsAsync(bool includeDeleted = false);
+
+        Task<(IEnumerable<Ingredient> ingredients, int totalCount)> GetFilteredIngredientsWithApiAsync(
+             IngredientFilterDto filter);
+
+        Task<IEnumerable<Ingredient>> SearchIngredientsWithApiAsync(
+    string searchTerm,
+    int maxResults = 10,
+    Guid? userId = null);
+
     }
 }

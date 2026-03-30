@@ -10,5 +10,7 @@ namespace HealthyRecipes.Web.ViewModels.Ingredient
         public float CarbsPer100g { get; set; }
         public float FatPer100g { get; set; }
         public bool IsAllergen { get; set; }
+        public bool IsSaved { get; set; }
+
     }
 }

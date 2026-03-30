@@ -2,7 +2,7 @@ using HealthyRecipes.Data.Entities.MappingEntities;
 
 namespace HealthyRecipes.Services.SavedRecipes
 {
-    public interface ISavedRecipe
+    public interface ISavedIngredients
     {
         Task SaveRecipeAsync(Guid userId, Guid recipeId);
         Task<bool> UnsaveRecipeAsync(Guid userId, Guid recipeId);

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Services.SavedRecipes
 {
-    public class SavedRecipeService : ISavedRecipe
+    public class SavedRecipeService : ISavedIngredients
     {
         private readonly HealthyRecipesDbContext _context;
         private readonly ILogger<SavedRecipeService> _logger;

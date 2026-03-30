@@ -6,6 +6,7 @@ namespace HealthyRecipes.Web.ViewModels.Ingredient
     {
         public IEnumerable<IngredientViewModel> Ingredients { get; set; } = new List<IngredientViewModel>();
         public string? SearchQuery { get; set; }
-        public IEnumerable<Guid> UserAllergyIds { get; set; } = new List<Guid>();
+        public IngredientFilterViewModel Filter { get; set; } = new();
+        public int TotalCount { get; set; }
     }
 }
