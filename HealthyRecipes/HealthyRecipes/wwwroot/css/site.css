@@ -1187,7 +1187,13 @@ textarea.form-control {
     border-left: 4px solid #2E7D32;
 }
 
-.alert-error {
+.alert-warning {
+    background: #dad0a8;
+    color: #dbd25d;
+    border-left: 4px solid #C62828;
+}
+
+.alert-danger {
     background: #FCE4EC;
     color: #C62828;
     border-left: 4px solid #C62828;

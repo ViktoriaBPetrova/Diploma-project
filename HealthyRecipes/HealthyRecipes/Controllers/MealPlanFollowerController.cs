@@ -1,4 +1,8 @@
+using HealthyRecipes.Data.Entities.Admin;
 using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Services.Admin;
+using HealthyRecipes.Services.Admin.Helpers;
+using HealthyRecipes.Services.Admin.Interfaces;
 using HealthyRecipes.Services.FileUploads;
 using HealthyRecipes.Services.MealEntries;
 using HealthyRecipes.Services.MealPlanDayEntries;
@@ -25,6 +29,9 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IMealPlanDayEntry _mealPlanDayEntryService;
         private readonly IFileUpload _fileUploadService;
         private readonly UserManager<Data.Entities.ApplicationUser> _userManager;
+        private readonly IContentFilter _contentFilterService;
+        private readonly IFlaggedContent _flaggedContentService;
+        private readonly ActivityLogHelper _activityLogHelper;
 
         public MealPlanFollowerController(
             IMealEntry mealEntryService,
@@ -32,7 +39,10 @@ namespace HealthyRecipes.Web.Controllers
             IMealPlanFollower mealPlanFollowerService,
             IMealPlan mealPlanService,
             IFileUpload fileUploadService,
-            UserManager<Data.Entities.ApplicationUser> userManager)
+            UserManager<Data.Entities.ApplicationUser> userManager,
+             IContentFilter contentFilterService,
+            IFlaggedContent flaggedContentService,
+            ActivityLogHelper activityLogHelper)
         {
             _mealEntryService = mealEntryService ?? throw new ArgumentNullException(nameof(mealEntryService));
             _mealPlanDayEntryService = mealPlanDayEntryService ?? throw new ArgumentNullException(nameof(mealPlanDayEntryService));
@@ -40,6 +50,9 @@ namespace HealthyRecipes.Web.Controllers
             _mealPlanService = mealPlanService ?? throw new ArgumentNullException(nameof(mealPlanService));
             _fileUploadService = fileUploadService ?? throw new ArgumentNullException(nameof(fileUploadService));
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
+            _contentFilterService = contentFilterService ?? throw new ArgumentNullException(nameof(contentFilterService));
+            _flaggedContentService = flaggedContentService ?? throw new ArgumentNullException(nameof(flaggedContentService));
+            _activityLogHelper = activityLogHelper ?? throw new ArgumentNullException(nameof(activityLogHelper));
         }
 
         // ========== FOLLOWING DASHBOARD ==========
@@ -787,6 +800,47 @@ namespace HealthyRecipes.Web.Controllers
 
             try
             {
+                // CHECK FOR BANNED WORDS in FeelingComment
+                if (!string.IsNullOrWhiteSpace(model.FeelingComment))
+                {
+                    var filterResult = await _contentFilterService.CheckContentAsync(model.FeelingComment);
+
+                    if (filterResult.ContainsBannedWords)
+                    {
+                        // Log banned word detection
+                        await _activityLogHelper.LogBannedWordDetectedAsync(
+                            user.Id,
+                            "MealEntry",
+                            model.MealId,
+                            string.Join(", ", filterResult.MatchedWords));
+
+                        // Auto-block high severity
+                        if (filterResult.ShouldAutoBlock)
+                        {
+                            TempData["Error"] = "Your feeling comment contains prohibited content and cannot be saved.";
+                            return View(model);
+                        }
+
+                        // Flag medium severity
+                        if (filterResult.ShouldFlagForReview)
+                        {
+                            await _flaggedContentService.FlagContentAsync(
+                                contentType: "MealEntry",
+                                contentId: model.MealId,
+                                contentPreview: model.FeelingComment.Length > 200
+                                    ? model.FeelingComment.Substring(0, 200)
+                                    : model.FeelingComment,
+                                contentAuthorId: user.Id,
+                                reason: FlagReason.BannedWords,
+                                details: $"Auto-flagged by content filter. Severity: {filterResult.HighestSeverity}",
+                                reportedByUserId: null,
+                                matchedBannedWords: string.Join(", ", filterResult.MatchedWords));
+
+                            TempData["Warning"] = "Your meal entry has been flagged for review.";
+                        }
+                    }
+                }
+
                 string? photoUrl = model.PhotoUrl; // Keep existing if no new photo
 
                 // Upload new photo if provided
@@ -814,7 +868,6 @@ namespace HealthyRecipes.Web.Controllers
                     model.MealId,
                     model.FeelingComment,
                     photoUrl
-
                 );
 
                 if (entry == null)
@@ -888,11 +941,51 @@ namespace HealthyRecipes.Web.Controllers
 
             try
             {
+                // CHECK FOR BANNED WORDS in OverallFeeling
+                if (!string.IsNullOrWhiteSpace(model.OverallFeeling))
+                {
+                    var filterResult = await _contentFilterService.CheckContentAsync(model.OverallFeeling);
+
+                    if (filterResult.ContainsBannedWords)
+                    {
+                        // Log banned word detection
+                        await _activityLogHelper.LogBannedWordDetectedAsync(
+                            user.Id,
+                            "DayReflection",
+                            model.MealPlanDayId,
+                            string.Join(", ", filterResult.MatchedWords));
+
+                        // Auto-block high severity
+                        if (filterResult.ShouldAutoBlock)
+                        {
+                            TempData["Error"] = "Your reflection contains prohibited content and cannot be saved.";
+                            return View(model);
+                        }
+
+                        // Flag medium severity
+                        if (filterResult.ShouldFlagForReview)
+                        {
+                            await _flaggedContentService.FlagContentAsync(
+                                contentType: "DayReflection",
+                                contentId: model.MealPlanDayId,
+                                contentPreview: model.OverallFeeling.Length > 200
+                                    ? model.OverallFeeling.Substring(0, 200)
+                                    : model.OverallFeeling,
+                                contentAuthorId: user.Id,
+                                reason: FlagReason.BannedWords,
+                                details: $"Auto-flagged by content filter. Severity: {filterResult.HighestSeverity}",
+                                reportedByUserId: null,
+                                matchedBannedWords: string.Join(", ", filterResult.MatchedWords));
+
+                            TempData["Warning"] = "Your day reflection has been flagged for review.";
+                        }
+                    }
+                }
+
                 var entry = await _mealPlanDayEntryService.UpsertDayEntryAsync(
                     user.Id,
                     model.MealPlanDayId,
                     model.OverallFeeling
-
                 );
 
                 if (entry == null)

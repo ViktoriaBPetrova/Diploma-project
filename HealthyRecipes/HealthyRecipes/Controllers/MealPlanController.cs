@@ -1,4 +1,8 @@
-using HealthyRecipes.Data.Entities;
+﻿using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Data.Entities.Admin;
+using HealthyRecipes.Services.Admin;
+using HealthyRecipes.Services.Admin.Helpers;
+using HealthyRecipes.Services.Admin.Interfaces;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.GroceryLists;
 using HealthyRecipes.Services.MealPlanDays;
@@ -27,6 +31,10 @@ namespace HealthyRecipes.Web.Controllers
         private readonly ISavedMealPlan _savedMealPlanService;
         private readonly IMealPlanFollower _mealPlanFollowerService;
         private readonly IGroceryList _groceryListService;
+        private readonly IActivityLog _activityLogService;
+        private readonly IContentFilter _contentFilterService;
+        private readonly IFlaggedContent _flaggedContentService;
+        private readonly ActivityLogHelper _activityLogHelper;
         private readonly UserManager<ApplicationUser> _userManager; 
 
         public MealPlanController(
@@ -38,7 +46,11 @@ namespace HealthyRecipes.Web.Controllers
             ISavedMealPlan savedMealPlanService,
             IMealPlanFollower mealPlanFollowerService,
             UserManager<ApplicationUser> userManager,
-            IGroceryList groceryListService)
+            IGroceryList groceryListService,
+            IActivityLog activityLogService,
+            IContentFilter contentFilterService,
+            IFlaggedContent flaggedContentService,
+            ActivityLogHelper activityLogHelper)
         {
             _mealPlanService = mealPlanService;
             _mealPlanDayService = mealPlanDayService;
@@ -49,6 +61,10 @@ namespace HealthyRecipes.Web.Controllers
             _mealPlanFollowerService = mealPlanFollowerService;
             _userManager = userManager;
             _groceryListService = groceryListService;
+            _activityLogService = activityLogService;
+            _contentFilterService = contentFilterService;
+            _flaggedContentService = flaggedContentService;
+            _activityLogHelper = activityLogHelper;
 
         }
 
@@ -289,6 +305,56 @@ namespace HealthyRecipes.Web.Controllers
             if (!ModelState.IsValid) return View(vm);
 
             var user = await _userManager.GetUserAsync(User);
+
+            // CHECK FOR BANNED WORDS in Name and Description
+            var nameFilterResult = await _contentFilterService.CheckContentAsync(vm.Name);
+            var descriptionFilterResult = string.IsNullOrWhiteSpace(vm.Description)
+                ? null
+                : await _contentFilterService.CheckContentAsync(vm.Description);
+
+            // Handle banned words in Name
+            if (nameFilterResult.ContainsBannedWords)
+            {
+                await _activityLogHelper.LogBannedWordDetectedAsync(
+                    user!.Id,
+                    "MealPlan",
+                    Guid.Empty,
+                    string.Join(", ", nameFilterResult.MatchedWords));
+
+                if (nameFilterResult.ShouldAutoBlock)
+                {
+                    TempData["Error"] = "The meal plan name contains prohibited content and cannot be created.";
+                    return View(vm);
+                }
+
+                if (nameFilterResult.ShouldFlagForReview)
+                {
+                    TempData["Warning"] = "Your meal plan has been flagged for review.";
+                }
+            }
+
+            // Handle banned words in Description
+            if (descriptionFilterResult?.ContainsBannedWords == true)
+            {
+                await _activityLogHelper.LogBannedWordDetectedAsync(
+                    user!.Id,
+                    "MealPlan",
+                    Guid.Empty,
+                    string.Join(", ", descriptionFilterResult.MatchedWords));
+
+                if (descriptionFilterResult.ShouldAutoBlock)
+                {
+                    TempData["Error"] = "The description contains prohibited content and cannot be created.";
+                    return View(vm);
+                }
+
+                if (descriptionFilterResult.ShouldFlagForReview && !nameFilterResult.ShouldFlagForReview)
+                {
+                    TempData["Warning"] = "Your meal plan has been flagged for review.";
+                }
+            }
+
+            // Create meal plan
             var mealPlan = new MealPlan
             {
                 Name = vm.Name,
@@ -297,6 +363,28 @@ namespace HealthyRecipes.Web.Controllers
             };
 
             var id = await _mealPlanService.CreateMealPlanAsync(mealPlan);
+
+            // Flag content if necessary
+            if (nameFilterResult.ShouldFlagForReview || descriptionFilterResult?.ShouldFlagForReview == true)
+            {
+                var allMatchedWords = nameFilterResult.MatchedWords
+                    .Concat(descriptionFilterResult?.MatchedWords ?? Enumerable.Empty<string>())
+                    .Distinct();
+
+                await _flaggedContentService.FlagContentAsync(
+                    contentType: "MealPlan",
+                    contentId: id,
+                    contentPreview: $"{vm.Name} - {vm.Description?.Substring(0, Math.Min(100, vm.Description.Length))}",
+                    contentAuthorId: user.Id,
+                    reason: FlagReason.BannedWords,
+                    details: $"Auto-flagged by content filter during creation",
+                    reportedByUserId: null,
+                    matchedBannedWords: string.Join(", ", allMatchedWords));
+            }
+
+            // LOG ACTIVITY
+            await _activityLogHelper.LogMealPlanCreatedAsync(user.Id, id, vm.Name);
+
             return RedirectToAction(nameof(Details), new { id });
         }
 
@@ -326,10 +414,103 @@ namespace HealthyRecipes.Web.Controllers
             if (mealPlan.UserId != user!.Id && !User.IsInRole("Admin"))
                 return Forbid();
 
+            // CAPTURE OLD VALUES
+            var oldValues = new
+            {
+                mealPlan.Name,
+                mealPlan.Description
+            };
+
+            // CHECK FOR BANNED WORDS
+            var nameFilterResult = await _contentFilterService.CheckContentAsync(vm.Name);
+            var descriptionFilterResult = string.IsNullOrWhiteSpace(vm.Description)
+                ? null
+                : await _contentFilterService.CheckContentAsync(vm.Description);
+
+            // Handle banned words in Name
+            if (nameFilterResult.ContainsBannedWords)
+            {
+                await _activityLogHelper.LogBannedWordDetectedAsync(
+                    user!.Id,
+                    "MealPlan",
+                    id,
+                    string.Join(", ", nameFilterResult.MatchedWords));
+
+                if (nameFilterResult.ShouldAutoBlock)
+                {
+                    TempData["Error"] = "The meal plan name contains prohibited content and cannot be updated.";
+                    return View(vm);
+                }
+
+                if (nameFilterResult.ShouldFlagForReview)
+                {
+                    TempData["Warning"] = "Your meal plan has been flagged for review.";
+                }
+            }
+
+            // Handle banned words in Description
+            if (descriptionFilterResult?.ContainsBannedWords == true)
+            {
+                await _activityLogHelper.LogBannedWordDetectedAsync(
+                    user!.Id,
+                    "MealPlan",
+                    id,
+                    string.Join(", ", descriptionFilterResult.MatchedWords));
+
+                if (descriptionFilterResult.ShouldAutoBlock)
+                {
+                    TempData["Error"] = "The description contains prohibited content and cannot be updated.";
+                    return View(vm);
+                }
+
+                if (descriptionFilterResult.ShouldFlagForReview && !nameFilterResult.ShouldFlagForReview)
+                {
+                    TempData["Warning"] = "Your meal plan has been flagged for review.";
+                }
+            }
+
+            // Update meal plan
             mealPlan.Name = vm.Name;
             mealPlan.Description = vm.Description;
             await _mealPlanService.UpdateMealPlanAsync(mealPlan);
-            
+
+            // Flag content if necessary
+            if (nameFilterResult.ShouldFlagForReview || descriptionFilterResult?.ShouldFlagForReview == true)
+            {
+                var allMatchedWords = nameFilterResult.MatchedWords
+                    .Concat(descriptionFilterResult?.MatchedWords ?? Enumerable.Empty<string>())
+                    .Distinct();
+
+                await _flaggedContentService.FlagContentAsync(
+                    contentType: "MealPlan",
+                    contentId: id,
+                    contentPreview: $"{vm.Name} - {vm.Description?.Substring(0, Math.Min(100, vm.Description.Length))}",
+                    contentAuthorId: user.Id,
+                    reason: FlagReason.BannedWords,
+                    details: $"Auto-flagged by content filter during update",
+                    reportedByUserId: null,
+                    matchedBannedWords: string.Join(", ", allMatchedWords));
+            }
+
+            // CAPTURE NEW VALUES and LOG
+            var newValues = new
+            {
+                mealPlan.Name,
+                mealPlan.Description
+            };
+
+            // Build change description
+            var changes = new List<string>();
+            if (oldValues.Name != newValues.Name)
+                changes.Add($"Name: '{oldValues.Name}' → '{newValues.Name}'");
+            if (oldValues.Description != newValues.Description)
+                changes.Add("Description updated");
+
+            await _activityLogHelper.LogMealPlanUpdatedAsync(
+                user.Id,
+                id,
+                vm.Name,
+                string.Join(", ", changes));
 
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -346,8 +527,17 @@ namespace HealthyRecipes.Web.Controllers
                 return Forbid();
 
             await _mealPlanService.SoftDeleteAsync(id);
+
+            // LOG ACTIVITY
+            await _activityLogHelper.LogMealPlanDeletedAsync(
+                user.Id,
+                id,
+                mealPlan.Name);
+
+            TempData["Success"] = "Meal plan deleted successfully";
             return RedirectToAction(nameof(Index));
         }
+        
 
         // POST: /MealPlan/ToggleSave/{id}
         [HttpPost, ValidateAntiForgeryToken]

@@ -1,5 +1,8 @@
 ﻿using HealthyRecipes.Data.Entities;
+using HealthyRecipes.Data.Entities.Admin;
 using HealthyRecipes.Data.Entities.MappingEntities;
+using HealthyRecipes.Services.Admin.Helpers;
+using HealthyRecipes.Services.Admin.Interfaces;
 using HealthyRecipes.Services.Allergies;
 using HealthyRecipes.Services.Categories;
 using HealthyRecipes.Services.CommentRatings;
@@ -36,6 +39,10 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IRecommendation _recommendationService;
         private readonly IFileUpload _fileUploadService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IActivityLog _activityLogService;
+        private readonly IContentFilter _contentFilterService;
+        private readonly IFlaggedContent _flaggedContentService;
+        private readonly ActivityLogHelper _activityLogHelper;
 
         public RecipeController(
             IRecipe recipeService,
@@ -49,7 +56,11 @@ namespace HealthyRecipes.Web.Controllers
             IRecipeStatistics recipeStatisticsService,
             IRecommendation recommendationService,
             IFileUpload fileUploadService,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IActivityLog activityLogService,
+            IContentFilter contentFilterService,
+            IFlaggedContent flaggedContentService,
+            ActivityLogHelper activityLogHelper)
         {
             _recipeService = recipeService;
             _categoryService = categoryService;
@@ -63,6 +74,10 @@ namespace HealthyRecipes.Web.Controllers
             _recommendationService = recommendationService;
             _fileUploadService = fileUploadService;
             _userManager = userManager;
+            _activityLogService = activityLogService;
+            _contentFilterService = contentFilterService;
+            _flaggedContentService = flaggedContentService;
+            _activityLogHelper = activityLogHelper;
         }
 
         // GET: /Recipe
@@ -112,20 +127,20 @@ namespace HealthyRecipes.Web.Controllers
                 HashSet<Guid> savedIds = new();
                 HashSet<Guid> allergyIngredientIds = new();
                 List<Recipe> myRecipes = new List<Recipe>();
-                
-                    
-                    if (currentUserId != null)
-                    {
-                        var my = await _recipeService.GetRecipesByUserAsync((Guid)currentUserId);
-                        myRecipes = my.ToList();
 
-                        var saved = await _savedRecipeService.GetSavedRecipesByUserAsync((Guid)currentUserId);
-                        savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
 
-                        var allergies = await _allergyService.GetAllergiesByUserAsync((Guid)currentUserId);
-                        allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
-                    }
-                
+                if (currentUserId != null)
+                {
+                    var my = await _recipeService.GetRecipesByUserAsync((Guid)currentUserId);
+                    myRecipes = my.ToList();
+
+                    var saved = await _savedRecipeService.GetSavedRecipesByUserAsync((Guid)currentUserId);
+                    savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
+
+                    var allergies = await _allergyService.GetAllergiesByUserAsync((Guid)currentUserId);
+                    allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
+                }
+
 
                 // Map My Recipes
                 var myCards = new List<RecipeCardViewModel>();
@@ -397,6 +412,9 @@ namespace HealthyRecipes.Web.Controllers
 
             await _recipeService.RecalculateRecipeNutritionAsync(recipeId);
 
+            // LOG ACTIVITY - Recipe creation
+            await _activityLogHelper.LogRecipeCreatedAsync(user.Id, recipeId, vm.Title);
+
             return RedirectToAction(nameof(Details), new { id = recipeId });
         }
 
@@ -415,7 +433,7 @@ namespace HealthyRecipes.Web.Controllers
             var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
             var recipeIngredients = await _recipeIngredientService.GetIngredientsByRecipeAsync(id);
 
-            
+
 
             var vm = new EditRecipeViewModel
             {
@@ -457,6 +475,16 @@ namespace HealthyRecipes.Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (recipe.UserId != user!.Id && !User.IsInRole("Admin"))
                 return Forbid();
+
+            // CAPTURE OLD VALUES for activity logging
+            var oldValues = new
+            {
+                recipe.Title,
+                recipe.Info,
+                recipe.PrepTime,
+                recipe.Difficulty,
+                recipe.Servings
+            };
 
             // Update basic properties
             recipe.Title = vm.Title;
@@ -510,7 +538,7 @@ namespace HealthyRecipes.Web.Controllers
                 recipe.VideoUrl = await _fileUploadService.UploadVideoAsync(vm.NewVideoFile);
             }
 
-            // ===== ADD THIS SECTION - Update Categories =====
+
             // Get current category associations
             var currentCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
             var currentCategoryIds = currentCategories.Select(rc => rc.CategoryId).ToHashSet();
@@ -535,6 +563,23 @@ namespace HealthyRecipes.Web.Controllers
 
             await _recipeService.UpdateRecipeAsync(recipe);
             await _recipeService.RecalculateRecipeNutritionAsync(id);
+
+            // CAPTURE NEW VALUES and log activity
+            var newValues = new
+            {
+                recipe.Title,
+                recipe.Info,
+                recipe.PrepTime,
+                recipe.Difficulty,
+                recipe.Servings
+            };
+
+            await _activityLogHelper.LogRecipeUpdatedAsync(
+                user.Id,
+                id,
+                vm.Title,
+                oldValues,
+                newValues);
 
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -565,6 +610,13 @@ namespace HealthyRecipes.Web.Controllers
             // NOW soft delete the recipe
             await _recipeService.SoftDeleteRecipeAsync(id);
 
+            // LOG ACTIVITY - Recipe deletion
+            await _activityLogHelper.LogRecipeDeletedAsync(
+                user.Id,
+                id,
+                recipe.Title,
+                isSoftDelete: true);
+
             TempData["Success"] = "Recipe deleted successfully";
             return RedirectToAction(nameof(Index));
         }
@@ -593,7 +645,59 @@ namespace HealthyRecipes.Web.Controllers
                 return RedirectToAction(nameof(Details), new { id = vm.RecipeId });
 
             var user = await _userManager.GetUserAsync(User);
+            Services.Admin.Models.ContentFilterResult? filterResult = null;
+
+            // CHECK FOR BANNED WORDS IF COMMENT PROVIDED
+            if (!string.IsNullOrWhiteSpace(vm.Comment))
+            {
+                filterResult = await _contentFilterService.CheckContentAsync(vm.Comment);
+
+                if (filterResult.ContainsBannedWords)
+                {
+                    // LOG BANNED WORD DETECTION
+                    await _activityLogHelper.LogBannedWordDetectedAsync(
+                        user!.Id,
+                        "Comment",
+                        Guid.Empty, // Entity ID not yet available
+                        string.Join(", ", filterResult.MatchedWords));
+
+                    if (filterResult.ShouldAutoBlock)
+                    {
+                        // Auto-block high severity words
+                        TempData["Error"] = "Your comment contains prohibited content and cannot be posted.";
+                        return RedirectToAction(nameof(Details), new { id = vm.RecipeId });
+                    }
+
+                    if (filterResult.ShouldFlagForReview)
+                    {
+                        // Flag for admin review but allow posting
+                        var recipe = await _recipeService.GetRecipeByIdAsync(vm.RecipeId);
+
+                        await _flaggedContentService.FlagContentAsync(
+                            contentType: "Comment",
+                            contentId: Guid.Empty, // Will be updated after comment creation
+                            contentPreview: vm.Comment.Length > 200 ? vm.Comment.Substring(0, 200) : vm.Comment,
+                            contentAuthorId: user.Id,
+                            reason: FlagReason.BannedWords,
+                            details: $"Auto-flagged by content filter. Severity: {filterResult.HighestSeverity}",
+                            reportedByUserId: null,
+                            matchedBannedWords: string.Join(", ", filterResult.MatchedWords));
+
+                        TempData["Warning"] = "Your comment has been flagged for review.";
+                    }
+                }
+            }
+
             await _commentRatingService.AddOrUpdateCommentRatingAsync(user!.Id, vm.RecipeId, vm.Rating, vm.Comment);
+
+            // LOG COMMENT POSTED
+            var recipeForLog = await _recipeService.GetRecipeByIdAsync(vm.RecipeId);
+            await _activityLogHelper.LogCommentPostedAsync(
+                user.Id,
+                Guid.NewGuid(), // Should ideally be the actual comment ID
+                vm.RecipeId,
+                recipeForLog?.Title ?? "Unknown Recipe",
+                filterResult?.ContainsBannedWords ?? false);
 
             return RedirectToAction(nameof(Details), new { id = vm.RecipeId });
         }
@@ -758,6 +862,43 @@ namespace HealthyRecipes.Web.Controllers
                 return RedirectToAction(nameof(Details), new { id = recipeId });
 
             var user = await _userManager.GetUserAsync(User);
+
+            // CHECK FOR BANNED WORDS
+            var filterResult = await _contentFilterService.CheckContentAsync(content);
+
+            if (filterResult.ContainsBannedWords)
+            {
+                // LOG BANNED WORD DETECTION
+                await _activityLogHelper.LogBannedWordDetectedAsync(
+                    user!.Id,
+                    "Reply",
+                    Guid.Empty,
+                    string.Join(", ", filterResult.MatchedWords));
+
+                if (filterResult.ShouldAutoBlock)
+                {
+                    TempData["Error"] = "Your reply contains prohibited content and cannot be posted.";
+                    return RedirectToAction(nameof(Details), new { id = recipeId });
+                }
+
+                if (filterResult.ShouldFlagForReview)
+                {
+                    var recipe = await _recipeService.GetRecipeByIdAsync(recipeId);
+
+                    await _flaggedContentService.FlagContentAsync(
+                        contentType: "Reply",
+                        contentId: Guid.Empty,
+                        contentPreview: content.Length > 200 ? content.Substring(0, 200) : content,
+                        contentAuthorId: user.Id,
+                        reason: FlagReason.BannedWords,
+                        details: $"Auto-flagged by content filter. Severity: {filterResult.HighestSeverity}",
+                        reportedByUserId: null,
+                        matchedBannedWords: string.Join(", ", filterResult.MatchedWords));
+
+                    TempData["Warning"] = "Your reply has been flagged for review.";
+                }
+            }
+
             await _commentRatingService.AddReplyAsync(parentCommentId, user!.Id, content);
 
             return RedirectToAction(nameof(Details), new { id = recipeId });
@@ -772,6 +913,41 @@ namespace HealthyRecipes.Web.Controllers
                 return RedirectToAction(nameof(Details), new { id = recipeId });
 
             var user = await _userManager.GetUserAsync(User);
+
+            // CHECK FOR BANNED WORDS
+            var filterResult = await _contentFilterService.CheckContentAsync(content);
+
+            if (filterResult.ContainsBannedWords)
+            {
+                // LOG BANNED WORD DETECTION
+                await _activityLogHelper.LogBannedWordDetectedAsync(
+                    user!.Id,
+                    "Comment",
+                    commentId,
+                    string.Join(", ", filterResult.MatchedWords));
+
+                if (filterResult.ShouldAutoBlock)
+                {
+                    TempData["Error"] = "Your comment contains prohibited content and cannot be updated.";
+                    return RedirectToAction(nameof(Details), new { id = recipeId });
+                }
+
+                if (filterResult.ShouldFlagForReview)
+                {
+                    await _flaggedContentService.FlagContentAsync(
+                        contentType: "Comment",
+                        contentId: commentId,
+                        contentPreview: content.Length > 200 ? content.Substring(0, 200) : content,
+                        contentAuthorId: user.Id,
+                        reason: FlagReason.BannedWords,
+                        details: $"Auto-flagged during edit. Severity: {filterResult.HighestSeverity}",
+                        reportedByUserId: null,
+                        matchedBannedWords: string.Join(", ", filterResult.MatchedWords));
+
+                    TempData["Warning"] = "Your updated comment has been flagged for review.";
+                }
+            }
+
             var success = await _commentRatingService.UpdateCommentAsync(commentId, user!.Id, content);
 
             if (!success)
