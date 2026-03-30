@@ -320,3 +320,87 @@
     gap: 16px;
     margin-bottom: 32px;
 }
+/* Action Links for Review Page */
+.action-link {
+    display: block;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: #f9fafb;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #374151;
+    transition: all 0.2s;
+}
+
+    .action-link:hover {
+        background: #e5e7eb;
+    }
+
+/* Back Links */
+.back-link {
+    display: inline-block;
+    margin-bottom: 12px;
+    color: #6b7280;
+    text-decoration: none;
+}
+
+    .back-link:hover {
+        color: #374151;
+    }
+
+/* Detail Rows */
+.detail-row {
+    display: flex;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+
+.detail-label {
+    min-width: 150px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Badge Variants */
+.badge-danger {
+    display: inline-block;
+    padding: 4px 8px;
+    background: #dc2626;
+    color: white;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.badge-sm {
+    padding: 4px 8px;
+    background: #e5e7eb;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* Status Badges */
+.status-badge {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-resolved {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.status-dismissed {
+    background: #e5e7eb;
+    color: #374151;
+}

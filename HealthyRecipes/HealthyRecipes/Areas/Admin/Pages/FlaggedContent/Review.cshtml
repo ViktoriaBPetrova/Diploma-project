@@ -1,0 +1,291 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.FlaggedContent.ReviewModel
+@using HealthyRecipes.Data.Entities.Admin
+@{
+    ViewData["Title"] = "Review Flagged Content";
+}
+
+<div class="page-header">
+    <a asp-page="/FlaggedContent/Index" class="back-link">← Back to Flagged Content</a>
+    <h1>Review Flagged Content</h1>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Main Content Column -->
+    <div>
+        <!-- Content Details -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <h3>Content Details</h3>
+            
+            <div class="detail-row">
+                <span class="detail-label">Content Type:</span>
+                <span class="badge-sm">@Model.ViewModel.ContentType</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Content ID:</span>
+                <code>@Model.ViewModel.ContentId</code>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Flagged Date:</span>
+                <span>@Model.ViewModel.CreatedAt.ToString("MMMM dd, yyyy 'at' HH:mm")</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="detail-label">Status:</span>
+                <span class="status-badge @(Model.ViewModel.Status == FlagStatus.Pending ? "status-pending" : "status-resolved")">
+                    @Model.ViewModel.Status
+                </span>
+            </div>
+        </div>
+
+        <!-- Content Preview -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <h3>Content Preview</h3>
+            <div style="background: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #dc2626;">
+                <p style="margin: 0; white-space: pre-wrap;">@Model.ViewModel.ContentPreview</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ViewModel.MatchedBannedWords))
+            {
+                <div style="margin-top: 12px; padding: 12px; background: #fef2f2; border-radius: 6px;">
+                    <strong style="color: #dc2626;">🚫 Matched Banned Words:</strong>
+                    <div style="margin-top: 4px;">
+                        @foreach (var word in Model.ViewModel.MatchedBannedWords.Split(','))
+                        {
+                            <span class="badge-danger" style="margin-right: 8px;">@word.Trim()</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Flag Details -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <h3>Flag Details</h3>
+            
+            <div class="detail-row">
+                <span class="detail-label">Reason:</span>
+                <strong style="color: #dc2626;">@Model.ViewModel.Reason</strong>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ViewModel.Details))
+            {
+                <div class="detail-row">
+                    <span class="detail-label">Additional Details:</span>
+                    <span>@Model.ViewModel.Details</span>
+                </div>
+            }
+
+            <div class="detail-row">
+                <span class="detail-label">Reported By:</span>
+                <span>
+                    @if (string.IsNullOrEmpty(Model.ViewModel.ReportedByUserName))
+                    {
+                        <em style="color: #666;">Auto-flagged by system</em>
+                    }
+                    else
+                    {
+                        @Model.ViewModel.ReportedByUserName
+                    }
+                </span>
+            </div>
+        </div>
+
+        <!-- Resolution Actions (only if pending) -->
+        @if (Model.ViewModel.Status == FlagStatus.Pending)
+        {
+            <div class="admin-card">
+                <h3>Take Action</h3>
+                
+                <form method="post" asp-page-handler="Resolve">
+                    <input type="hidden" asp-for="Input.Id" />
+
+                    <div class="form-group">
+                        <label asp-for="Input.Resolution">Resolution</label>
+                        <select asp-for="Input.Resolution" class="form-control" required>
+                            <option value="">Select resolution...</option>
+                            @foreach (FlagResolution resolution in Enum.GetValues(typeof(FlagResolution)))
+                            {
+                                <option value="@((int)resolution)">@resolution.ToString()</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Input.AdminNotes">Admin Notes (optional)</label>
+                        <textarea asp-for="Input.AdminNotes" class="form-control" rows="3" 
+                                  placeholder="Internal notes about this resolution..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                            <input type="checkbox" asp-for="Input.IssueWarning" />
+                            <span>Issue warning to content author</span>
+                        </label>
+                    </div>
+
+                    <div id="warning-fields" style="display: none; margin-left: 28px; padding: 12px; background: #fef3c7; border-radius: 6px;">
+                        <div class="form-group">
+                            <label asp-for="Input.WarningType">Warning Type</label>
+                            <select asp-for="Input.WarningType" class="form-control">
+                                @foreach (WarningType type in Enum.GetValues(typeof(WarningType)))
+                                {
+                                    <option value="@((int)type)">@type.ToString()</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="Input.WarningReason">Warning Reason</label>
+                            <input asp-for="Input.WarningReason" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div style="display: flex; gap: 12px; margin-top: 24px;">
+                        <button type="submit" class="btn-primary">✓ Resolve</button>
+                        <button type="button" class="btn-ghost" onclick="dismissFlag()">Dismiss as False Positive</button>
+                    </div>
+                </form>
+            </div>
+        }
+        else
+        {
+            <!-- Already Resolved -->
+            <div class="admin-card">
+                <h3>Resolution</h3>
+                <div class="detail-row">
+                    <span class="detail-label">Resolution:</span>
+                    <strong>@Model.ViewModel.Resolution</strong>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.ViewModel.AdminNotes))
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Admin Notes:</span>
+                        <span>@Model.ViewModel.AdminNotes</span>
+                    </div>
+                }
+                @if (Model.ViewModel.ReviewedAt.HasValue)
+                {
+                    <div class="detail-row">
+                        <span class="detail-label">Reviewed:</span>
+                        <span>@Model.ViewModel.ReviewedAt.Value.ToString("MMMM dd, yyyy 'at' HH:mm")</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <!-- Sidebar Column -->
+    <div>
+        <!-- Author Info -->
+        <div class="admin-card" style="margin-bottom: 24px;">
+            <h3>Content Author</h3>
+            
+            <div style="margin-bottom: 12px;">
+                <div style="font-weight: 600; font-size: 1.1rem;">@Model.ViewModel.ContentAuthorName</div>
+                <div style="color: #666; font-size: 0.9rem;">@Model.ViewModel.ContentAuthorEmail</div>
+            </div>
+
+            <div style="padding: 12px; background: #f9fafb; border-radius: 6px; margin-bottom: 12px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #666;">Active Warnings:</span>
+                    <strong style="color: @(Model.ViewModel.AuthorActiveWarnings > 0 ? "#dc2626" : "#10b981");">
+                        @Model.ViewModel.AuthorActiveWarnings
+                    </strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: #666;">Total Flags:</span>
+                    <strong>@Model.ViewModel.AuthorTotalFlags</strong>
+                </div>
+            </div>
+
+            <a asp-page="/UserModeration/Details" asp-route-userId="@Model.ViewModel.ContentAuthorId" 
+               class="btn-ghost" style="width: 100%; text-align: center;">
+                View Full Profile →
+            </a>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="admin-card">
+            <h3>Quick Actions</h3>
+            
+            <a href="#" class="action-link">🔗 View Original Content</a>
+            <a href="#" class="action-link">📧 Email Author</a>
+            <a asp-page="/ActivityLogs/Index" asp-route-userId="@Model.ViewModel.ContentAuthorId" 
+               class="action-link">📊 View Activity History</a>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden form for dismiss action -->
+<form id="dismissForm" method="post" asp-page-handler="Dismiss" style="display: none;">
+    <input type="hidden" name="id" value="@Model.ViewModel.Id" />
+    <input type="hidden" name="adminNotes" id="dismissNotes" />
+</form>
+
+@section Scripts {
+    <script>
+        // Show/hide warning fields
+        document.querySelector('[name="Input.IssueWarning"]').addEventListener('change', function() {
+            document.getElementById('warning-fields').style.display = this.checked ? 'block' : 'none';
+        });
+
+        // Dismiss function
+        function dismissFlag() {
+            if (confirm('Dismiss this flag as a false positive? This action can be reviewed later.')) {
+                const notes = prompt('Optional: Add a note about why this is being dismissed:');
+                if (notes !== null) {
+                    document.getElementById('dismissNotes').value = notes;
+                    document.getElementById('dismissForm').submit();
+                }
+            }
+        }
+    </script>
+}
+
+<style>
+    .detail-row {
+        display: flex;
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .detail-row:last-child {
+        border-bottom: none;
+    }
+    .detail-label {
+        min-width: 150px;
+        color: #666;
+        font-weight: 500;
+    }
+    .action-link {
+        display: block;
+        padding: 10px 12px;
+        margin-bottom: 8px;
+        background: #f9fafb;
+        border-radius: 6px;
+        text-decoration: none;
+        color: #374151;
+        transition: all 0.2s;
+    }
+    .action-link:hover {
+        background: #e5e7eb;
+    }
+    .back-link {
+        display: inline-block;
+        margin-bottom: 12px;
+        color: #6b7280;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        color: #374151;
+    }
+    .badge-danger {
+        display: inline-block;
+        padding: 4px 8px;
+        background: #dc2626;
+        color: white;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+</style>

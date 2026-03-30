@@ -1,0 +1,76 @@
+@page
+@model HealthyRecipes.Web.Areas.Admin.Pages.BannedWords.EditModel
+@using HealthyRecipes.Data.Entities.Admin
+@{
+    ViewData["Title"] = "Edit Banned Word";
+}
+
+<div class="page-header">
+    <a asp-page="/BannedWords/Index" class="back-link">← Back to Banned Words</a>
+    <h1>Edit Banned Word</h1>
+    <p>Update settings for this banned word</p>
+</div>
+
+<div class="admin-card" style="max-width: 600px;">
+    <form method="post">
+        <input type="hidden" asp-for="Input.Id" />
+
+        <div class="form-group">
+            <label asp-for="Input.Word">Word or Phrase <span style="color: #dc2626;">*</span></label>
+            <input asp-for="Input.Word" class="form-control" required 
+                   placeholder="e.g., spam, offensive" />
+            <small class="form-text">The word or phrase to filter</small>
+            <span asp-validation-for="Input.Word" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Input.Severity">Severity Level <span style="color: #dc2626;">*</span></label>
+            <select asp-for="Input.Severity" class="form-control" required>
+                @foreach (WordSeverity severity in Enum.GetValues(typeof(WordSeverity)))
+                {
+                    <option value="@((int)severity)">@severity.ToString()</option>
+                }
+            </select>
+            <small class="form-text">
+                <strong>Low:</strong> Allows posting, no flag &nbsp;|&nbsp;
+                <strong>Medium:</strong> Allows with warning, flags for review &nbsp;|&nbsp;
+                <strong>High:</strong> Blocks posting entirely
+            </small>
+            <span asp-validation-for="Input.Severity" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="checkbox" asp-for="Input.IsRegexPattern" />
+                <span>Use as regex pattern</span>
+            </label>
+            <small class="form-text" style="margin-left: 28px; display: block; margin-top: 4px;">
+                Advanced: Treat as regular expression for complex matching
+            </small>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Input.Description">Description (optional)</label>
+            <textarea asp-for="Input.Description" class="form-control" rows="3"
+                      placeholder="Optional: Why this word is banned..."></textarea>
+            <small class="form-text">Internal note about this banned word</small>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 24px;">
+            <button type="submit" class="btn-primary">Save Changes</button>
+            <a asp-page="/BannedWords/Index" class="btn-ghost">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .back-link {
+        display: inline-block;
+        margin-bottom: 12px;
+        color: #6b7280;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        color: #374151;
+    }
+</style>

@@ -151,6 +151,7 @@ namespace HealthyRecipes.Services.Admin
                 ContentType = entity.ContentType,
                 ContentId = entity.ContentId,
                 ContentPreview = entity.ContentPreview,
+                ContentAuthorId = entity.ContentAuthorId,
                 ContentAuthorName = entity.ContentAuthor?.UserName ?? "Unknown",
                 ContentAuthorEmail = entity.ContentAuthor?.Email ?? "N/A",
                 Reason = entity.Reason,

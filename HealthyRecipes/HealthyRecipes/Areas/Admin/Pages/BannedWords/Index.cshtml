@@ -136,6 +136,9 @@
                         </td>
                         <td>
                             <div style="display: flex; gap: 8px;">
+                                <a asp-page="/BannedWords/Edit" asp-route-id="@word.Id" class="btn-action">
+                                    Edit
+                                </a>
                                 <form method="post" asp-page-handler="ToggleStatus" asp-route-id="@word.Id" style="display: inline;">
                                     <button type="submit" class="btn-action">
                                         @(word.IsActive ? "Disable" : "Enable")

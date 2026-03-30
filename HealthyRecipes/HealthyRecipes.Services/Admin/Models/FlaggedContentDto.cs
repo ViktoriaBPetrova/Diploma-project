@@ -13,6 +13,7 @@ namespace HealthyRecipes.Services.Admin.Models
         public string ContentType { get; set; } = string.Empty;
         public Guid ContentId { get; set; }
         public string ContentPreview { get; set; } = string.Empty;
+        public Guid ContentAuthorId { get; set; }
         public string ContentAuthorName { get; set; } = string.Empty;
         public string ContentAuthorEmail { get; set; } = string.Empty;
         public FlagReason Reason { get; set; }
