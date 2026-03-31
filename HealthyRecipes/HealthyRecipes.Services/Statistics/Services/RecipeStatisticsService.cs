@@ -85,7 +85,7 @@ namespace HealthyRecipes.Services.Statistics.Services
             {
                 var ratings = await _context.CommentRatings
                     .Where(cr => cr.RecipeId == recipeId && !cr.Deleted)
-                    .Select(cr => (int)cr.Rating)
+                    .Select(cr => (int)(cr.Rating ?? 0))
                     .ToListAsync();
 
                 if (!ratings.Any())
