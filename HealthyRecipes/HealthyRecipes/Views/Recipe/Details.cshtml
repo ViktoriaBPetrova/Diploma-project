@@ -22,8 +22,32 @@
     }
 
     <div class="recipe-hero">
-        @if (!string.IsNullOrEmpty(Model.ImageUrl))
-        {          
+        @if (Model.ImageUrls != null && Model.ImageUrls.Any())
+        {
+            @if (Model.ImageUrls.Count == 1)
+            {
+                <img src="@Model.ImageUrls.First()" alt="Recipe" class="recipe-hero-img" />
+            }
+            else
+            {
+                <div class="recipe-gallery">
+                    <div class="recipe-gallery-main">
+                        <img src="@Model.ImageUrls.First()" alt="Recipe" id="mainGalleryImage" class="recipe-hero-img" />
+                    </div>
+                    <div class="recipe-gallery-thumbs">
+                        @for (int i = 0; i < Model.ImageUrls.Count; i++)
+                        {
+                            <img src="@Model.ImageUrls[i]" 
+                                 alt="Recipe @(i + 1)" 
+                                 class="gallery-thumb @(i == 0 ? "active" : "")"
+                                 onclick="changeGalleryImage('@Model.ImageUrls[i]', this)" />
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else if (!string.IsNullOrEmpty(Model.ImageUrl))
+        {
             <img src="@Model.ImageUrl" alt="Recipe" class="recipe-hero-img" />
         }
         else
@@ -88,9 +112,21 @@
                 <div class="recipe-section">
                     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
                         <h2 class="recipe-section-title" >Ingredients</h2>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <!-- Unit Selector -->
+                        <select id="unit-selector" class="form-control" style="width: auto; padding: 0.5rem;">
+                            <option value="original">As Entered</option>
+                            <option value="grams">Grams (g)</option>
+                            <option value="teaspoons">Teaspoons (tsp)</option>
+                            <option value="tablespoons">Tablespoons (tbsp)</option>
+                            <option value="cups">Cups</option>
+                            <option value="coffeecups">Coffee Cups</option>
+                            <option value="millilitres">Millilitres (ml)</option>
+                        </select>
 
                         @if (isAuthor)
                         {
+                           
                             <div class="ingredient-search-toggle-container">
                                 <button type="button" class="btn-search-icon" id="add-ingredient-btn" title="Add ingredient">
                                     <svg width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -117,28 +153,56 @@
                                     </div>
 
                                     <div id="ingredient-quantity-form" class="ingredient-quantity-form-overlay">
-                                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                                            <input type="number"
-                                                   id="ingredient-quantity"
-                                                   class="form-control"
-                                                   placeholder="Quantity"
-                                                   step="0.01"
-                                                   style="flex: 1;">
-                                            
+                                        <div class="measurement-inputs-compact">
+                                            <div class="measurement-field-compact">
+                                                <label>Grams</label>
+                                                <input type="number" step="0.1" min="0" data-unit="grams" class="form-control measurement-input-compact" placeholder="0">
+                                            </div>
+                                            <div class="measurement-field-compact">
+                                                <label>tsp</label>
+                                                <input type="number" step="0.1" min="0" data-unit="teaspoons" class="form-control measurement-input-compact" placeholder="0">
+                                            </div>
+                                            <div class="measurement-field-compact">
+                                                <label>tbsp</label>
+                                                <input type="number" step="0.1" min="0" data-unit="tablespoons" class="form-control measurement-input-compact" placeholder="0">
+                                            </div>
+                                            <div class="measurement-field-compact">
+                                                <label>Cups</label>
+                                                <input type="number" step="0.01" min="0" data-unit="cups" class="form-control measurement-input-compact" placeholder="0">
+                                            </div>
+                                            <div class="measurement-field-compact">
+                                                <label>ml</label>
+                                                <input type="number" step="1" min="0" data-unit="millilitres" class="form-control measurement-input-compact" placeholder="0">
+                                            </div>
                                         </div>
-                                        <button type="button" class="btn-primary" id="confirm-add-ingredient">Add</button>
-                                        <button type="button" class="btn-ghost" id="cancel-add-ingredient">Cancel</button>
+                                        <button type="button" class="btn-secondary" id="convert-measurement-btn" style="width: 100%; margin-bottom: 0.5rem;">🔄 Convert</button>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <button type="button" class="btn-primary" id="confirm-add-ingredient" style="flex: 1;">Add</button>
+                                            <button type="button" class="btn-ghost" id="cancel-add-ingredient" style="flex: 1;">Cancel</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         }
                     </div>
+                   
+                </div>
+                </div>
 
-                    <ul class="recipe-ingredients-list" id="ingredients-list">
-                        @foreach (var ingredient in Model.Ingredients)
-                        {
-                            <li class="recipe-ingredient-item">
-                                <span class="ingredient-name">@ingredient.QuantityInGrams g @ingredient.IngredientName</span>
+                <ul class="recipe-ingredients-list" id="ingredients-list">
+                    @foreach (var ingredient in Model.Ingredients)
+                    {
+                        <li class="recipe-ingredient-item"
+                            data-grams="@ingredient.QuantityInGrams"
+                            data-teaspoons="@(ingredient.QuantityInTeaspoons ?? 0)"
+                            data-tablespoons="@(ingredient.QuantityInTablespoons ?? 0)"
+                            data-cups="@(ingredient.QuantityInCups ?? 0)"
+                            data-coffeecups="@(ingredient.QuantityInCoffeeCups ?? 0)"
+                            data-millilitres="@(ingredient.QuantityInMillilitres ?? 0)"
+                            data-original-unit="@(ingredient.OriginalUnit ?? "grams")"
+                            data-original-formatted="@ingredient.FormattedQuantity">
+                            <span class="ingredient-quantity">@ingredient.FormattedQuantity</span>
+                            <span class="ingredient-name">@ingredient.IngredientName</span>
                             @if (isAuthor)
                             {
                                 <button type="button"
@@ -151,26 +215,9 @@
                                     </svg>
                                 </button>
                             }
-                            </li>
-                        }
-                    </ul>
-                </div>
-
-            @if (!string.IsNullOrEmpty(Model.VideoUrl))
-            {
-                <h3 class="recipe-video-heading">Video</h3>
-                <div class="recipe-video-section">
-                    <a href="@Model.VideoUrl" target="_blank" class="btn-ghost">▶ Watch video tutorial</a>
-                    @if (!string.IsNullOrEmpty(Model.VideoUrl))
-                    {
-                        <video controls class="recipe-video">
-                            <source src="@Model.VideoUrl" type="video/mp4">
-                            Your browser doesn't support video playback.
-                        </video>
+                        </li>
                     }
-                </div>             
-            }
-
+                </ul>
             <!-- Comments Section - MOVED HERE -->
             <div class="recipe-comments-section">
                 <div class="recipe-comments-header">
@@ -243,7 +290,23 @@
 
         </div>
 
-            
+            @if (!string.IsNullOrEmpty(Model.VideoUrl))
+            {
+                <h3 class="recipe-video-heading">Video</h3>
+                <div class="recipe-video-section">
+                    <a href="@Model.VideoUrl" target="_blank" class="btn-ghost">▶ Watch video tutorial</a>
+                    @if (!string.IsNullOrEmpty(Model.VideoUrl))
+                    {
+                        <video controls class="recipe-video">
+                            <source src="@Model.VideoUrl" type="video/mp4">
+                            Your browser doesn't support video playback.
+                        </video>
+                    }
+                </div>             
+            }
+
+
+        
 
         <!-- Sidebar -->
         <div class="recipe-sidebar">
@@ -274,25 +337,29 @@
                     </div>
                 </div>
 
-            <!-- Statistics (Async loaded) - Only visible to recipe owner -->
-            @if (isAuthor)
-            {
-                <div id="recipe-statistics" data-recipe-id="@Model.Id" class="recipe-stats-container">
-                    <div class="nutrition-card recipe-stats-card">
-                        <div class="text-center">
-                            <div class="spinner-border spinner-border-sm" role="status">
-                                <span class="visually-hidden">Loading...</span>
+                <!-- Statistics (Async loaded) - Only visible to recipe owner -->
+                @if (isAuthor)
+                {
+                    <div id="recipe-statistics" data-recipe-id="@Model.Id" class="recipe-stats-container">
+                        <div class="nutrition-card recipe-stats-card">
+                            <div class="text-center">
+                                <div class="spinner-border spinner-border-sm" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="recipe-stats-loading">Loading statistics...</p>
                             </div>
-                            <p class="recipe-stats-loading">Loading statistics...</p>
                         </div>
                     </div>
-                </div>
-            }
+                }
 
                 <a asp-controller="Recipe" asp-action="Index" class="btn-ghost recipe-back-btn">← Back to recipes</a>
             </div>
         </div>
     </div>
+
+   
+   
+ </div>
 
     @* Similar Recipes Section *@
     @if (Model.SimilarRecipes.Any())
@@ -351,6 +418,13 @@
 
 @section Scripts {
     <script>
+        // Image Gallery Navigation
+        function changeGalleryImage(imageSrc, thumbElement) {
+            document.getElementById('mainGalleryImage').src = imageSrc;
+            document.querySelectorAll('.gallery-thumb').forEach(thumb => thumb.classList.remove('active'));
+            thumbElement.classList.add('active');
+        }
+
         // Recipe statistics loading (keeping jQuery for this part since it's already working)
         $(document).ready(function() {
             var recipeStatsId = $('#recipe-statistics').data('recipe-id');
@@ -535,7 +609,7 @@
         let selectedIngredientId = null;
         let selectedIngredientName = null;
 
-        // Get elements - make sure these IDs match your HTML exactly
+        // Get elements 
         const addIngredientBtn = document.getElementById('add-ingredient-btn');
         const searchContainer = document.getElementById('ingredient-search-container');
         const searchInput = document.getElementById('ingredient-search');
@@ -654,20 +728,120 @@
             cancelBtn.addEventListener('click', resetIngredientForm);
         }
 
-        // Confirm add ingredient
+        // Convert measurement button
+        const convertBtn = document.getElementById('convert-measurement-btn');
+        if (convertBtn) {
+            convertBtn.addEventListener('click', async function() {
+                const inputs = document.querySelectorAll('.measurement-input-compact');
+                let sourceInput = null;
+                let sourceValue = 0;
+
+                // Clear previous conversion markers
+                inputs.forEach(input => {
+                    input.removeAttribute('data-converted-from');
+                });
+
+                for (const input of inputs) {
+                    const value = parseFloat(input.value);
+                    if (value && value > 0) {
+                        sourceInput = input;
+                        sourceValue = value;
+                        break;
+                    }
+                }
+
+                if (!sourceInput) {
+                    alert('Please enter a quantity in at least one field');
+                    return;
+                }
+
+                const unit = sourceInput.dataset.unit;
+
+                try {
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    const response = await fetch('/Recipe/ConvertMeasurement', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': token
+                        },
+                        body: JSON.stringify({
+                            quantity: sourceValue,
+                            fromUnit: unit
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Conversion failed');
+
+                    const data = await response.json();
+
+                    // Update all fields
+                    document.querySelector('[data-unit="grams"]').value = data.grams;
+                    document.querySelector('[data-unit="teaspoons"]').value = data.teaspoons;
+                    document.querySelector('[data-unit="tablespoons"]').value = data.tablespoons;
+                    document.querySelector('[data-unit="cups"]').value = data.cups;
+                    document.querySelector('[data-unit="millilitres"]').value = data.millilitres;
+
+                    // Mark the original source field
+                    sourceInput.setAttribute('data-converted-from', 'true');
+
+                    // Visual feedback
+                    convertBtn.textContent = '✓ Converted';
+                    convertBtn.style.background = 'var(--sage)';
+                    setTimeout(() => {
+                        convertBtn.textContent = '🔄 Convert';
+                        convertBtn.style.background = '';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Conversion error:', error);
+                    alert('Failed to convert measurements');
+                }
+            });
+        }
+
+        // Confirm add ingredient - FIXED to preserve original unit
         if (confirmBtn) {
             confirmBtn.addEventListener('click', async function() {
-                const quantity = parseFloat(quantityInput.value);
-                console.log('Adding ingredient:', selectedIngredientId, quantity);
+                const inputs = document.querySelectorAll('.measurement-input-compact');
+                let quantity = 0;
+                let unit = 'grams';
+                let foundOriginalInput = false;
+
+                // FIRST: Try to find which field the user originally filled
+                // by checking which one was the last to be modified (has focus or was changed)
+                // OR check which field has a value that's different from the others
+
+                // Better approach: Find the field that was the SOURCE of conversion
+                // We'll track this with a data attribute set during conversion
+                const convertedFrom = document.querySelector('[data-converted-from="true"]');
+
+                if (convertedFrom) {
+                    // Use the original field that was converted
+                    quantity = parseFloat(convertedFrom.value);
+                    unit = convertedFrom.dataset.unit;
+                } else {
+                    // No conversion happened - find the first non-empty field
+                    for (const input of inputs) {
+                        const value = parseFloat(input.value);
+                        if (value && value > 0) {
+                            quantity = value;
+                            unit = input.dataset.unit;
+                            break;
+                        }
+                    }
+                }
+
+                console.log('Adding ingredient:', selectedIngredientId, quantity, unit);
 
                 if (!selectedIngredientId || !quantity) {
-                    alert('Please fill in all fields');
+                    alert('Please fill in a quantity');
                     return;
                 }
 
                 try {
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-                    
+
                     const response = await fetch('/Recipe/AddIngredient', {
                         method: 'POST',
                         headers: {
@@ -677,6 +851,7 @@
                             recipeId: recipeId,
                             ingredientId: selectedIngredientId,
                             quantity: quantity,
+                            unit: unit,
                             __RequestVerificationToken: token
                         })
                     });
@@ -685,7 +860,23 @@
                     console.log('Add result:', result);
 
                     if (result.success) {
-                        addIngredientToList(result.ingredientId, result.ingredientName, result.quantity);
+                        const quantityData = {
+                            grams: result.quantityInGrams,
+                            teaspoons: result.unit === 'teaspoons' ? result.quantity : (result.quantityInGrams / 5),
+                            tablespoons: result.unit === 'tablespoons' ? result.quantity : (result.quantityInGrams / 15),
+                            cups: result.unit === 'cups' ? result.quantity : (result.quantityInGrams / 240),
+                            coffeecups: result.unit === 'coffeecups' ? result.quantity : (result.quantityInGrams / 150),
+                            millilitres: result.unit === 'millilitres' ? result.quantity : result.quantityInGrams,
+                            unit: result.unit
+                        };
+                        addIngredientToList(
+                            result.ingredientId,
+                            result.ingredientName,
+                            result.formattedQuantity,
+                            quantityData
+                        );
+                        // Update nutrition info in the sidebar
+                        updateNutritionDisplay(result.calories, result.protein, result.carbs, result.fat);
                         resetIngredientForm();
                     } else {
                         alert(result.message);
@@ -697,14 +888,26 @@
             });
         }
 
-        function addIngredientToList(id, name, quantity, unit) {
+         function addIngredientToList(id, name, formattedQuantity, quantityData) {
             const li = document.createElement('li');
             li.className = 'recipe-ingredient-item';
             li.dataset.ingredientId = id;
+
+            // Add all the data attributes for unit conversion
+            li.dataset.grams = quantityData.grams || 0;
+            li.dataset.teaspoons = quantityData.teaspoons || 0;
+            li.dataset.tablespoons = quantityData.tablespoons || 0;
+            li.dataset.cups = quantityData.cups || 0;
+            li.dataset.coffeecups = quantityData.coffeecups || 0;
+            li.dataset.millilitres = quantityData.millilitres || 0;
+            li.dataset.originalUnit = quantityData.unit || 'grams';
+            li.dataset.originalFormatted = formattedQuantity;
+
             li.innerHTML = `
-                <span class="ingredient-name">${quantity} g ${name}</span>
-                <button type="button" 
-                        class="btn-delete-ingredient" 
+                <span class="ingredient-quantity">${formattedQuantity}</span>
+                <span class="ingredient-name">${name}</span>
+                <button type="button"
+                        class="btn-delete-ingredient"
                         data-ingredient-id="${id}"
                         title="Remove ingredient">
                     <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -716,11 +919,17 @@
             ingredientsList.appendChild(li);
         }
 
-        function resetIngredientForm() {
+         function resetIngredientForm() {
             selectedIngredientId = null;
             selectedIngredientName = null;
             searchInput.value = '';
-            quantityInput.value = '';
+
+            // Clear all measurement inputs AND conversion markers
+            document.querySelectorAll('.measurement-input-compact').forEach(input => {
+                input.value = '';
+                input.removeAttribute('data-converted-from');
+            });
+
             searchResults.innerHTML = '';
             searchResults.style.display = 'none';
             if (quantityForm) {
@@ -762,6 +971,8 @@
                     if (result.success) {
                         listItem.style.opacity = '0';
                         setTimeout(() => listItem.remove(), 300);
+                         // Update nutrition info in the sidebar
+                        updateNutritionDisplay(result.calories, result.protein, result.carbs, result.fat);
                     } else {
                         alert(result.message);
                     }
@@ -770,6 +981,76 @@
                     alert('Failed to remove ingredient');
                 }
             });
+        }
+
+        // Unit conversion functionality
+        const unitSelector = document.getElementById('unit-selector');
+        if (unitSelector) {
+            unitSelector.addEventListener('change', function() {
+                const selectedUnit = this.value;
+                convertAllIngredients(selectedUnit);
+            });
+        }
+
+        function convertAllIngredients(targetUnit) {
+            const items = document.querySelectorAll('.recipe-ingredient-item');
+
+            items.forEach(item => {
+                const quantitySpan = item.querySelector('.ingredient-quantity');
+                if (!quantitySpan) return;
+
+                if (targetUnit === 'original') {
+                    // Show original formatted quantity
+                    quantitySpan.textContent = item.dataset.originalFormatted;
+                } else {
+                    // Convert to target unit
+                    const grams = parseFloat(item.dataset.grams);
+                    const converted = convertFromGrams(grams, targetUnit);
+                    quantitySpan.textContent = formatQuantity(converted, targetUnit);
+                }
+            });
+        }
+
+        function convertFromGrams(grams, unit) {
+            const GRAMS_PER_TEASPOON = 5;
+            const GRAMS_PER_TABLESPOON = 15;
+            const GRAMS_PER_CUP = 240;
+            const GRAMS_PER_COFFEE_CUP = 150;
+            const GRAMS_PER_MILLILITRE = 1;
+
+            switch(unit) {
+                case 'teaspoons':
+                    return grams / GRAMS_PER_TEASPOON;
+                case 'tablespoons':
+                    return grams / GRAMS_PER_TABLESPOON;
+                case 'cups':
+                    return grams / GRAMS_PER_CUP;
+                case 'coffeecups':
+                    return grams / GRAMS_PER_COFFEE_CUP;
+                case 'millilitres':
+                    return grams / GRAMS_PER_MILLILITRE;
+                case 'grams':
+                default:
+                    return grams;
+            }
+        }
+
+        function formatQuantity(quantity, unit) {
+            switch(unit) {
+                case 'teaspoons':
+                    return `${quantity.toFixed(1)} tsp`;
+                case 'tablespoons':
+                    return `${quantity.toFixed(1)} tbsp`;
+                case 'cups':
+                    return `${quantity.toFixed(2)} cups`;
+                case 'coffeecups':
+                    return `${quantity.toFixed(2)} coffee cups`;
+                case 'millilitres':
+                    return `${Math.round(quantity)} ml`;
+                case 'grams':
+                default:
+                    return `${quantity.toFixed(1)}g`;
+            }
         }
 
         // Close search results when clicking outside
@@ -781,5 +1062,151 @@
                 searchResults.style.display = 'none';
             }
         });
+
+        function updateNutritionDisplay(calories, protein, carbs, fat) {
+            // Update each nutrition value with smooth transition
+            const caloriesEl = document.querySelector('.recipe-nutrition-calories');
+            const proteinEl = document.querySelector('.recipe-nutrition-protein');
+            const carbsEl = document.querySelector('.recipe-nutrition-carbs');
+            const fatEl = document.querySelector('.recipe-nutrition-fat');
+
+            if (caloriesEl) {
+                caloriesEl.textContent = calories.toFixed(0);
+                caloriesEl.classList.add('nutrition-updated');
+                setTimeout(() => caloriesEl.classList.remove('nutrition-updated'), 1000);
+            }
+
+            if (proteinEl) {
+                proteinEl.textContent = protein.toFixed(1) + 'g';
+                proteinEl.classList.add('nutrition-updated');
+                setTimeout(() => proteinEl.classList.remove('nutrition-updated'), 1000);
+            }
+
+            if (carbsEl) {
+                carbsEl.textContent = carbs.toFixed(1) + 'g';
+                carbsEl.classList.add('nutrition-updated');
+                setTimeout(() => carbsEl.classList.remove('nutrition-updated'), 1000);
+            }
+
+            if (fatEl) {
+                fatEl.textContent = fat.toFixed(1) + 'g';
+                fatEl.classList.add('nutrition-updated');
+                setTimeout(() => fatEl.classList.remove('nutrition-updated'), 1000);
+            }
+        }
     </script>
+
+    <style>
+        /* Image Gallery Styles */
+        .recipe-gallery {
+            width: 100%;
+        }
+
+        .recipe-gallery-main {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: var(--parchment);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .recipe-gallery-main img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recipe-gallery-thumbs {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .gallery-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--radius);
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .gallery-thumb:hover {
+            border-color: var(--sage);
+            transform: scale(1.05);
+        }
+
+        .gallery-thumb.active {
+            border-color: var(--forest);
+            box-shadow: 0 2px 8px rgba(44, 74, 46, 0.3);
+        }
+
+        .measurement-inputs-compact {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .measurement-field-compact {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+            .measurement-field-compact label {
+                font-size: 0.75rem;
+                color: var(--forest);
+                font-weight: 500;
+            }
+
+        .measurement-input-compact {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        .ingredient-quantity {
+            font-weight: 600;
+            color: var(--forest);
+            min-width: 80px;
+            display: inline-block;
+        }
+
+        .recipe-ingredient-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            transition: background-color 0.2s;
+        }
+
+            .recipe-ingredient-item:hover {
+                background-color: rgba(90, 125, 92, 0.05);
+            }
+
+        .nutrition-updated {
+            animation: nutritionPulse 0.6s ease-out;
+        }
+
+        @@keyframes nutritionPulse {
+            0% {
+                background-color: var(--gold);
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                background-color: transparent;
+                transform: scale(1);
+            }
+        }
+
+     </style>
 }

@@ -65,8 +65,9 @@ namespace HealthyRecipes.Data
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-
+            
             builder.ApplyConfiguration(new ApplicationUserConfig());
+            builder.ApplyConfiguration(new RecipeConfig());
             builder.ApplyConfiguration(new RecipeCategoryConfig());
             builder.ApplyConfiguration(new MealPlanCategoryConfig());
             builder.ApplyConfiguration(new RecipeIngredientConfig());

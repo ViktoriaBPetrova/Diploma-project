@@ -27,6 +27,16 @@ namespace HealthyRecipes.Data.Entities.MappingEntities
         public Ingredient Ingredient { get; set; } = null!;
         public float QuantityInGrams { get; set; }
 
+        // Alternative measurements (nullable - only set if explicitly specified)
+        public float? QuantityInTeaspoons { get; set; }
+        public float? QuantityInTablespoons { get; set; }
+        public float? QuantityInCups { get; set; }
+        public float? QuantityInCoffeeCups { get; set; }
+        public float? QuantityInMillilitres { get; set; }
+
+        // Store which unit was originally entered
+        public string? OriginalUnit { get; set; }
+
         public bool Deleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; } = null;
         public DateTime CreatedAt { get; init; } 

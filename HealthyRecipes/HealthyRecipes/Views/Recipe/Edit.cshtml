@@ -44,35 +44,58 @@
             <div class="recipe-form-section">
                 <h3>Media</h3>
                 
-                @* Current Image Display *@
-                @if (!string.IsNullOrEmpty(Model.CurrentImageUrl))
+                @* Current Images Display and Management *@
+                @if (Model.CurrentImageUrls != null && Model.CurrentImageUrls.Any())
                 {
                     <div class="form-group">
-                        <label>Current Image</label>
-                        <div class="current-media-preview">
-                            <img src="@Model.CurrentImageUrl" alt="Current recipe image" class="recipe-current-image" />
+                        <label>Current Images (@Model.CurrentImageUrls.Count / 5)</label>
+                        <div class="current-images-grid">
+                            @for (int i = 0; i < Model.CurrentImageUrls.Count; i++)
+                            {
+                                var imageUrl = Model.CurrentImageUrls[i];
+                                <div class="current-image-item">
+                                    <div class="current-image-overlay">
+                                        <input type="checkbox"
+                                               name="ImagesToRemove"
+                                               value="@imageUrl"
+                                               id="removeImg@(i)"
+                                               class="image-remove-checkbox" />
+                                        <label for="removeImg@(i)" class="image-remove-label">
+                                            <span class="remove-icon">✕</span>
+                                            <span class="remove-text">Remove</span>
+                                        </label>
+                                    </div>
+                                    <img src="@imageUrl" alt="Recipe image @(i + 1)" />
+                                    @if (i == 0)
+                                    {
+                                        <span class="primary-badge">Primary</span>
+                                    }
+                                </div>
+                            }
                         </div>
+                        <small class="file-upload-helper">Check images to remove them. First image is the primary image.</small>
                     </div>
                 }
 
-                @* New Image Upload - Custom Styled *@
-                <div class="form-group">
-                    <label>@(string.IsNullOrEmpty(Model.CurrentImageUrl) ? "Recipe Image" : "Replace Image")</label>
-                    <div class="file-upload-wrapper" id="imageUploadWrapper">
-                        <input asp-for="NewImageFile" type="file" accept="image/*" id="imageInput" />
-                        <label for="imageInput" class="file-upload-label image-upload">
-                            <span class="file-upload-icon">📷</span>
-                            <span class="file-upload-text">Choose an image</span>
-                        </label>
-                        <div class="file-upload-filename" id="imageFilename" style="display: none;">
-                            <span class="filename-label">Selected:</span>
-                            <span id="imageFilenameText"></span>
-                            <button type="button" class="file-upload-remove" id="imageRemove">✕ Remove</button>
+                @* Add More Images *@
+                @if (Model.CurrentImageUrls == null || Model.CurrentImageUrls.Count < 5)
+                {
+                    <div class="form-group">
+                        <label>Add More Images (up to @(5 - (Model.CurrentImageUrls?.Count ?? 0)) more)</label>
+                        <div class="file-upload-wrapper" id="imageUploadWrapper">
+                            <input asp-for="NewImageFiles" type="file" accept="image/*" id="imageInput" multiple />
+                            <label for="imageInput" class="file-upload-label image-upload">
+                                <span class="file-upload-icon">📷</span>
+                                <span class="file-upload-text">Choose images</span>
+                            </label>
+                            <div class="file-upload-previews" id="imagePreviews" style="display: none;">
+                                <!-- Image previews will be added here -->
+                            </div>
                         </div>
+                        <span asp-validation-for="NewImageFiles" class="field-validation-error"></span>
+                        <small class="file-upload-helper">Max 5MB per image. Formats: JPG, PNG, WebP</small>
                     </div>
-                    <span asp-validation-for="NewImageFile" class="field-validation-error"></span>
-                    <small class="file-upload-helper">Max 5MB. Formats: JPG, PNG, WebP. @(string.IsNullOrEmpty(Model.CurrentImageUrl) ? "" : "Leave empty to keep current image.")</small>
-                </div>
+                }
 
                 @* Current Video Display *@
                 @if (!string.IsNullOrEmpty(Model.CurrentVideoUrl))
@@ -84,6 +107,12 @@
                                 <source src="@Model.CurrentVideoUrl" type="video/mp4">
                                 Your browser doesn't support video playback.
                             </video>
+                        </div>
+                        <div class="form-check" style="margin-top: 0.5rem;">
+                            <input asp-for="RemoveCurrentVideo" type="checkbox" class="form-check-input" id="removeVideoCheck" />
+                            <label for="removeVideoCheck" class="form-check-label" style="color: var(--charcoal); font-size: 0.9rem;">
+                                Remove this video
+                            </label>
                         </div>
                     </div>
                 }
@@ -107,6 +136,10 @@
                     <small class="file-upload-helper">Max 100MB. Formats: MP4, WebM. @(string.IsNullOrEmpty(Model.CurrentVideoUrl) ? "" : "Leave empty to keep current video.")</small>
                 </div>
             </div>
+                        
+                      
+                        
+               
 
             <div class="recipe-form-section">
                 <h3>Categories</h3>
@@ -133,13 +166,85 @@
 
 @section Scripts {
 <script>
-// File upload interactions
+// Multiple Image Upload with Previews
+const imageInput = document.getElementById('imageInput');
+const imagePreviews = document.getElementById('imagePreviews');
+const imageUploadWrapper = document.getElementById('imageUploadWrapper');
+let selectedFiles = [];
+
+if (imageInput) {
+    const maxNewImages = @(5 - (Model.CurrentImageUrls?.Count ?? 0));
+    
+    imageInput.addEventListener('change', function(e) {
+        const files = Array.from(this.files);
+        
+        // Limit based on remaining slots
+        if (files.length > maxNewImages) {
+            alert(`Maximum ${maxNewImages} more images allowed`);
+            selectedFiles = files.slice(0, maxNewImages);
+        } else {
+            selectedFiles = files;
+        }
+        
+        updateImagePreviews();
+    });
+}
+
+function updateImagePreviews() {
+    if (!imagePreviews) return;
+    
+    imagePreviews.innerHTML = '';
+    
+    if (selectedFiles.length === 0) {
+        imagePreviews.style.display = 'none';
+        if (imageUploadWrapper) imageUploadWrapper.classList.remove('has-file');
+        return;
+    }
+    
+    imagePreviews.style.display = 'grid';
+    if (imageUploadWrapper) imageUploadWrapper.classList.add('has-file');
+    
+    selectedFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.createElement('div');
+            preview.className = 'image-preview-item';
+            preview.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="image-preview-remove" data-index="${index}">✕</button>
+                <span class="image-preview-label">New ${index + 1}</span>
+            `;
+            imagePreviews.appendChild(preview);
+            
+            // Attach remove handler
+            preview.querySelector('.image-preview-remove').addEventListener('click', function() {
+                removeNewImage(parseInt(this.dataset.index));
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+function removeNewImage(index) {
+    selectedFiles.splice(index, 1);
+    
+    // Update the file input
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    if (imageInput) imageInput.files = dt.files;
+    
+    updateImagePreviews();
+}
+
+// Video Upload (single file)
 function setupFileUpload(inputId, wrapperId, filenameId, filenameTextId, removeId) {
     const input = document.getElementById(inputId);
     const wrapper = document.getElementById(wrapperId);
     const filenameDisplay = document.getElementById(filenameId);
     const filenameText = document.getElementById(filenameTextId);
     const removeBtn = document.getElementById(removeId);
+
+    if (!input || !wrapper || !filenameDisplay || !filenameText || !removeBtn) return;
 
     input.addEventListener('change', function(e) {
         if (this.files && this.files[0]) {
@@ -158,44 +263,9 @@ function setupFileUpload(inputId, wrapperId, filenameId, filenameTextId, removeI
         filenameDisplay.style.display = 'none';
         wrapper.classList.remove('has-file');
     });
-
-    // Drag and drop support
-    const label = wrapper.querySelector('.file-upload-label');
-    
-    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-        label.addEventListener(eventName, preventDefaults, false);
-    });
-
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
-
-    ['dragenter', 'dragover'].forEach(eventName => {
-        label.addEventListener(eventName, function() {
-            wrapper.classList.add('dragging');
-        }, false);
-    });
-
-    ['dragleave', 'drop'].forEach(eventName => {
-        label.addEventListener(eventName, function() {
-            wrapper.classList.remove('dragging');
-        }, false);
-    });
-
-    label.addEventListener('drop', function(e) {
-        const dt = e.dataTransfer;
-        const files = dt.files;
-        input.files = files;
-        
-        // Trigger change event
-        const event = new Event('change', { bubbles: true });
-        input.dispatchEvent(event);
-    }, false);
 }
 
-// Initialize file uploads
-setupFileUpload('imageInput', 'imageUploadWrapper', 'imageFilename', 'imageFilenameText', 'imageRemove');
+// Initialize video upload
 setupFileUpload('videoInput', 'videoUploadWrapper', 'videoFilename', 'videoFilenameText', 'videoRemove');
 
 // Ingredient management 
@@ -309,4 +379,173 @@ function removeIngredient(button, ingredientId) {
     button.parentElement.remove();
 }
 </script>
+
+<style>
+        /* Current Images Grid */
+        .current-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .current-image-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 2px solid var(--border);
+        }
+
+            .current-image-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: opacity 0.3s;
+            }
+
+        .current-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 2;
+        }
+
+        .current-image-item:hover .current-image-overlay {
+            opacity: 1;
+        }
+
+        .image-remove-checkbox {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .image-remove-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            user-select: none;
+        }
+
+        .remove-icon {
+            font-size: 24px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .image-remove-label:hover .remove-icon {
+            background: #dc3545;
+            transform: scale(1.1);
+        }
+
+        .remove-text {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* When checkbox is checked */
+        .image-remove-checkbox:checked + .image-remove-label .remove-icon {
+            background: #dc3545;
+        }
+
+        .image-remove-checkbox:checked ~ .current-image-overlay {
+            opacity: 1;
+            background: rgba(220, 53, 69, 0.3);
+        }
+
+        .current-image-item:has(.image-remove-checkbox:checked) img {
+            opacity: 0.4;
+        }
+
+        .primary-badge {
+            position: absolute;
+            bottom: 0.5rem;
+            left: 0.5rem;
+            background: var(--forest);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--radius);
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 3;
+        }
+
+        /* New Image Previews */
+        .file-upload-previews {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .image-preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 2px solid var(--border);
+        }
+
+            .image-preview-item img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .image-preview-remove {
+            position: absolute;
+            top: 0.25rem;
+            right: 0.25rem;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--charcoal);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+            .image-preview-remove:hover {
+                opacity: 1;
+                background: #dc3545;
+            }
+
+        .image-preview-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+            color: white;
+            padding: 0.5rem 0.25rem 0.25rem;
+            font-size: 11px;
+            text-align: center;
+        }
+</style>
 }
