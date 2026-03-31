@@ -165,7 +165,7 @@ namespace HealthyRecipes.Web.Controllers
                                             {
                                                 RecipeId = rm.RecipeId,
                                                 Name = rm.Recipe.Title,
-                                                ImageUrl = rm.Recipe.ImageUrl,
+                                                ImageUrl = rm.Recipe.PrimaryImageUrl,
                                                 PrepTime = rm.Recipe.PrepTime,
                                                 Calories = rm.Recipe.Calories,
                                                 Protein = rm.Recipe.Protein,

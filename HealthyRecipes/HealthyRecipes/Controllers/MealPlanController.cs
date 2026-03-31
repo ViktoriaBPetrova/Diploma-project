@@ -1,5 +1,6 @@
 ﻿using HealthyRecipes.Data.Entities;
 using HealthyRecipes.Data.Entities.Admin;
+using HealthyRecipes.Data.Enums;
 using HealthyRecipes.Services.Admin;
 using HealthyRecipes.Services.Admin.Helpers;
 using HealthyRecipes.Services.Admin.Interfaces;
@@ -11,7 +12,9 @@ using HealthyRecipes.Services.MealPlans;
 using HealthyRecipes.Services.MealPlans.Models;
 using HealthyRecipes.Services.Meals;
 using HealthyRecipes.Services.RecipeMeals;
+using HealthyRecipes.Services.Recipes;
 using HealthyRecipes.Services.SavedMealPlans;
+using HealthyRecipes.Services.SavedRecipes;
 using HealthyRecipes.Web.Models.MealPlan;
 using HealthyRecipes.Web.ViewModels.MealPlan;
 using Microsoft.AspNetCore.Authorization;
@@ -34,6 +37,8 @@ namespace HealthyRecipes.Web.Controllers
         private readonly IActivityLog _activityLogService;
         private readonly IContentFilter _contentFilterService;
         private readonly IFlaggedContent _flaggedContentService;
+        private readonly IRecipe _recipeService;
+        private readonly ISavedIngredients _savedRecipeService;
         private readonly ActivityLogHelper _activityLogHelper;
         private readonly UserManager<ApplicationUser> _userManager; 
 
@@ -50,6 +55,8 @@ namespace HealthyRecipes.Web.Controllers
             IActivityLog activityLogService,
             IContentFilter contentFilterService,
             IFlaggedContent flaggedContentService,
+            IRecipe recipeService,
+            ISavedIngredients savedRecipeService,
             ActivityLogHelper activityLogHelper)
         {
             _mealPlanService = mealPlanService;
@@ -65,6 +72,8 @@ namespace HealthyRecipes.Web.Controllers
             _contentFilterService = contentFilterService;
             _flaggedContentService = flaggedContentService;
             _activityLogHelper = activityLogHelper;
+            _recipeService = recipeService;
+            _savedRecipeService = savedRecipeService;
 
         }
 
@@ -240,7 +249,7 @@ namespace HealthyRecipes.Web.Controllers
                             RecipeId = rm.RecipeId,
                             Name = rm.Recipe?.Title ?? "",
                             Info = rm.Recipe?.Info ?? "",
-                            ImageUrl = rm.Recipe?.ImageUrl,
+                            ImageUrl = rm.Recipe?.PrimaryImageUrl,
                             Calories = rm.Recipe?.Calories ?? 0,
                             Protein = rm.Recipe?.Protein ?? 0,
                             Carbs = rm.Recipe?.Carbs ?? 0,
@@ -302,7 +311,34 @@ namespace HealthyRecipes.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateMealPlanViewModel vm)
         {
-            if (!ModelState.IsValid) return View(vm);
+            // DEBUGGING: Log all ModelState errors
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new
+                    {
+                        Field = x.Key,
+                        Errors = x.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    })
+                    .ToList();
+
+                // Log to console (you'll see this in Visual Studio output window)
+                foreach (var error in errors)
+                {
+                    Console.WriteLine($"Field: {error.Field}");
+                    foreach (var msg in error.Errors)
+                    {
+                        Console.WriteLine($"  Error: {msg}");
+                    }
+                }
+
+                // Also show in TempData so you can see in the browser
+                TempData["DebugErrors"] = string.Join("\n", errors.Select(e =>
+                    $"{e.Field}: {string.Join(", ", e.Errors)}"));
+
+                return View(vm);
+            }
 
             var user = await _userManager.GetUserAsync(User);
 
@@ -362,7 +398,54 @@ namespace HealthyRecipes.Web.Controllers
                 UserId = user!.Id
             };
 
-            var id = await _mealPlanService.CreateMealPlanAsync(mealPlan);
+            var mealPlanId = await _mealPlanService.CreateMealPlanAsync(mealPlan);
+
+            // Create days, meals, and recipes
+            if (vm.Days != null && vm.Days.Any())
+            {
+                foreach (var dayVm in vm.Days)
+                {
+                    var day = new MealPlanDay
+                    {
+                        MealPlanId = mealPlanId,
+                        DayNumber = dayVm.DayNumber,
+                        DayOfWeek = (Data.Enums.DayOfWeek)dayVm.DayOfWeek
+                    };
+
+                    var dayId = await _mealPlanDayService.CreateMealPlanDayAsync(day);
+
+                    if (dayVm.Meals != null && dayVm.Meals.Any())
+                    {
+                        foreach (var mealVm in dayVm.Meals)
+                        {
+                            var meal = new Meal
+                            {
+                                MealPlanDayId = dayId,
+                                Type = (MealType)mealVm.Type
+                            };
+
+                            var mealId = await _mealService.CreateMealAsync(meal);
+
+                            if (mealVm.RecipeIds != null && mealVm.RecipeIds.Any())
+                            {
+                                foreach (var recipeId in mealVm.RecipeIds)
+                                {
+                                    await _recipeMealService.AddRecipeToMealAsync(recipeId, mealId);
+                                }
+
+                                // Recalculate meal nutrition after adding recipes
+                                await _mealService.RecalculateNutritionAsync(mealId);
+                            }
+                        }
+
+                        // Recalculate day nutrition after adding all meals
+                        await _mealPlanDayService.RecalculateNutritionAsync(dayId);
+                    }
+                }
+
+                // Recalculate meal plan nutrition after adding all days
+                await _mealPlanService.RecalculateNutritionalTotalsAsync(mealPlanId);
+            }
 
             // Flag content if necessary
             if (nameFilterResult.ShouldFlagForReview || descriptionFilterResult?.ShouldFlagForReview == true)
@@ -373,7 +456,7 @@ namespace HealthyRecipes.Web.Controllers
 
                 await _flaggedContentService.FlagContentAsync(
                     contentType: "MealPlan",
-                    contentId: id,
+                    contentId: mealPlanId,
                     contentPreview: $"{vm.Name} - {vm.Description?.Substring(0, Math.Min(100, vm.Description.Length))}",
                     contentAuthorId: user.Id,
                     reason: FlagReason.BannedWords,
@@ -383,9 +466,9 @@ namespace HealthyRecipes.Web.Controllers
             }
 
             // LOG ACTIVITY
-            await _activityLogHelper.LogMealPlanCreatedAsync(user.Id, id, vm.Name);
+            await _activityLogHelper.LogMealPlanCreatedAsync(user.Id, mealPlanId, vm.Name);
 
-            return RedirectToAction(nameof(Details), new { id });
+            return RedirectToAction(nameof(Details), new { id = mealPlanId });
         }
 
         // GET: /MealPlan/Edit/{id}
@@ -634,7 +717,56 @@ namespace HealthyRecipes.Web.Controllers
             return Ok();
         }
 
-        // Request models (add these as nested classes or create separate files)
+        // GET: /MealPlan/SearchRecipes?query=chicken&filter=mine
+        [HttpGet]
+        public async Task<IActionResult> SearchRecipes([FromQuery] string query, [FromQuery] string filter = "all")
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var recipes = await _recipeService.GetAllRecipesAsync();
+
+            switch (filter?.ToLower())
+            {
+                case "mine":
+                    // Get only user's own recipes
+                    recipes = await _recipeService.GetRecipesByUserAsync(user.Id);
+                    break;
+
+                case "saved":
+                    // Get only saved recipes
+                    var savedRecipes = await _savedRecipeService.GetSavedRecipesByUserAsync(user.Id);
+                    recipes = savedRecipes.Select(sr => sr.Recipe).Where(r => r != null)!;
+                    break;
+
+                default: // "all"
+                         // Get all recipes
+                    recipes = await _recipeService.SearchRecipesAsync(query ?? "");
+                    break;
+            }
+
+            // Apply search filter if query provided
+            if (!string.IsNullOrWhiteSpace(query) && filter?.ToLower() != "all")
+            {
+                var searchLower = query.ToLower();
+                recipes = recipes.Where(r => r.Info.ToLower().Contains(searchLower));
+            }
+
+            var results = recipes
+                .Take(10)
+                .Select(r => new
+                {
+                    id = r.Id,
+                    name = r.Title,
+                    calories = Math.Round(r.Calories, 0),
+                    protein = Math.Round(r.Protein, 1),
+                    carbs = Math.Round(r.Carbs, 1),
+                    fat = Math.Round(r.Fat, 1)
+                });
+
+            return Ok(results);
+        }
+
         public class RemoveRecipeRequest
         {
             public Guid MealId { get; set; }

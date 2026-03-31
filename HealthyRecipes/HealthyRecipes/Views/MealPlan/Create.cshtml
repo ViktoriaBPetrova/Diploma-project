@@ -7,11 +7,20 @@
         <h1 class="meal-plan-form-label">New Meal Plan</h1>
         <p class="page-subtitle meal-plan-form-textarea">Give your plan a name and start building your week</p>
 
+        @if (TempData["DebugErrors"] != null)
+        {
+            <div style="background: #fee; border: 2px solid #c00; padding: 20px; margin-bottom: 20px; white-space: pre-wrap; font-family: monospace;">
+                <strong>VALIDATION ERRORS:</strong><br />
+                @TempData["DebugErrors"]
+            </div>
+        }
+
         <div class="form-card">
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" id="createMealPlanForm">
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="All" class="validation-summary-errors"></div>
 
+                <!-- Basic Info Section -->
                 <div class="form-group">
                     <label asp-for="Name">Plan name *</label>
                     <input asp-for="Name" class="form-control" placeholder="e.g. Summer Lean Bulk" />
@@ -23,6 +32,15 @@
                     <textarea asp-for="Description" class="form-control" rows="3" placeholder="What's the goal of this plan?"></textarea>
                 </div>
 
+                <!-- Days Section -->
+                <div class="form-section">
+                    <div class="section-header">
+                        <h3>Days</h3>
+                        <button type="button" class="btn-secondary" onclick="addDay()">+ Add Day</button>
+                    </div>
+                    <div id="daysContainer"></div>
+                </div>
+
                 <div class="meal-plan-form-actions">
                     <button type="submit" class="btn-primary">Create plan</button>
                     <a asp-action="Index" class="btn-ghost">Cancel</a>
@@ -32,3 +50,583 @@
     </div>
 </div>
 
+<!-- Recipe Search Modal -->
+<div id="recipeSearchModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Recipe</h3>
+            <button type="button" class="modal-close" onclick="closeRecipeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="search-controls">
+                <input type="text" id="recipeSearchInput" class="form-control" placeholder="Search recipes..." />
+                <select id="recipeFilterSelect" class="form-control">
+                    <option value="all">All Recipes</option>
+                    <option value="mine">My Recipes</option>
+                    <option value="saved">Saved Recipes</option>
+                </select>
+            </div>
+            <div id="recipeSearchResults" class="search-results"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let dayCounter = 0;
+        let currentMealTarget = null;
+
+        const dayOfWeekNames = ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];  // Index 0 unused, 1=Monday...7=Sunday
+        const mealTypeNames = {
+               1: 'Breakfast',
+        2: 'Lunch',
+        3: 'Dinner',
+        4: 'Snack'
+        };
+
+        function addDay() {
+            const dayIndex = dayCounter++;
+            const dayNumber = dayIndex + 1;
+            const dayOfWeek = (dayIndex % 7) + 1;  // 1-7 to match enum (Monday=1 ... Sunday=7)
+
+            const dayHtml = `
+                <div class="day-card" data-day-index="${dayIndex}">
+                    <div class="day-header">
+                        <h4>Day ${dayNumber} - ${dayOfWeekNames[dayOfWeek]}</h4>
+                        <button type="button" class="btn-remove-day" onclick="removeDay(${dayIndex})">Remove</button>
+                    </div>
+                    
+                    <input type="hidden" class="day-number" value="${dayNumber}" />
+                    <input type="hidden" class="day-of-week" value="${dayOfWeek}" />
+                    
+                    <div class="meal-type-buttons">
+                        <button type="button" class="btn-meal-type" onclick="addMeal(${dayIndex}, 1)">+ Breakfast</button>
+                        <button type="button" class="btn-meal-type" onclick="addMeal(${dayIndex}, 2)">+ Lunch</button>
+                        <button type="button" class="btn-meal-type" onclick="addMeal(${dayIndex}, 3)">+ Dinner</button>
+                        <button type="button" class="btn-meal-type" onclick="addMeal(${dayIndex}, 4)">+ Snack</button>
+                    </div>
+                    
+                    <div class="meals-list" data-day-index="${dayIndex}"></div>
+                </div>
+            `;
+
+            document.getElementById('daysContainer').insertAdjacentHTML('beforeend', dayHtml);
+        }
+
+        function removeDay(dayIndex) {
+            const dayCard = document.querySelector(`.day-card[data-day-index="${dayIndex}"]`);
+            if (dayCard) {
+                dayCard.remove();
+            }
+        }
+
+        function addMeal(dayIndex, mealType) {
+            const mealsContainer = document.querySelector(`.meals-list[data-day-index="${dayIndex}"]`);
+            const mealId = `day${dayIndex}_meal${Date.now()}`;
+
+            const mealHtml = `
+                <div class="meal-card" data-meal-id="${mealId}" data-meal-type="${mealType}">
+                    <div class="meal-header">
+                        <h5>${mealTypeNames[mealType]}</h5>
+                        <button type="button" class="btn-remove-meal" onclick="removeMeal('${mealId}')">Remove</button>
+                    </div>
+                    
+                    <div class="meal-recipes" data-meal-id="${mealId}"></div>
+                    
+                    <button type="button" class="btn-add-recipe" onclick="openRecipeModal('${mealId}')">+ Add Recipe</button>
+                </div>
+            `;
+
+            mealsContainer.insertAdjacentHTML('beforeend', mealHtml);
+        }
+
+        function removeMeal(mealId) {
+            const mealCard = document.querySelector(`.meal-card[data-meal-id="${mealId}"]`);
+            if (mealCard) {
+                mealCard.remove();
+            }
+        }
+
+        function openRecipeModal(mealId) {
+            currentMealTarget = mealId;
+            document.getElementById('recipeSearchModal').style.display = 'flex';
+            document.getElementById('recipeSearchInput').value = '';
+            document.getElementById('recipeSearchResults').innerHTML = '';
+            
+            // Load initial results
+            const filter = document.getElementById('recipeFilterSelect').value;
+            searchRecipes('', filter);
+        }
+
+        function closeRecipeModal() {
+            document.getElementById('recipeSearchModal').style.display = 'none';
+            currentMealTarget = null;
+        }
+
+        // Recipe search with debouncing
+        let searchTimeout;
+        document.getElementById('recipeSearchInput').addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchRecipes(e.target.value);
+            }, 300);
+        });
+
+        document.getElementById('recipeFilterSelect').addEventListener('change', function() {
+            const query = document.getElementById('recipeSearchInput').value;
+            searchRecipes(query, this.value);
+        });
+
+        async function searchRecipes(query, filter) {
+            if (!filter) {
+                filter = document.getElementById('recipeFilterSelect').value;
+            }
+            
+            try {
+                const response = await fetch(`/MealPlan/SearchRecipes?query=${encodeURIComponent(query || '')}&filter=${filter}`);
+                const recipes = await response.json();
+                
+                if (recipes.length === 0) {
+                    document.getElementById('recipeSearchResults').innerHTML = '<p class="no-results">No recipes found</p>';
+                    return;
+                }
+                
+                const resultsHtml = recipes.map(r => `
+                    <div class="recipe-result-item" onclick="addRecipeToMeal('${r.id}', '${r.name.replace(/'/g, "\\'")}', ${r.calories}, ${r.protein}, ${r.carbs}, ${r.fat})">
+                        <div class="recipe-result-name">${r.name}</div>
+                        <div class="recipe-result-macros">${r.calories} cal | P: ${r.protein}g | C: ${r.carbs}g | F: ${r.fat}g</div>
+                    </div>
+                `).join('');
+                
+                document.getElementById('recipeSearchResults').innerHTML = resultsHtml;
+            } catch (error) {
+                console.error('Error searching recipes:', error);
+                document.getElementById('recipeSearchResults').innerHTML = '<p class="error">Error loading recipes</p>';
+            }
+        }
+
+        function addRecipeToMeal(recipeId, recipeName, calories, protein, carbs, fat) {
+            if (!currentMealTarget) return;
+
+            const recipesContainer = document.querySelector(`.meal-recipes[data-meal-id="${currentMealTarget}"]`);
+            const existingRecipes = recipesContainer.querySelectorAll('.recipe-item');
+
+            // Check if recipe already added
+            const existingIds = Array.from(existingRecipes).map(r => r.dataset.recipeId);
+            if (existingIds.includes(recipeId)) {
+                alert('This recipe is already added to this meal');
+                return;
+            }
+
+            const recipeHtml = `
+                <div class="recipe-item" data-recipe-id="${recipeId}">
+                    <div class="recipe-item-content">
+                        <span class="recipe-item-name">${recipeName}</span>
+                        <span class="recipe-item-macros">${calories} cal | P: ${protein}g | C: ${carbs}g | F: ${fat}g</span>
+                    </div>
+                    <button type="button" class="btn-remove-recipe" onclick="removeRecipeFromMeal(this)">×</button>
+                </div>
+            `;
+
+            recipesContainer.insertAdjacentHTML('beforeend', recipeHtml);
+            closeRecipeModal();
+        }
+
+        function removeRecipeFromMeal(button) {
+            button.closest('.recipe-item').remove();
+        }
+
+        // Rebuild form data with proper indexes before submission
+        document.getElementById('createMealPlanForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const daysContainer = document.getElementById('daysContainer');
+            if (daysContainer.children.length === 0) {
+                alert('Please add at least one day to your meal plan');
+                return false;
+            }
+
+            // Clear any existing hidden inputs for days/meals/recipes
+            this.querySelectorAll('input[name^="Days["]').forEach(input => input.remove());
+
+            // Rebuild the form data with proper indexes
+            const dayCards = Array.from(daysContainer.querySelectorAll('.day-card'));
+            
+            console.log('Total days found:', dayCards.length);
+            
+            dayCards.forEach((dayCard, dayIndex) => {
+                const dayNumber = dayCard.querySelector('.day-number').value;
+                const dayOfWeek = dayCard.querySelector('.day-of-week').value;
+                
+                console.log(`Day ${dayIndex}: DayNumber=${dayNumber}, DayOfWeek=${dayOfWeek}`);
+                
+                // Add day fields
+                this.insertAdjacentHTML('beforeend', `<input type="hidden" name="Days[${dayIndex}].DayNumber" value="${dayNumber}" />`);
+                this.insertAdjacentHTML('beforeend', `<input type="hidden" name="Days[${dayIndex}].DayOfWeek" value="${dayOfWeek}" />`);
+                
+                // Get meals for this day (only direct children)
+                const mealsContainer = dayCard.querySelector(`.meals-list[data-day-index="${dayIndex}"]`);
+                const meals = mealsContainer ? Array.from(mealsContainer.children).filter(el => el.classList.contains('meal-card')) : [];
+                
+                console.log(`  Day ${dayIndex} has ${meals.length} meals`);
+                
+                meals.forEach((mealCard, mealIndex) => {
+                    const mealType = parseInt(mealCard.dataset.mealType, 10);
+                    
+                    console.log(`    Meal ${mealIndex}: Type=${mealType} (${mealTypeNames[mealType]})`);
+                    
+                    // Add meal type field
+                    this.insertAdjacentHTML('beforeend', `<input type="hidden" name="Days[${dayIndex}].Meals[${mealIndex}].Type" value="${mealType}" />`);
+                    
+                    // Get recipes for this meal
+                    const recipes = Array.from(mealCard.querySelectorAll('.recipe-item'));
+                    
+                    console.log(`      Meal ${mealIndex} has ${recipes.length} recipes`);
+                    
+                    recipes.forEach((recipeItem, recipeIndex) => {
+                        const recipeId = recipeItem.dataset.recipeId;
+                        console.log(`        Recipe ${recipeIndex}: ${recipeId}`);
+                        this.insertAdjacentHTML('beforeend', `<input type="hidden" name="Days[${dayIndex}].Meals[${mealIndex}].RecipeIds[${recipeIndex}]" value="${recipeId}" />`);
+                    });
+                });
+            });
+
+            // Log all form data being submitted
+            const formData = new FormData(this);
+            console.log('=== FORM DATA BEING SUBMITTED ===');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key} = ${value}`);
+            }
+            console.log('=================================');
+
+            // Now submit the form
+            this.submit();
+        });
+    </script>
+
+    <style>
+        .form-section {
+            margin-top: var(--space-xl);
+            padding-top: var(--space-lg);
+            border-top: 1px solid var(--border);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+        }
+
+        .section-header h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: var(--forest);
+            margin: 0;
+        }
+
+        .day-card {
+            background: var(--parchment);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-lg);
+            margin-bottom: var(--space-md);
+        }
+
+        .day-header {
+            background: var(--forest);
+            color: white;
+            padding: var(--space-md) var(--space-lg);
+            margin: calc(var(--space-lg) * -1) calc(var(--space-lg) * -1) var(--space-md);
+            border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .day-header h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            color: white;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .btn-remove-day {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-remove-day:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .meal-type-buttons {
+            display: flex;
+            gap: var(--space-xs);
+            flex-wrap: wrap;
+            margin-bottom: var(--space-md);
+        }
+
+        .btn-meal-type {
+            background: white;
+            border: 1px solid var(--sage);
+            color: var(--sage);
+            padding: var(--space-xs) var(--space-md);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-meal-type:hover {
+            background: var(--sage);
+            color: white;
+        }
+
+        .meals-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+
+        .meal-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: var(--space-md);
+        }
+
+        .meal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-sm);
+            padding-bottom: var(--space-xs);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .meal-header h5 {
+            font-size: 1rem;
+            color: var(--forest);
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .btn-remove-meal {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--charcoal);
+            padding: 4px var(--space-sm);
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-remove-meal:hover {
+            background: #fee;
+            border-color: #fcc;
+            color: #c00;
+        }
+
+        .meal-recipes {
+            margin-bottom: var(--space-sm);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+        }
+
+        .recipe-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--parchment);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+        }
+
+        .recipe-item-content {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+
+        .recipe-item-name {
+            font-weight: 500;
+            color: var(--forest);
+            font-size: 0.875rem;
+        }
+
+        .recipe-item-macros {
+            font-size: 0.75rem;
+            color: var(--charcoal);
+        }
+
+        .btn-remove-recipe {
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+            flex-shrink: 0;
+            margin-left: var(--space-sm);
+        }
+
+        .btn-remove-recipe:hover {
+            color: #c00;
+        }
+
+        .btn-add-recipe {
+            background: transparent;
+            border: 1px dashed var(--sage);
+            color: var(--sage);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .btn-add-recipe:hover {
+            background: var(--sage);
+            color: white;
+            border-style: solid;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            color: var(--forest);
+            font-size: 1.5rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--charcoal);
+        }
+
+        .modal-body {
+            padding: var(--space-lg);
+            overflow-y: auto;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .search-controls input {
+            flex: 1;
+        }
+
+        .search-controls select {
+            width: auto;
+            min-width: 150px;
+        }
+
+        .search-results {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .recipe-result-item {
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: var(--space-xs);
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .recipe-result-item:hover {
+            background: var(--parchment);
+            border-color: var(--sage);
+            transform: translateX(4px);
+        }
+
+        .recipe-result-name {
+            font-weight: 500;
+            color: var(--forest);
+            margin-bottom: 4px;
+        }
+
+        .recipe-result-macros {
+            font-size: 0.875rem;
+            color: var(--charcoal);
+        }
+
+        .no-results, .error {
+            text-align: center;
+            padding: var(--space-xl);
+            color: #999;
+        }
+    </style>
+}
