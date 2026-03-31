@@ -161,7 +161,7 @@ namespace HealthyRecipes.Web.Controllers
                         Fat = recipe.Fat,
                         PrepTime = recipe.PrepTime,
                         Difficulty = recipe.Difficulty,
-                        ImageUrl = recipe.ImageUrl,
+                        ImageUrl = recipe.PrimaryImageUrl,
                         AverageRating = avgRating,
                         RatingCount = ratings.Count(),
                         CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
@@ -189,7 +189,7 @@ namespace HealthyRecipes.Web.Controllers
                         Fat = recipe.Fat,
                         PrepTime = recipe.PrepTime,
                         Difficulty = recipe.Difficulty,
-                        ImageUrl = recipe.ImageUrl,
+                        ImageUrl = recipe.PrimaryImageUrl,
                         AverageRating = avgRating,
                         RatingCount = ratings.Count(),
                         CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
@@ -279,7 +279,14 @@ namespace HealthyRecipes.Web.Controllers
                 IngredientName = ri.Ingredient?.Name ?? "Unknown",
                 QuantityInGrams = ri.QuantityInGrams,
                 IngredientCaloriesPer100g = ri.Ingredient?.CaloriesPer100g ?? 0,
-                IsAllergen = ri.Ingredient != null && allergyIngredientIds.Contains(ri.IngredientId)
+                IsAllergen = ri.Ingredient != null && allergyIngredientIds.Contains(ri.IngredientId),
+                // Add measurement properties
+                OriginalUnit = ri.OriginalUnit,
+                QuantityInTeaspoons = ri.QuantityInTeaspoons,
+                QuantityInTablespoons = ri.QuantityInTablespoons,
+                QuantityInCups = ri.QuantityInCups,
+                QuantityInCoffeeCups = ri.QuantityInCoffeeCups,
+                QuantityInMillilitres = ri.QuantityInMillilitres
             }).ToList();
 
             var conflictingIngredients = ingredientVms
@@ -301,7 +308,8 @@ namespace HealthyRecipes.Web.Controllers
                 PrepTime = recipe.PrepTime,
                 Difficulty = recipe.Difficulty,
                 Servings = recipe.Servings,
-                ImageUrl = recipe.ImageUrl,
+                ImageUrl = recipe.PrimaryImageUrl,
+                ImageUrls = recipe.ImageUrls ?? new List<string>(),
                 VideoUrl = recipe.VideoUrl,
                 AuthorName = recipe.User?.UserName ?? "Unknown",
                 AuthorId = recipe.UserId,
@@ -345,16 +353,32 @@ namespace HealthyRecipes.Web.Controllers
                 return View(vm);
             }
 
-            // Handle image upload
-            string? imageUrl = null;
-            if (vm.ImageFile != null)
+            // Handle multiple image uploads
+            List<string> imageUrls = new();
+            string? primaryImageUrl = null;
+
+            if (vm.ImageFiles != null && vm.ImageFiles.Any())
             {
-                if (!_fileUploadService.IsValidImage(vm.ImageFile))
+                // Validate all images first
+                foreach (var file in vm.ImageFiles)
                 {
-                    ModelState.AddModelError("ImageFile", "Invalid image file. Allowed: JPG, PNG, WebP. Max size: 5MB");
-                    return View(vm);
+                    if (!_fileUploadService.IsValidImage(file))
+                    {
+                        ModelState.AddModelError("ImageFiles", $"Invalid image file: {file.FileName}. Allowed: JPG, PNG, WebP. Max size: 5MB");
+                        var cats = await _categoryService.GetAllCategoriesAsync();
+                        vm.AvailableCategories = cats.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name });
+                        return View(vm);
+                    }
                 }
-                imageUrl = await _fileUploadService.UploadImageAsync(vm.ImageFile);
+
+                // Upload all images (max 5)
+                imageUrls = await _fileUploadService.UploadMultipleImagesAsync(vm.ImageFiles, "recipes", maxFiles: 5);
+
+                // Set first image as primary
+                if (imageUrls.Any())
+                {
+                    primaryImageUrl = imageUrls.First();
+                }
             }
 
             // Handle video upload
@@ -364,6 +388,8 @@ namespace HealthyRecipes.Web.Controllers
                 if (!_fileUploadService.IsValidVideo(vm.VideoFile))
                 {
                     ModelState.AddModelError("VideoFile", "Invalid video file. Allowed: MP4, WebM. Max size: 100MB");
+                    var cats = await _categoryService.GetAllCategoriesAsync();
+                    vm.AvailableCategories = cats.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name });
                     return View(vm);
                 }
                 videoUrl = await _fileUploadService.UploadVideoAsync(vm.VideoFile);
@@ -377,7 +403,8 @@ namespace HealthyRecipes.Web.Controllers
                 PrepTime = vm.PrepTime,
                 Difficulty = vm.Difficulty,
                 Servings = vm.Servings,
-                ImageUrl = imageUrl,
+                PrimaryImageUrl = primaryImageUrl,
+                ImageUrls = imageUrls,
                 VideoUrl = videoUrl,
                 UserId = user!.Id
             };
@@ -388,7 +415,24 @@ namespace HealthyRecipes.Web.Controllers
                 await _recipeCategoryService.AddCategoryToRecipeAsync(recipeId, catId);
 
             foreach (var ing in vm.Ingredients.Where(i => i.IngredientId != Guid.Empty))
-                await _recipeIngredientService.AddIngredientToRecipeAsync(recipeId, ing.IngredientId, ing.QuantityInGrams);
+            {
+                var originalQuantity = (ing.OriginalUnit?.ToLower()) switch
+                {
+                    "teaspoons" => ing.QuantityInTeaspoons ?? 0,
+                    "tablespoons" => ing.QuantityInTablespoons ?? 0,
+                    "cups" => ing.QuantityInCups ?? 0,
+                    "coffeecups" => ing.QuantityInCoffeeCups ?? 0,
+                    "millilitres" => ing.QuantityInMillilitres ?? 0,
+                    _ => ing.QuantityInGrams
+                };
+
+                await _recipeIngredientService.AddIngredientToRecipeAsync(
+                    recipeId,
+                    ing.IngredientId,
+                    originalQuantity,
+                    ing.OriginalUnit ?? "grams"
+                );
+            }
 
             await _recipeService.RecalculateRecipeNutritionAsync(recipeId);
 
@@ -413,8 +457,6 @@ namespace HealthyRecipes.Web.Controllers
             var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
             var recipeIngredients = await _recipeIngredientService.GetIngredientsByRecipeAsync(id);
 
-
-
             var vm = new EditRecipeViewModel
             {
                 Id = id,
@@ -423,8 +465,8 @@ namespace HealthyRecipes.Web.Controllers
                 PrepTime = recipe.PrepTime,
                 Difficulty = recipe.Difficulty,
                 Servings = recipe.Servings,
-                CurrentImageUrl = recipe.ImageUrl,  // Store current image
-                CurrentVideoUrl = recipe.VideoUrl,  // Store current video
+                CurrentImageUrls = recipe.ImageUrls ?? new List<string>(),
+                CurrentVideoUrl = recipe.VideoUrl,
                 SelectedCategoryIds = recipeCategories.Select(rc => rc.CategoryId).ToList(),
                 AvailableCategories = categories.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name }),
                 Ingredients = recipeIngredients.Select(ri => new RecipeIngredientInputViewModel
@@ -473,33 +515,60 @@ namespace HealthyRecipes.Web.Controllers
             recipe.Difficulty = vm.Difficulty;
             recipe.Servings = vm.Servings;
 
-            // Handle NEW image upload
-            if (vm.NewImageFile != null)
+            // Handle image management
+            var currentImages = recipe.ImageUrls ?? new List<string>();
+
+            // Remove images marked for deletion
+            if (vm.ImagesToRemove != null && vm.ImagesToRemove.Any())
             {
-                // Validate image
-                if (!_fileUploadService.IsValidImage(vm.NewImageFile))
+                foreach (var urlToRemove in vm.ImagesToRemove)
                 {
-                    ModelState.AddModelError("NewImageFile", "Invalid image file. Allowed: JPG, PNG, WebP. Max size: 5MB");
-                    var cats = await _categoryService.GetAllCategoriesAsync();
-                    vm.AvailableCategories = cats.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name });
-                    return View(vm);
+                    await _fileUploadService.DeleteFileAsync(urlToRemove);
+                    currentImages.Remove(urlToRemove);
                 }
-
-                // Delete old image if exists
-                if (!string.IsNullOrEmpty(recipe.ImageUrl))
-                {
-                    await _fileUploadService.DeleteFileAsync(recipe.ImageUrl);
-                }
-
-                // Upload new image
-                recipe.ImageUrl = await _fileUploadService.UploadImageAsync(vm.NewImageFile);
             }
 
-
-            // Handle NEW video upload
-            if (vm.NewVideoFile != null)
+            // Add new images
+            if (vm.NewImageFiles != null && vm.NewImageFiles.Any())
             {
-                // Validate video
+                // Validate all new images first
+                foreach (var file in vm.NewImageFiles)
+                {
+                    if (!_fileUploadService.IsValidImage(file))
+                    {
+                        ModelState.AddModelError("NewImageFiles", $"Invalid image file: {file.FileName}. Allowed: JPG, PNG, WebP. Max size: 5MB");
+                        var cats = await _categoryService.GetAllCategoriesAsync();
+                        vm.AvailableCategories = cats.Select(c => new CategoryFilterViewModel { Id = c.Id, Name = c.Name });
+                        return View(vm);
+                    }
+                }
+
+                // Calculate how many more images we can add (max 5 total)
+                int slotsAvailable = 5 - currentImages.Count;
+                if (slotsAvailable > 0)
+                {
+                    var newImageUrls = await _fileUploadService.UploadMultipleImagesAsync(vm.NewImageFiles, "recipes", maxFiles: slotsAvailable);
+                    currentImages.AddRange(newImageUrls);
+                }
+            }
+
+            // Update recipe images
+            recipe.ImageUrls = currentImages;
+
+            // Update primary image (first in the list, or null if no images)
+            recipe.PrimaryImageUrl = currentImages.Any() ? currentImages.First() : null;
+
+            // Handle video removal or replacement
+            if (vm.RemoveCurrentVideo)
+            {
+                if (!string.IsNullOrEmpty(recipe.VideoUrl))
+                {
+                    await _fileUploadService.DeleteFileAsync(recipe.VideoUrl);
+                    recipe.VideoUrl = null;
+                }
+            }
+            else if (vm.NewVideoFile != null)
+            {
                 if (!_fileUploadService.IsValidVideo(vm.NewVideoFile))
                 {
                     ModelState.AddModelError("NewVideoFile", "Invalid video file. Allowed: MP4, WebM. Max size: 100MB");
@@ -514,10 +583,8 @@ namespace HealthyRecipes.Web.Controllers
                     await _fileUploadService.DeleteFileAsync(recipe.VideoUrl);
                 }
 
-                // Upload new video
                 recipe.VideoUrl = await _fileUploadService.UploadVideoAsync(vm.NewVideoFile);
             }
-
 
             // Get current category associations
             var currentCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(id);
@@ -555,11 +622,12 @@ namespace HealthyRecipes.Web.Controllers
             };
 
             await _activityLogHelper.LogRecipeUpdatedAsync(
-                user.Id,
-                id,
-                vm.Title,
-                oldValues,
-                newValues);
+               user.Id,
+               id,
+               vm.Title,
+               oldValues,
+               newValues);
+
 
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -577,9 +645,9 @@ namespace HealthyRecipes.Web.Controllers
                 return Forbid();
 
             // DELETE FILES FIRST (before soft-deleting recipe)
-            if (!string.IsNullOrEmpty(recipe.ImageUrl))
+            if (!string.IsNullOrEmpty(recipe.PrimaryImageUrl))
             {
-                await _fileUploadService.DeleteFileAsync(recipe.ImageUrl);
+                await _fileUploadService.DeleteFileAsync(recipe.PrimaryImageUrl);
             }
 
             if (!string.IsNullOrEmpty(recipe.VideoUrl))
@@ -759,7 +827,7 @@ namespace HealthyRecipes.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddIngredient(Guid recipeId, Guid ingredientId, float quantity)
+        public async Task<IActionResult> AddIngredient(Guid recipeId, Guid ingredientId, float quantity, string unit = "grams")
         {
             if (!User.Identity?.IsAuthenticated ?? true)
             {
@@ -774,23 +842,35 @@ namespace HealthyRecipes.Web.Controllers
                 return Json(new { success = false, message = "Recipe not found." });
             }
 
-            if (recipe.UserId != userId)
+            if (recipe.UserId != userId && !User.IsInRole("Admin"))
             {
                 return Json(new { success = false, message = "You can only edit your own recipes." });
             }
 
             try
             {
-                await _recipeService.AddIngredientToRecipeAsync(recipeId, ingredientId, quantity);
+                await _recipeIngredientService.AddIngredientToRecipeAsync(recipeId, ingredientId, quantity, unit);
                 await _recipeService.RecalculateRecipeNutritionAsync(recipeId);
+
                 var ingredient = await _ingredientService.GetIngredientByIdAsync(ingredientId);
+
+                // Get the converted quantity in grams for display purposes
+                var quantityInGrams = _recipeIngredientService.ConvertToGrams(quantity, unit);
+                var updatedRecipe = await _recipeService.GetRecipeByIdAsync(recipeId);
 
                 return Json(new
                 {
                     success = true,
-                    ingredientId = ingredientId,
+                    ingredientId,
                     ingredientName = ingredient.Name,
-                    quantity = quantity
+                    quantity,
+                    unit,
+                    quantityInGrams,
+                    formattedQuantity = _recipeIngredientService.FormatQuantity(quantity, unit),
+                    calories = updatedRecipe.Calories,
+                    protein = updatedRecipe.Protein,
+                    carbs = updatedRecipe.Carbs,
+                    fat = updatedRecipe.Fat
                 });
             }
             catch (Exception ex)
@@ -816,16 +896,28 @@ namespace HealthyRecipes.Web.Controllers
                 return Json(new { success = false, message = "Recipe not found." });
             }
 
-            if (recipe.UserId != userId)
+            if (recipe.UserId != userId && !User.IsInRole("Admin"))
             {
                 return Json(new { success = false, message = "You can only edit your own recipes." });
             }
 
             try
             {
-                await _recipeService.RemoveIngredientFromRecipeAsync(recipeId, ingredientId);
+                await _recipeIngredientService.RemoveIngredientFromRecipeAsync(recipeId, ingredientId);
                 await _recipeService.RecalculateRecipeNutritionAsync(recipeId);
-                return Json(new { success = true });
+
+                // Get the updated recipe with recalculated nutrition
+                var updatedRecipe = await _recipeService.GetRecipeByIdAsync(recipeId);
+
+                return Json(new
+                {
+                    success = true,
+                    // Return updated nutrition values
+                    calories = updatedRecipe.Calories,
+                    protein = updatedRecipe.Protein,
+                    carbs = updatedRecipe.Carbs,
+                    fat = updatedRecipe.Fat
+                });
             }
             catch (Exception ex)
             {
@@ -1000,6 +1092,38 @@ namespace HealthyRecipes.Web.Controllers
                 TempData["Error"] = "Unable to pin/unpin comment";
 
             return RedirectToAction(nameof(Details), new { id = recipeId });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ConvertMeasurement([FromBody] ConversionRequest request)
+        {
+            try
+            {
+                var grams = _recipeIngredientService.ConvertToGrams(request.Quantity, request.FromUnit);
+
+                var result = new
+                {
+                    grams = Math.Round(grams, 1),
+                    teaspoons = Math.Round(_recipeIngredientService.ConvertFromGrams(grams, "teaspoons"), 1),
+                    tablespoons = Math.Round(_recipeIngredientService.ConvertFromGrams(grams, "tablespoons"), 1),
+                    cups = Math.Round(_recipeIngredientService.ConvertFromGrams(grams, "cups"), 2),
+                    coffeeCups = Math.Round(_recipeIngredientService.ConvertFromGrams(grams, "coffeecups"), 2),
+                    millilitres = Math.Round(_recipeIngredientService.ConvertFromGrams(grams, "millilitres"), 0)
+                };
+
+                return Json(result);
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { error = "Conversion failed" });
+            }
+        }
+
+        public class ConversionRequest
+        {
+            public float Quantity { get; set; }
+            public string FromUnit { get; set; } = string.Empty;
         }
 
         private List<CommentViewModel> MapCommentViewModels(IEnumerable<CommentRating> comments, Guid? currentUserId, Guid recipeOwnerId)

@@ -21,6 +21,7 @@ namespace HealthyRecipes.Data.Entities
             RecipeIngredients = new List<RecipeIngredient>();
             RecipeMeals = new List<RecipeMeal>();
             SavedRecipes = new List<SavedRecipe>();
+            ImageUrls = new List<string>();
         }
         public Recipe(DateTime createdAt, Guid id) : this()
         {
@@ -56,7 +57,8 @@ namespace HealthyRecipes.Data.Entities
 
         public int? Servings { get; set; } //nullable
 
-        public string? ImageUrl { get; set; } // nullable
+        public string? PrimaryImageUrl { get; set; } // nullable
+        public List<string> ImageUrls { get; set; } // nullable
         public string? VideoUrl { get; set; } //nullable
 
         // ---------- Navigation Collections ----------

@@ -22,8 +22,8 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         [Range(1, 100)]
         public int? Servings { get; set; }
 
-        [Display(Name = "Recipe Image")]
-        public IFormFile? ImageFile { get; set; }
+        [Display(Name = "Recipe Images (up to 5)")]
+        public List<IFormFile>? ImageFiles { get; set; }
 
         [Display(Name = "Recipe Video")]
         public IFormFile? VideoFile { get; set; }

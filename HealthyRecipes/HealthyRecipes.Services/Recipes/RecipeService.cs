@@ -137,7 +137,7 @@ namespace HealthyRecipes.Services.Recipes
                 existing.PrepTime = recipe.PrepTime;
                 existing.Servings = recipe.Servings;
                 existing.Difficulty = recipe.Difficulty;
-                existing.ImageUrl = recipe.ImageUrl;
+                existing.PrimaryImageUrl = recipe.PrimaryImageUrl;
                 existing.VideoUrl = recipe.VideoUrl;
                 existing.UpdatedAt = DateTime.UtcNow;
 
@@ -421,30 +421,7 @@ namespace HealthyRecipes.Services.Recipes
                 throw;
             }
         }
-        public async Task AddIngredientToRecipeAsync(Guid recipeId, Guid ingredientId, float quantity)
-        {
-            var recipeIngredient = new RecipeIngredient
-            {
-                RecipeId = recipeId,
-                IngredientId = ingredientId,
-                QuantityInGrams = quantity
-            };
-
-            await _context.RecipeIngredients.AddAsync(recipeIngredient);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task RemoveIngredientFromRecipeAsync(Guid recipeId, Guid ingredientId)
-        {
-            var recipeIngredient = await _context.RecipeIngredients
-                .FirstOrDefaultAsync(ri => ri.RecipeId == recipeId && ri.IngredientId == ingredientId);
-
-            if (recipeIngredient != null)
-            {
-                _context.RecipeIngredients.Remove(recipeIngredient);
-                await _context.SaveChangesAsync();
-            }
-        }
+      
 
         public async Task<IEnumerable<Recipe>> SearchRecipesAsync(string query)
         {

@@ -16,7 +16,8 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         public int? PrepTime { get; set; }
         public Difficulty? Difficulty { get; set; }
         public int? Servings { get; set; }
-        public string? ImageUrl { get; set; }
+        public string? ImageUrl { get; set; } // Primary image for backward compatibility
+        public List<string> ImageUrls { get; set; } = new(); // All images
         public string? VideoUrl { get; set; }
         public string AuthorName { get; set; } = null!;
         public Guid AuthorId { get; set; }

@@ -59,6 +59,44 @@ namespace HealthyRecipes.Services.FileUploads
             return await SaveFileAsync(file, subFolder);
         }
 
+        public async Task<List<string>> UploadMultipleImagesAsync(List<IFormFile>? files, string subFolder = "recipes", int maxFiles = 5)
+        {
+            var uploadedUrls = new List<string>();
+
+            if (files == null || files.Count == 0)
+                return uploadedUrls;
+
+            // Limit to maxFiles
+            var filesToUpload = files.Take(maxFiles).ToList();
+
+            foreach (var file in filesToUpload)
+            {
+                if (IsValidImage(file))
+                {
+                    var url = await SaveFileAsync(file, subFolder);
+                    uploadedUrls.Add(url);
+                }
+            }
+
+            return uploadedUrls;
+        }
+
+        public async Task<bool> DeleteMultipleFilesAsync(List<string>? filePaths)
+        {
+            if (filePaths == null || filePaths.Count == 0)
+                return true;
+
+            bool allDeleted = true;
+            foreach (var filePath in filePaths)
+            {
+                var deleted = await DeleteFileAsync(filePath);
+                if (!deleted)
+                    allDeleted = false;
+            }
+
+            return allDeleted;
+        }
+
         private async Task<string> SaveFileAsync(IFormFile file, string subFolder)
         {
             // Create unique filename to prevent conflicts
