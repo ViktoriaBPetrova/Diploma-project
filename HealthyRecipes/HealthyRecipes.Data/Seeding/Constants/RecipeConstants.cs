@@ -16,6 +16,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "A healthy and high-protein chicken and rice bowl with sautéed onion and garlic. " +
             "Perfect for meal prep and quick lunches.";
         public const int ChickenRiceBowlPrepTime = 30;
+        public const int ChickenRiceBowlServings = 4;
         public const Difficulty ChickenRiceBowlDifficulty = Difficulty.Easy;
 
         // ---------- Recipe 2: Grilled Salmon with Quinoa ----------
@@ -25,6 +26,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "Perfectly grilled salmon served over fluffy quinoa with a fresh lemon dressing. " +
             "Rich in omega-3 fatty acids and complete protein.";
         public const int GrilledSalmonQuinoaPrepTime = 25;
+        public const int GrilledSalmonQuinoaServings = 2;
         public const Difficulty GrilledSalmonQuinoaDifficulty = Difficulty.Medium;
 
         // ---------- Recipe 3: Greek Yogurt Breakfast Bowl ----------
@@ -34,6 +36,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "Creamy Greek yogurt topped with fresh blueberries, almonds, and a drizzle of honey. " +
             "A protein-packed breakfast that keeps you full all morning.";
         public const int GreekYogurtBowlPrepTime = 5;
+        public const int GreekYogurtBowlServings = 1;
         public const Difficulty GreekYogurtBowlDifficulty = Difficulty.Easy;
 
         // ---------- Recipe 4: Spinach & Sweet Potato Buddha Bowl ----------
@@ -43,6 +46,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "A vibrant plant-based bowl loaded with roasted sweet potato, fresh spinach, " +
             "avocado, and a tahini dressing. Nutrient-dense and satisfying.";
         public const int BuddhaBowlPrepTime = 35;
+        public const int BuddhaBowlServings = 2;
         public const Difficulty BuddhaBowlDifficulty = Difficulty.Medium;
 
         // ---------- Recipe 5: Veggie Omelette ----------
@@ -52,6 +56,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "Fluffy eggs filled with bell peppers, tomatoes, spinach, and onions. " +
             "A classic breakfast packed with protein and vitamins.";
         public const int VeggieOmelettePrepTime = 15;
+        public const int VeggieOmeletteServings = 1;
         public const Difficulty VeggieOmeletteDifficulty = Difficulty.Easy;
 
         // ---------- Recipe 6: Overnight Oats ----------
@@ -61,6 +66,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "Creamy oats soaked overnight with banana, peanut butter, and a touch of honey. " +
             "Prep the night before for an effortless healthy breakfast.";
         public const int OvernightOatsPrepTime = 5;
+        public const int OvernightOatsServings = 1;
         public const Difficulty OvernightOatsDifficulty = Difficulty.Easy;
 
         // ---------- Recipe 7: Chicken Broccoli Stir-Fry ----------
@@ -70,6 +76,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "Quick and delicious chicken stir-fry with broccoli, garlic, and ginger in a light sauce. " +
             "Serve over brown rice for a complete meal.";
         public const int ChickenStirFryPrepTime = 20;
+        public const int ChickenStirFryServings = 3;
         public const Difficulty ChickenStirFryDifficulty = Difficulty.Medium;
 
         // ---------- Recipe 8: Mediterranean Cucumber Salad ----------
@@ -79,6 +86,7 @@ namespace HealthyRecipes.Data.Seeding.Constants
             "Refreshing salad with cucumbers, tomatoes, bell peppers, parsley, and olive oil. " +
             "Light, crisp, and full of Mediterranean flavors.";
         public const int MediterraneanSaladPrepTime = 10;
+        public const int MediterraneanSaladServings = 4;
         public const Difficulty MediterraneanSaladDifficulty = Difficulty.Easy;
 
     }

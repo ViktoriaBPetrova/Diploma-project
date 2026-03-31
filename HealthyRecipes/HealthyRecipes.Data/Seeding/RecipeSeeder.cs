@@ -23,6 +23,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.ChickenRiceBowlTitle,
                     Info = RecipeConstants.ChickenRiceBowlInfo,
                     PrepTime = RecipeConstants.ChickenRiceBowlPrepTime,
+                    Servings = RecipeConstants.ChickenRiceBowlServings,
                     Difficulty = RecipeConstants.ChickenRiceBowlDifficulty,
                     UserId = Guid.Parse(UserConstants.UserId)
                 },
@@ -32,6 +33,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.VeggieOmeletteTitle,
                     Info = RecipeConstants.VeggieOmeletteInfo,
                     PrepTime = RecipeConstants.VeggieOmelettePrepTime,
+                    Servings = RecipeConstants.VeggieOmeletteServings,
                     Difficulty = RecipeConstants.VeggieOmeletteDifficulty,
                     UserId = Guid.Parse(UserConstants.UserId)
                 },
@@ -41,6 +43,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.GrilledSalmonQuinoaTitle,
                     Info = RecipeConstants.GrilledSalmonQuinoaInfo,
                     PrepTime = RecipeConstants.GrilledSalmonQuinoaPrepTime,
+                    Servings = RecipeConstants.GrilledSalmonQuinoaServings,
                     Difficulty = RecipeConstants.GrilledSalmonQuinoaDifficulty,
                     UserId = Guid.Parse(UserConstants.User4Id)
                 },
@@ -50,6 +53,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.MediterraneanSaladTitle,
                     Info = RecipeConstants.MediterraneanSaladInfo,
                     PrepTime = RecipeConstants.MediterraneanSaladPrepTime,
+                    Servings = RecipeConstants.MediterraneanSaladServings,
                     Difficulty = RecipeConstants.MediterraneanSaladDifficulty,
                     UserId = Guid.Parse(UserConstants.User4Id)
                 },
@@ -59,6 +63,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.GreekYogurtBowlTitle,
                     Info = RecipeConstants.GreekYogurtBowlInfo,
                     PrepTime = RecipeConstants.GreekYogurtBowlPrepTime,
+                    Servings = RecipeConstants.GreekYogurtBowlServings,
                     Difficulty = RecipeConstants.GreekYogurtBowlDifficulty,
                     UserId = Guid.Parse(UserConstants.User2Id)
                 },
@@ -69,6 +74,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.BuddhaBowlTitle,
                     Info = RecipeConstants.BuddhaBowlInfo,
                     PrepTime = RecipeConstants.BuddhaBowlPrepTime,
+                    Servings = RecipeConstants.BuddhaBowlServings,
                     Difficulty = RecipeConstants.BuddhaBowlDifficulty,
                     UserId = Guid.Parse(UserConstants.User2Id)
                 },
@@ -79,6 +85,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.OvernightOatsTitle,
                     Info = RecipeConstants.OvernightOatsInfo,
                     PrepTime = RecipeConstants.OvernightOatsPrepTime,
+                    Servings = RecipeConstants.OvernightOatsServings,
                     Difficulty = RecipeConstants.OvernightOatsDifficulty,
                     UserId = Guid.Parse(UserConstants.User3Id)
                 },
@@ -89,6 +96,7 @@ namespace HealthyRecipes.Data.Seeding
                     Title = RecipeConstants.ChickenStirFryTitle,
                     Info = RecipeConstants.ChickenStirFryInfo,
                     PrepTime = RecipeConstants.ChickenStirFryPrepTime,
+                    Servings = RecipeConstants.ChickenStirFryServings,
                     Difficulty = RecipeConstants.ChickenStirFryDifficulty,
                     UserId = Guid.Parse(UserConstants.User3Id)
                 },

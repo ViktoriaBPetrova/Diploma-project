@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HealthyRecipes.Data.Enums;
+using DayOfWeek = HealthyRecipes.Data.Enums.DayOfWeek;
 
 namespace HealthyRecipes.Data.Seeding.Constants.MealPlanConstants
 {
