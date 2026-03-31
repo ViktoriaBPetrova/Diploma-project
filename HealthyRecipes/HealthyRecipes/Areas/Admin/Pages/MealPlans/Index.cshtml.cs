@@ -54,18 +54,6 @@ namespace HealthyRecipes.Web.Areas.Admin.Pages.MealPlans
             }).OrderByDescending(mp => mp.CreatedAt).ToList();
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(Guid id)
-        {
-            await _mealPlanService.SoftDeleteAsync(id);
-            return RedirectToPage();
-        }
-
-        public async Task<IActionResult> OnPostRestoreAsync(Guid id)
-        {
-            await _mealPlanService.RestoreMealPlanAsync(id);
-            return RedirectToPage();
-        }
-
         public class MealPlanViewModel
         {
             public Guid Id { get; set; }

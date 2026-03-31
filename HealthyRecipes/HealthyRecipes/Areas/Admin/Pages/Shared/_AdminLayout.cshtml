@@ -21,6 +21,9 @@
                 <a asp-page="/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString() == "/Index" ? "active" : "")">
                     Dashboard
                 </a>
+                <a asp-page="/Reports/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Reports") == true ? "active" : "")">
+                    Reports
+                </a>
                 <a asp-page="/Users/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Users") == true ? "active" : "")">
                     Users
                 </a>
@@ -30,8 +33,8 @@
                 <a asp-page="/MealPlans/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("MealPlans") == true ? "active" : "")">
                     Meal Plans
                 </a>
-                <a asp-page="/Reports/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Reports") == true ? "active" : "")">
-                    Reports
+                <a asp-page="/Ingredients/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Ingredients") == true ? "active" : "")">
+                    Ingredients
                 </a>
                 <a asp-page="/ActivityLogs/Index" asp-area="Admin" class="admin-nav-link @(ViewContext.RouteData.Values["Page"]?.ToString()?.Contains("Logs") == true ? "active" : "")">
                     Activity Logs

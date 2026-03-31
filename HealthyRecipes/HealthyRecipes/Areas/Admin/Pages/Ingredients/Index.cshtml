@@ -1,12 +1,12 @@
 @page
-@model HealthyRecipes.Web.Areas.Admin.Pages.MealPlans.IndexModel
+@model HealthyRecipes.Web.Areas.Admin.Pages.Ingredients.IndexModel
 @{
-    ViewData["Title"] = "Meal Plan Management";
+    ViewData["Title"] = "Ingredient Management";
 }
 
 <div class="page-header" style="margin-bottom: 32px;">
-    <h1 style="font-size: 2rem; color: var(--admin-primary); margin: 0;">Meal Plan Management</h1>
-    <p style="color: #666; margin-top: 8px;">View and manage all meal plans</p>
+    <h1 style="font-size: 2rem; color: var(--admin-primary); margin: 0;">Ingredient Management</h1>
+    <p style="color: #666; margin-top: 8px;">View and manage all ingredients</p>
 </div>
 
 <div class="admin-card" style="margin-bottom: 24px;">
@@ -24,7 +24,7 @@
             </button>
             @if (!string.IsNullOrWhiteSpace(Model.SearchTerm))
             {
-                <a asp-page="/MealPlans/Index" class="btn-ghost-sm">Clear</a>
+                <a asp-page="/Ingredients/Index" class="btn-ghost-sm">Clear</a>
             }
         </div>
     </form>
@@ -33,7 +33,7 @@
 <div class="admin-card">
     <div style="margin-bottom: 16px;">
         <h2 style="font-size: 1.25rem; margin: 0; color: var(--admin-primary);">
-            Meal Plans (@Model.MealPlans.Count)
+            Ingredients (@Model.Ingredients.Count)
         </h2>
     </div>
 
@@ -41,32 +41,32 @@
         <thead>
             <tr>
                 <th>Name</th>
-                <th>Author</th>
-                <th>Days</th>
+                <th>Brand</th>
+                <th>CalPer100g</th>
+                <th>ProteinPer100g</th>
+                <th>CarbsPer100g</th>
+                <th>FatPer100g</th>
                 <th>Created</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @if (Model.MealPlans.Any())
+            @if (Model.Ingredients.Any())
             {
-                @foreach (var plan in Model.MealPlans)
+                @foreach (var plan in Model.Ingredients)
                 {
                     <tr style="@(plan.IsDeleted ? "opacity: 0.5;" : "")">
                         <td>
                             <div>
                                 <strong>@plan.Name</strong>
-                                @if (!string.IsNullOrWhiteSpace(plan.Description))
-                                {
-                                    <div style="font-size: 0.85rem; color: #666; margin-top: 2px;">
-                                        @(plan.Description.Length > 60 ? plan.Description.Substring(0, 60) + "..." : plan.Description)
-                                    </div>
-                                }
                             </div>
                         </td>
-                        <td>@plan.AuthorName</td>
-                        <td style="text-align: center;">@plan.DayCount</td>
+                        <td>@plan.Brand</td>
+                        <td style="text-align: center;">@plan.CaloriesPer100g</td>
+                        <td style="text-align: center;">@plan.ProteinPer100g</td>
+                        <td style="text-align: center;">@plan.CarbsPer100g</td>
+                        <td style="text-align: center;">@plan.FatPer100g</td>
                         <td>@plan.CreatedAt.ToString("MMM dd, yyyy")</td>
                         <td>
                             @if (plan.IsDeleted)
@@ -81,13 +81,13 @@
                         <td>
                             <div style="display: flex; gap: 8px;"> 
                                 <!-- View on public site -->
-                                <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@plan.Id" asp-area=""
+                                <a asp-controller="Ingredient" asp-action="Details" asp-route-id="@plan.Id" asp-area=""
                                    class="btn-action" target="_blank">
                                     View
                                 </a>
 
                                 <!-- Edit using existing RecipeController.Edit -->
-                                <a asp-controller="MealPlan" asp-action="Edit" asp-route-id="@plan.Id" asp-area=""
+                                <a asp-controller="Ingredient" asp-action="Edit" asp-route-id="@plan.Id" asp-area=""
                                    class="btn-action">
                                     Edit
                                 </a>
@@ -95,7 +95,7 @@
                                 @if (!plan.IsDeleted)
                                 {
                                     <!-- Delete using existing RecipeController.Delete -->
-                                    <form asp-controller="MealPlan" asp-action="Delete" asp-route-id="@plan.Id" asp-area=""
+                                    <form asp-controller="Ingredient" asp-action="Delete" asp-route-id="@plan.Id" asp-area=""
                                           method="post" style="display: inline;">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn-action btn-danger"
@@ -107,7 +107,7 @@
                                 else
                                 {
                                     <!-- Restore - you'd need to add this action to RecipeController -->
-                                    <form asp-controller="MealPlan" asp-action="Restore" asp-route-id="@plan.Id" asp-area=""
+                                    <form asp-controller="Ingredient" asp-action="Restore" asp-route-id="@plan.Id" asp-area=""
                                           method="post" style="display: inline;">
                                         @Html.AntiForgeryToken()
                                         <button type="submit" class="btn-action btn-success">
@@ -124,7 +124,7 @@
             {
                 <tr>
                     <td colspan="6" style="text-align: center; padding: 32px; color: #666;">
-                        No meal plans found
+                        No ingredients found
                     </td>
                 </tr>
             }

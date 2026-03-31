@@ -63,17 +63,6 @@ namespace HealthyRecipes.Web.Areas.Admin.Pages.Recipes
             }).OrderByDescending(r => r.CreatedAt).ToList();
         }
 
-        public async Task<IActionResult> OnPostDeleteAsync(Guid id)
-        {
-            await _recipeService.SoftDeleteRecipeAsync(id);
-            return RedirectToPage();
-        }
-
-        public async Task<IActionResult> OnPostRestoreAsync(Guid id)
-        {
-            await _recipeService.RestoreRecipeAsync(id);
-            return RedirectToPage();
-        }
 
         public class RecipeViewModel
         {
