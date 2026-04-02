@@ -23,13 +23,13 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore HealthyRecipes/HealthyRecipes.Web/HealthyRecipes.Web.csproj
     
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build HealthyRecipes/HealthyRecipes.Web/HealthyRecipes.Web.csproj --configuration Release --no-restore
     
     - name: Publish
-      run: dotnet publish HealthyRecipes.Web/HealthyRecipes.Web.csproj -c Release -o ./publish
+      run: dotnet publish HealthyRecipes/HealthyRecipes.Web/HealthyRecipes.Web.csproj -c Release -o ./publish
     
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
