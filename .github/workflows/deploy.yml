@@ -28,6 +28,14 @@ jobs:
     - name: Build
       run: dotnet build HealthyRecipes/HealthyRecipes.sln --configuration Release --no-restore
     
+    - name: Install EF Core tools
+      run: dotnet tool install --global dotnet-ef
+    
+    - name: Run database migrations
+      run: |
+        cd HealthyRecipes
+        dotnet ef database update --project HealthyRecipes.Data/HealthyRecipes.Data.csproj --startup-project HealthyRecipes/HealthyRecipes.Web.csproj --connection "${{ secrets.PRODUCTION_CONNECTION_STRING }}"
+    
     - name: Publish
       run: dotnet publish HealthyRecipes/HealthyRecipes/HealthyRecipes.Web.csproj -c Release -o ./publish
     
