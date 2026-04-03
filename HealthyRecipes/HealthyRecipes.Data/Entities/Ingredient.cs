@@ -39,7 +39,7 @@ namespace HealthyRecipes.Data.Entities
         public Guid Id { get; init; }
 
         // ---------- Core Data ----------
-        public string Name { get; set; } = null!;  // required // private ste?
+        public string Name { get; set; } = null!;  // required
         public string? Brand { get; set; }         // optional - if not store-bought // private set?
         public string? BulgarianName { get; set; }
 

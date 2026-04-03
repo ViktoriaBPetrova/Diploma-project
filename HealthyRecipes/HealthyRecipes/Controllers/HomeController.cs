@@ -68,7 +68,7 @@ namespace HealthyRecipes.Web.Controllers
                     Fat = r.Fat,
                     PrepTime = r.PrepTime,
                     Difficulty = r.Difficulty,
-                    ImageUrl = r.ImageUrl,
+                    ImageUrl = r.PrimaryImageUrl,
                     AverageRating = avg,
                     CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
                     IsSaved = savedIds.Contains(r.Id),
