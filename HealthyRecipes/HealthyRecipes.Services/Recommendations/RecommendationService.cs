@@ -813,7 +813,7 @@ namespace HealthyRecipes.Services.Recommendations
             {
                 RecipeId = recipe.Id,
                 Title = recipe.Title ?? "Untitled Recipe",
-                ImageUrl = recipe.ImageUrl ?? string.Empty,
+                ImageUrl = recipe.PrimaryImageUrl ?? string.Empty,
                 PrepTime = recipe.PrepTime ?? 0,
                 Servings = recipe.Servings ?? 1,
                 Calories = (decimal)macros.Calories,
