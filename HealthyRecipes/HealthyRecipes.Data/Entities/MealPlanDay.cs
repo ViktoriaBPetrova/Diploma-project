@@ -41,7 +41,7 @@ namespace HealthyRecipes.Data.Entities
         public MealPlan MealPlan { get; set; } = null!;
 
         // Day of week (enum)
-        public DayOfWeek DayOfWeek { get; /*private*/ set; } = DayOfWeek.Monday; // change back later
+        public Enums.DayOfWeek DayOfWeek { get; set; } = Enums.DayOfWeek.Monday; // change back later
 
         // nutrition totals (private set)
         public float Calories { get; set; }
