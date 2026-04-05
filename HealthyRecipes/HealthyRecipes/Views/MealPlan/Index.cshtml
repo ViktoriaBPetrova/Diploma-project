@@ -8,9 +8,11 @@
                 <h1>Meal Plans</h1>
                 <p class="page-subtitle">Plan your week, hit your macros</p>
             </div>
+             @if (User.Identity?.IsAuthenticated == true){
             <form asp-action="Create" method="get" style="display: inline;">
                 <button type="submit" class="btn-primary">+ New Plan</button>
             </form>
+             }
         </div>
     </div>
 
