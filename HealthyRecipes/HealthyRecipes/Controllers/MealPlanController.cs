@@ -222,13 +222,24 @@ namespace HealthyRecipes.Web.Controllers
         {
             var mealPlan = await _mealPlanService.GetByIdAsync(id);
             if (mealPlan == null) return NotFound();
+            var isSaved = false;
+            var isFollowing = false;
+            Guid? currentUserId = null;
+            
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if(user != null)
+                {
+                    currentUserId = user.Id;
+                    isSaved = await _savedMealPlanService.IsMealPlanSavedAsync(user!.Id, id);
+                    isFollowing = await _mealPlanFollowerService.IsFollowingAsync(user.Id, id);
+                }      
+            }
 
-            var user = await _userManager.GetUserAsync(User);
-            bool isSaved = await _savedMealPlanService.IsMealPlanSavedAsync(user!.Id, id);
-            bool isFollowing = await _mealPlanFollowerService.IsFollowingAsync(user.Id, id);
             var days = await _mealPlanDayService.GetDaysByMealPlanAsync(id);
-
             var dayVms = new List<MealPlanDayViewModel>();
+
             foreach (var day in days.OrderBy(d => d.DayNumber))
             {
                 var meals = await _mealService.GetMealsByDayAsync(day.Id);
@@ -285,7 +296,7 @@ namespace HealthyRecipes.Web.Controllers
                 Carbs = mealPlan.Carbs,
                 Fat = mealPlan.Fat,
                 IsSaved = isSaved,
-                IsOwner = mealPlan.UserId == user.Id,
+                IsOwner = mealPlan.UserId == currentUserId,
                 IsFollowing = isFollowing,
                 Days = dayVms,
 
