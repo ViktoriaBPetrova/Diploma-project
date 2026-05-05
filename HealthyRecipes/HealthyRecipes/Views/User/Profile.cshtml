@@ -120,9 +120,26 @@
 
     @if (Model.IsCurrentUser)
     {
+        <!-- Primary Actions - My Content -->
         <div class="profile-actions">
             <a asp-controller="Recipe" asp-action="Index" class="btn-ghost">My recipes</a>
             <a asp-controller="MealPlan" asp-action="Index" class="btn-primary">My meal plans</a>
+        </div>
+
+        <!-- Secondary Actions - Activity & Stats -->
+        <div class="profile-secondary-actions">
+            <a asp-controller="MealPlanFollower" asp-action="MyActivePlans" class="btn-ghost profile-secondary-btn">
+                <span class="profile-action-icon">✓</span>
+                <span>My Active Plans</span>
+            </a>
+            <a asp-controller="Statistics" asp-action="Dashboard" class="btn-ghost profile-secondary-btn">
+                <span class="profile-action-icon">📊</span>
+                <span>My Statistics</span>
+            </a>
+            <a asp-controller="MealPlanFollower" asp-action="FollowingDashboard" class="btn-ghost profile-secondary-btn">
+                <span class="profile-action-icon">👥</span>
+                <span>Following</span>
+            </a>
         </div>
     }
 </div>
