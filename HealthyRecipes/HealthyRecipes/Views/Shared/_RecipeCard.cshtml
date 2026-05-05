@@ -1,4 +1,9 @@
+@using System.Security.Claims
 @model HealthyRecipes.Web.ViewModels.Recipe.RecipeCardViewModel
+@{
+    var isAuthor = User.Identity?.IsAuthenticated == true &&
+                   Model.AuthorId == Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+}
 
 <div class="card">
     @if (!string.IsNullOrEmpty(Model.ImageUrl))
@@ -47,12 +52,19 @@
                 }
                 @if (User.Identity?.IsAuthenticated == true)
                 {
+                    if (isAuthor)
+                    {
+                        <a asp-controller="Recipe" asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
+                    }
+                    else
+                    {
                     <form asp-controller="Recipe" asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" class="recipe-card-save-form">
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
                             @(Model.IsSaved ? "♥" : "♡")
                         </button>
                     </form>
+                    }
                 }
             </div>
         </div>

@@ -14,5 +14,6 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         public int TotalPages { get; set; } = 1;
         public RecipeFilterViewModel Filter { get; set; } = new();
         public int TotalCount { get; set; }
+        public string? ViewMode { get; set; }
     }
 }

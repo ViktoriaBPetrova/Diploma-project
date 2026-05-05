@@ -150,7 +150,7 @@ namespace HealthyRecipes.Web.Controllers
                         Fat = mp.Fat,
                         DayCount = mp.MealPlanDays?.Count() ?? 0,
                         IsSaved = savedPlanIds.Contains(mp.Id),
-                        IsOwner = true,
+                        AuthorId = mp.UserId,
                         CreatedAt = mp.CreatedAt,
                         FollowerCount = followerCount,  
                         CategoryNames = mp.MealPlanCategories?
@@ -178,7 +178,7 @@ namespace HealthyRecipes.Web.Controllers
                         Fat = mp.Fat,
                         DayCount = mp.MealPlanDays?.Count() ?? 0,
                         IsSaved = savedPlanIds.Contains(mp.Id),
-                        IsOwner = false,
+                        AuthorId = mp.UserId,
                         CreatedAt = mp.CreatedAt,
                         FollowerCount = followerCount, 
                         CategoryNames = mp.MealPlanCategories?

@@ -166,7 +166,8 @@ namespace HealthyRecipes.Web.Controllers
                         RatingCount = ratings.Count(),
                         CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
                         IsSaved = savedIds.Contains(recipe.Id),
-                        AuthorName = recipe.User?.UserName ?? "Unknown"
+                        AuthorName = recipe.User?.UserName ?? "Unknown",
+                        AuthorId = recipe.UserId
                     });
                 }
 
@@ -194,7 +195,8 @@ namespace HealthyRecipes.Web.Controllers
                         RatingCount = ratings.Count(),
                         CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
                         IsSaved = savedIds.Contains(recipe.Id),
-                        AuthorName = recipe.User?.UserName ?? "Unknown"
+                        AuthorName = recipe.User?.UserName ?? "Unknown",
+                        AuthorId = recipe.UserId
                     });
                 }
 

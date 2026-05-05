@@ -1,7 +1,6 @@
-@using HealthyRecipes.Web.ViewModels.Statistics
+@using System.Security.Claims
 @model HealthyRecipes.Web.ViewModels.Recipe.RecipeDetailsViewModel
 @{ ViewData["Title"] = "Recipe Details"; }
-@using System.Security.Claims
 @{
     var isAuthor = User.Identity?.IsAuthenticated == true && 
                    Model.AuthorId == Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
@@ -85,20 +84,23 @@
                 <div class="recipe-detail-actions">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
-                                @(Model.IsSaved ? "♥ Saved" : "♡ Save")
-                            </button>
-                        </form>
-                    }
-                    @if (User.Identity?.IsAuthenticated == true && (User.IsInRole("Admin") || Model.AuthorId.ToString() == User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value))
-                    {
-                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
-                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Delete this recipe?')">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-danger">Delete</button>
-                        </form>
+                        if(User.IsInRole("Admin") || isAuthor)
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
+                            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Delete this recipe?')">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-danger">Delete</button>
+                            </form>
+                        }
+                        else if(!isAuthor)
+                        {
+                            <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
+                                    @(Model.IsSaved ? "♥ Saved" : "♡ Save")
+                                </button>
+                            </form>
+                        }
                     }
                 </div>
             </div>

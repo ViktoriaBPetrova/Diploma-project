@@ -1,4 +1,9 @@
+@using System.Security.Claims
 @model HealthyRecipes.Web.ViewModels.MealPlan.MealPlanCardViewModel
+@{
+    var isAuthor = User.Identity?.IsAuthenticated == true &&
+                   Model.AuthorId == Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+}
 <div class="card meal-plan-card">
     <div class="meal-plan-header">
         <div>
@@ -20,15 +25,21 @@
     </div>
     <div class="meal-plan-actions">
         <a asp-controller="MealPlan" asp-action="Details" asp-route-id="@Model.Id" class="btn-ghost">View plan</a>
-        @if (Model.IsOwner)
+        @if (User.Identity?.IsAuthenticated == true)
         {
-            <a asp-controller="MealPlan" asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
+            if (isAuthor)
+            {
+                <a asp-controller="MealPlan" asp-action="Edit" asp-route-id="@Model.Id" class="btn-ghost">Edit</a>
+            }
+            else
+            {
+                <form asp-controller="MealPlan" asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" class="meal-plan-save-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
+                    @(Model.IsSaved ? "♥ Saved" : "♡ Save")
+                </button>
+                </form>
+            }
         }
-        <form asp-controller="MealPlan" asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" class="meal-plan-save-form">
-            @Html.AntiForgeryToken()
-            <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
-                @(Model.IsSaved ? "♥ Saved" : "♡ Save")
-            </button>
-        </form>
     </div>
 </div>

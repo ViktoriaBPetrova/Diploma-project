@@ -19,5 +19,6 @@ namespace HealthyRecipes.Web.ViewModels.Recipe
         public IEnumerable<string> CategoryNames { get; set; } = new List<string>();
         public bool IsSaved { get; set; }
         public string AuthorName { get; set; } = null!;
+        public Guid AuthorId { get; set; } 
     }
 }

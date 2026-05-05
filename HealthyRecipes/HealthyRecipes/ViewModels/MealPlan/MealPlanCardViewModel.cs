@@ -11,7 +11,7 @@ namespace HealthyRecipes.Web.ViewModels.MealPlan
         public float Fat { get; set; }
         public int DayCount { get; set; }
         public bool IsSaved { get; set; }
-        public bool IsOwner { get; set; }
+        public Guid AuthorId { get; set; }
         public int FollowerCount { get; set; } 
         public DateTime CreatedAt { get; set; }
         public IEnumerable<string> CategoryNames { get; set; } = new List<string>();
