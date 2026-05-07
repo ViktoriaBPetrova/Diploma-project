@@ -359,10 +359,6 @@
         </div>
     </div>
 
-   
-   
- </div>
-
     @* Similar Recipes Section *@
     @if (Model.SimilarRecipes.Any())
     {
@@ -372,51 +368,54 @@
                 <p class="similar-recipes-subtitle">Recipes with similar ingredients and categories</p>
             </div>
 
-            <div class="similar-recipes-grid">
-                @foreach (var similar in Model.SimilarRecipes)
-                {
-                    <div class="similar-recipe-card card">
-                        @if (!string.IsNullOrEmpty(similar.ImageUrl))
-                        {
-                            <div class="similar-recipe-image" style="background-image: url('@similar.ImageUrl');"></div>
-                        }
-                        else
-                        {
-                            <div class="similar-recipe-image similar-recipe-image-placeholder">
-                                <span style="font-size: 2.5rem;">🍽️</span>
-                            </div>
-                        }
-
-                        <div class="similar-recipe-content">
-                            <a asp-action="Details" asp-route-id="@similar.RecipeId" class="similar-recipe-title">
-                                @similar.Title
-                            </a>
-
-                            <p class="similar-recipe-similarity">
-                                @Math.Round(similar.Score)% similar
-                            </p>
-
-                            <div class="similar-recipe-macros macros">
-                                <span class="macro-pill macro-calories">@similar.Calories.ToString("F0") cal</span>
-                                <span class="macro-pill macro-protein">@similar.Protein.ToString("F0")g protein</span>
-                            </div>
-
-                            @if (similar.Categories.Any())
+            <div class="similar-recipes-scroll-container">
+                <div class="similar-recipes-row">
+                    @foreach (var similar in Model.SimilarRecipes)
+                    {
+                        <div class="similar-recipe-card card">
+                            @if (!string.IsNullOrEmpty(similar.ImageUrl))
                             {
-                                <div class="similar-recipe-categories">
-                                    @foreach (var category in similar.Categories.Take(2))
-                                    {
-                                        <span class="tag">@category</span>
-                                    }
+                                <div class="similar-recipe-image" style="background-image: url('@similar.ImageUrl');"></div>
+                            }
+                            else
+                            {
+                                <div class="similar-recipe-image similar-recipe-image-placeholder">
+                                    <span style="font-size: 2.5rem;">🍽️</span>
                                 </div>
                             }
+
+                            <div class="similar-recipe-content">
+                                <a asp-action="Details" asp-route-id="@similar.RecipeId" class="similar-recipe-title">
+                                    @similar.Title
+                                </a>
+
+                                <p class="similar-recipe-similarity">
+                                    @Math.Round(similar.Score)% similar
+                                </p>
+
+                                <div class="similar-recipe-macros macros">
+                                    <span class="macro-pill macro-calories">@similar.Calories.ToString("F0") cal</span>
+                                    <span class="macro-pill macro-protein">@similar.Protein.ToString("F0")g protein</span>
+                                </div>
+
+                                @if (similar.Categories.Any())
+                                {
+                                    <div class="similar-recipe-categories">
+                                        @foreach (var category in similar.Categories.Take(2))
+                                        {
+                                            <span class="tag">@category</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+                </div>
             </div>
         </section>
     }
-</div>
+   
+ </div>
 
 @section Scripts {
     <script>
@@ -1096,6 +1095,89 @@
                 setTimeout(() => fatEl.classList.remove('nutrition-updated'), 1000);
             }
         }
+
+
+
+        // SIMILAR RECIPES - DRAG TO SCROLL (FIXED TEXT SELECTION)
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const slider = document.querySelector('.similar-recipes-row');
+
+            if (!slider) return;
+
+            let isDown = false;
+            let isDragging = false;
+            let startX;
+            let scrollLeft;
+
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                isDragging = false;
+                slider.style.cursor = 'grabbing';
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+
+                // Prevent text selection during mousedown
+                e.preventDefault();
+            });
+
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+            });
+
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+                slider.style.cursor = 'grab';
+
+                // Small delay to allow click events if not dragging
+                setTimeout(() => {
+                    isDragging = false;
+                }, 10);
+            });
+
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+
+                e.preventDefault(); // Prevent text selection while dragging
+                isDragging = true;
+
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2;
+                slider.scrollLeft = scrollLeft - walk;
+            });
+
+            // Prevent default click behavior when dragging
+            slider.addEventListener('click', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }, true);
+
+            // Prevent links from being clicked during drag
+            const links = slider.querySelectorAll('a');
+            links.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (isDragging) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    }
+                });
+
+                // Prevent drag behavior on links to avoid text selection
+                link.addEventListener('dragstart', (e) => {
+                    e.preventDefault();
+                });
+            });
+
+            // Additional prevention for text selection
+            slider.addEventListener('selectstart', (e) => {
+                if (isDown) {
+                    e.preventDefault();
+                }
+            });
+        });
     </script>
 
     <style>
