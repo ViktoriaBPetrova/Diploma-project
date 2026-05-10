@@ -25,6 +25,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.ChickenRiceBowlPrepTime,
                     Servings = RecipeConstants.ChickenRiceBowlServings,
                     Difficulty = RecipeConstants.ChickenRiceBowlDifficulty,
+                    Calories = RecipeConstants.ChickenRiceBowlCalories,
+                    Protein = RecipeConstants.ChickenRiceBowlProtein,
+                    Carbs = RecipeConstants.ChickenRiceBowlCarbs,
+                    Fat = RecipeConstants.ChickenRiceBowlFat,
                     UserId = Guid.Parse(UserConstants.UserId)
                 },
                 // Recipe 5: Veggie Omelette - by John Doe (Regular User)
@@ -35,6 +39,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.VeggieOmelettePrepTime,
                     Servings = RecipeConstants.VeggieOmeletteServings,
                     Difficulty = RecipeConstants.VeggieOmeletteDifficulty,
+                    Calories = RecipeConstants.VeggieOmeletteCalories,
+                    Protein = RecipeConstants.VeggieOmeletteProtein,
+                    Carbs = RecipeConstants.VeggieOmeletteCarbs,
+                    Fat = RecipeConstants.VeggieOmeletteFat,
                     UserId = Guid.Parse(UserConstants.UserId)
                 },
                 // Recipe 2: Grilled Salmon with Quinoa - by Emma Davis (Nutritionist)
@@ -45,6 +53,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.GrilledSalmonQuinoaPrepTime,
                     Servings = RecipeConstants.GrilledSalmonQuinoaServings,
                     Difficulty = RecipeConstants.GrilledSalmonQuinoaDifficulty,
+                    Calories = RecipeConstants.GrilledSalmonQuinoaCalories,
+                    Protein = RecipeConstants.GrilledSalmonQuinoaProtein,
+                    Carbs = RecipeConstants.GrilledSalmonQuinoaCarbs,
+                    Fat = RecipeConstants.GrilledSalmonQuinoaFat,
                     UserId = Guid.Parse(UserConstants.User4Id)
                 },
                 // Recipe 8: Mediterranean Salad - by Emma Davis (Nutritionist)
@@ -55,6 +67,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.MediterraneanSaladPrepTime,
                     Servings = RecipeConstants.MediterraneanSaladServings,
                     Difficulty = RecipeConstants.MediterraneanSaladDifficulty,
+                    Calories = RecipeConstants.MediterraneanSaladCalories,
+                    Protein = RecipeConstants.MediterraneanSaladProtein,
+                    Carbs = RecipeConstants.MediterraneanSaladCarbs,
+                    Fat = RecipeConstants.MediterraneanSaladFat,
                     UserId = Guid.Parse(UserConstants.User4Id)
                 },
                 // Recipe 3: Greek Yogurt Breakfast Bowl - by Sarah Johnson (Yoga instructor)
@@ -65,6 +81,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.GreekYogurtBowlPrepTime,
                     Servings = RecipeConstants.GreekYogurtBowlServings,
                     Difficulty = RecipeConstants.GreekYogurtBowlDifficulty,
+                    Calories = RecipeConstants.GreekYogurtBowlCalories,
+                    Protein = RecipeConstants.GreekYogurtBowlProtein,
+                    Carbs = RecipeConstants.GreekYogurtBowlCarbs,
+                    Fat = RecipeConstants.GreekYogurtBowlFat,
                     UserId = Guid.Parse(UserConstants.User2Id)
                 },
 
@@ -76,6 +96,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.BuddhaBowlPrepTime,
                     Servings = RecipeConstants.BuddhaBowlServings,
                     Difficulty = RecipeConstants.BuddhaBowlDifficulty,
+                    Calories = RecipeConstants.BuddhaBowlCalories,
+                    Protein = RecipeConstants.BuddhaBowlProtein,
+                    Carbs = RecipeConstants.BuddhaBowlCarbs,
+                    Fat = RecipeConstants.BuddhaBowlFat,
                     UserId = Guid.Parse(UserConstants.User2Id)
                 },
 
@@ -87,6 +111,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.OvernightOatsPrepTime,
                     Servings = RecipeConstants.OvernightOatsServings,
                     Difficulty = RecipeConstants.OvernightOatsDifficulty,
+                    Calories = RecipeConstants.OvernightOatsCalories,
+                    Protein = RecipeConstants.OvernightOatsProtein,
+                    Carbs = RecipeConstants.OvernightOatsCarbs,
+                    Fat = RecipeConstants.OvernightOatsFat,
                     UserId = Guid.Parse(UserConstants.User3Id)
                 },
 
@@ -98,6 +126,10 @@ namespace HealthyRecipes.Data.Seeding
                     PrepTime = RecipeConstants.ChickenStirFryPrepTime,
                     Servings = RecipeConstants.ChickenStirFryServings,
                     Difficulty = RecipeConstants.ChickenStirFryDifficulty,
+                    Calories = RecipeConstants.ChickenStirFryCalories,
+                    Protein = RecipeConstants.ChickenStirFryProtein,
+                    Carbs = RecipeConstants.ChickenStirFryCarbs,
+                    Fat = RecipeConstants.ChickenStirFryFat,
                     UserId = Guid.Parse(UserConstants.User3Id)
                 },
             };
