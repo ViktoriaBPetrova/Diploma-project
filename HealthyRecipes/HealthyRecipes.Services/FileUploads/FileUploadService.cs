@@ -22,7 +22,8 @@ namespace HealthyRecipes.Services.FileUploads
 
         public FileUploadService(IConfiguration configuration)
         {
-            var storageAccountUrl = configuration["AzureBlobStorage:StorageAccountUrl"];
+            var storageAccountUrl = configuration["HealthyRecipes_BlobStorage_Url"]
+            ?? configuration["AzureBlobStorage:StorageAccountUrl"];
             var containerName = configuration["AzureBlobStorage:ContainerName"] ?? "recipe-images";
 
             // Use DefaultAzureCredential - works locally AND in Azure
