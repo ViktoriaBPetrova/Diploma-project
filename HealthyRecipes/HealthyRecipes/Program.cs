@@ -29,8 +29,10 @@ using HealthyRecipes.Services.Statistics.Interfaces;
 using HealthyRecipes.Services.Statistics.Services;
 using HealthyRecipes.Services.StoreApis;
 using HealthyRecipes.Services.Users;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -140,6 +142,17 @@ builder.Services.AddAuthorization(options =>
 builder.Services.Configure<RazorPagesOptions>(options =>
 {
     options.Conventions.AuthorizeAreaFolder("Admin", "/", "AdminOnly");
+});
+
+// Allow larger file uploads
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 524288000; // 500 MB in bytes
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 524288000; // 500 MB
 });
 
 // ─── Pipeline ─────────────────────────────────────────────────────────────────
