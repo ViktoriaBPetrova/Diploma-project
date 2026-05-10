@@ -22,22 +22,32 @@ namespace HealthyRecipes.Services.FileUploads
 
         public FileUploadService(IConfiguration configuration)
         {
+            var storageAccountUrl = configuration["AzureBlobStorage:StorageAccountUrl"];
+            /*
             var storageAccountUrl = configuration["HealthyRecipes_BlobStorage_Url"]
-            ?? configuration["AzureBlobStorage:StorageAccountUrl"];
-            var containerName = configuration["AzureBlobStorage:ContainerName"] ?? "recipe-images";
+            ?? configuration["AzureBlobStorage:StorageAccountUrl"];*/
+            var connectionString = configuration["AzureBlobStorage:ConnectionString"];
+            var containerName = configuration["AzureBlobStorage:ContainerName"] ?? "recipe-images";  
 
-            // Use DefaultAzureCredential - works locally AND in Azure
-            // Locally: Uses your Azure CLI/Visual Studio credentials
-            // In Azure: Uses Managed Identity
-            _blobServiceClient = new BlobServiceClient(
-                new Uri(storageAccountUrl),
-                new DefaultAzureCredential()
-            );
+            // Use connection string if available (local dev), otherwise use Managed Identity (production)
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                // Local development - use connection string
+                _blobServiceClient = new BlobServiceClient(connectionString);
+            }
+            else
+            {
+                // Production - use Managed Identity
+                _blobServiceClient = new BlobServiceClient(
+                    new Uri(storageAccountUrl),
+                    new DefaultAzureCredential()
+                );
+            }
 
             _containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
 
             // Create container if it doesn't exist (public read access for images)
-            _containerClient.CreateIfNotExists(PublicAccessType.Blob);
+            //_containerClient.CreateIfNotExists(PublicAccessType.Blob);
 
             _maxImageSize = long.Parse(configuration["AzureBlobStorage:MaxImageSizeMB"] ?? "5") * 1024 * 1024;
             _maxVideoSize = long.Parse(configuration["AzureBlobStorage:MaxVideoSizeMB"] ?? "100") * 1024 * 1024;
@@ -126,6 +136,9 @@ namespace HealthyRecipes.Services.FileUploads
             var blobName = string.IsNullOrEmpty(subFolder)
                 ? fileName
                 : $"{subFolder}/{fileName}";
+
+            // Creates container only when actually uploading
+            await _containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
             var blobClient = _containerClient.GetBlobClient(blobName);
 
