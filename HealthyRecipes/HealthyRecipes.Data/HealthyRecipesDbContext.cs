@@ -156,8 +156,6 @@ namespace HealthyRecipes.Data
             
             base.OnModelCreating(builder);
 
-           
-
         }
     }
 }

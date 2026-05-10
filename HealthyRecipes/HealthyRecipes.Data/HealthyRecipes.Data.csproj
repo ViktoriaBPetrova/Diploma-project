@@ -5,6 +5,8 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
+		<PackageReference Include="Azure.Identity" Version="1.12.1" />
+		<PackageReference Include="Azure.Storage.Blobs" Version="12.21.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.22" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.22" />
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.2.2" />

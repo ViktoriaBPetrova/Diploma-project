@@ -101,7 +101,7 @@ builder.Services.AddScoped<IMealPlanFollower, MealPlanFollowerService>();
 builder.Services.AddScoped<IMealEntry, MealEntryService>();
 builder.Services.AddScoped<IMealPlanDayEntry, MealPlanDayEntryService>();
 builder.Services.AddScoped<IRecommendation, RecommendationService>();
-builder.Services.AddScoped<IFileUpload, FileUploadService>();
+builder.Services.AddSingleton<IFileUpload, FileUploadService>();
 // Admin Moderation Services
 builder.Services.AddScoped<IActivityLog, ActivityLogService>();
 builder.Services.AddScoped<IContentFilter, ContentFilterService>();

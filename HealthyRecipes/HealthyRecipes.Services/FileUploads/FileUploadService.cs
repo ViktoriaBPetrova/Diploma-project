@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Azure.Identity;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -10,23 +13,37 @@ namespace HealthyRecipes.Services.FileUploads
 {
     public class FileUploadService : IFileUpload
     {
-        private readonly IConfiguration _configuration;
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly BlobContainerClient _containerClient;
         private readonly long _maxImageSize;
         private readonly long _maxVideoSize;
         private readonly string[] _allowedImageExtensions;
         private readonly string[] _allowedVideoExtensions;
-        private readonly string _storagePath;
 
         public FileUploadService(IConfiguration configuration)
         {
-            _configuration = configuration;
-            _maxImageSize = long.Parse(_configuration["FileUpload:MaxImageSizeMB"] ?? "5") * 1024 * 1024;
-            _maxVideoSize = long.Parse(_configuration["FileUpload:MaxVideoSizeMB"] ?? "100") * 1024 * 1024;
-            _allowedImageExtensions = _configuration.GetSection("FileUpload:AllowedImageExtensions").Get<string[]>()
+            var storageAccountUrl = configuration["AzureBlobStorage:StorageAccountUrl"];
+            var containerName = configuration["AzureBlobStorage:ContainerName"] ?? "recipe-images";
+
+            // Use DefaultAzureCredential - works locally AND in Azure
+            // Locally: Uses your Azure CLI/Visual Studio credentials
+            // In Azure: Uses Managed Identity
+            _blobServiceClient = new BlobServiceClient(
+                new Uri(storageAccountUrl),
+                new DefaultAzureCredential()
+            );
+
+            _containerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Create container if it doesn't exist (public read access for images)
+            _containerClient.CreateIfNotExists(PublicAccessType.Blob);
+
+            _maxImageSize = long.Parse(configuration["AzureBlobStorage:MaxImageSizeMB"] ?? "5") * 1024 * 1024;
+            _maxVideoSize = long.Parse(configuration["AzureBlobStorage:MaxVideoSizeMB"] ?? "100") * 1024 * 1024;
+            _allowedImageExtensions = configuration.GetSection("AzureBlobStorage:AllowedImageExtensions").Get<string[]>()
                 ?? new[] { ".jpg", ".jpeg", ".png", ".webp" };
-            _allowedVideoExtensions = _configuration.GetSection("FileUpload:AllowedVideoExtensions").Get<string[]>()
+            _allowedVideoExtensions = configuration.GetSection("AzureBlobStorage:AllowedVideoExtensions").Get<string[]>()
                 ?? new[] { ".mp4", ".webm" };
-            _storagePath = _configuration["FileUpload:StoragePath"] ?? "wwwroot/uploads/recipes";
         }
 
         public bool IsValidImage(IFormFile file)
@@ -50,13 +67,17 @@ namespace HealthyRecipes.Services.FileUploads
         public async Task<string?> UploadImageAsync(IFormFile file, string subFolder = "recipes")
         {
             if (!IsValidImage(file)) return null;
-            return await SaveFileAsync(file, subFolder);
+
+            var contentType = file.ContentType;
+            return await UploadToBlobAsync(file, subFolder, contentType);
         }
 
         public async Task<string?> UploadVideoAsync(IFormFile file, string subFolder = "recipes")
         {
             if (!IsValidVideo(file)) return null;
-            return await SaveFileAsync(file, subFolder);
+
+            var contentType = file.ContentType;
+            return await UploadToBlobAsync(file, subFolder, contentType);
         }
 
         public async Task<List<string>> UploadMultipleImagesAsync(List<IFormFile>? files, string subFolder = "recipes", int maxFiles = 5)
@@ -66,15 +87,15 @@ namespace HealthyRecipes.Services.FileUploads
             if (files == null || files.Count == 0)
                 return uploadedUrls;
 
-            // Limit to maxFiles
             var filesToUpload = files.Take(maxFiles).ToList();
 
             foreach (var file in filesToUpload)
             {
                 if (IsValidImage(file))
                 {
-                    var url = await SaveFileAsync(file, subFolder);
-                    uploadedUrls.Add(url);
+                    var url = await UploadImageAsync(file, subFolder);
+                    if (url != null)
+                        uploadedUrls.Add(url);
                 }
             }
 
@@ -97,25 +118,42 @@ namespace HealthyRecipes.Services.FileUploads
             return allDeleted;
         }
 
-        private async Task<string> SaveFileAsync(IFormFile file, string subFolder)
+        private async Task<string> UploadToBlobAsync(IFormFile file, string subFolder, string contentType)
         {
-            // Create unique filename to prevent conflicts
+            // Create unique blob name
             var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
-            var uploadPath = Path.Combine(_storagePath, subFolder);
+            var blobName = string.IsNullOrEmpty(subFolder)
+                ? fileName
+                : $"{subFolder}/{fileName}";
 
-            // Ensure directory exists
-            Directory.CreateDirectory(uploadPath);
+            var blobClient = _containerClient.GetBlobClient(blobName);
 
-            var filePath = Path.Combine(uploadPath, fileName);
-
-            // Save file
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            // Set headers for optimal performance
+            var blobHttpHeaders = new BlobHttpHeaders
             {
-                await file.CopyToAsync(stream);
+                ContentType = contentType,
+                CacheControl = "public, max-age=31536000" // Cache for 1 year
+            };
+
+            // Add metadata for tracking
+            var metadata = new Dictionary<string, string>
+            {
+                { "OriginalFileName", file.FileName },
+                { "UploadedAt", DateTime.UtcNow.ToString("o") },
+                { "FileSize", file.Length.ToString() }
+            };
+
+            using (var stream = file.OpenReadStream())
+            {
+                await blobClient.UploadAsync(stream, new BlobUploadOptions
+                {
+                    HttpHeaders = blobHttpHeaders,
+                    Metadata = metadata
+                });
             }
 
-            // Return relative URL path (what gets stored in database)
-            return $"/uploads/recipes/{subFolder}/{fileName}";
+            // Return the full blob URL
+            return blobClient.Uri.AbsoluteUri;
         }
 
         public async Task<bool> DeleteFileAsync(string? filePath)
@@ -124,21 +162,26 @@ namespace HealthyRecipes.Services.FileUploads
 
             try
             {
-                // Convert URL path to physical path
-                var physicalPath = Path.Combine("wwwroot", filePath.TrimStart('/'));
+                // Extract blob name from URL
+                var uri = new Uri(filePath);
+                var blobName = uri.AbsolutePath.TrimStart('/');
 
-                if (File.Exists(physicalPath))
+                // Remove container name from path if present
+                var containerName = _containerClient.Name;
+                if (blobName.StartsWith(containerName + "/"))
                 {
-                    await Task.Run(() => File.Delete(physicalPath));
-                    return true;
+                    blobName = blobName.Substring(containerName.Length + 1);
                 }
+
+                var blobClient = _containerClient.GetBlobClient(blobName);
+                var result = await blobClient.DeleteIfExistsAsync();
+
+                return result.Value;
             }
             catch
             {
                 return false;
             }
-
-            return false;
         }
     }
 }
