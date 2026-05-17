@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 
 namespace HealthyRecipes.Web.Areas.Identity.Pages.Account
 {
+    [AllowAnonymous]
     public class LogoutModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -24,20 +25,19 @@ namespace HealthyRecipes.Web.Areas.Identity.Pages.Account
             _logger = logger;
         }
 
+        public void OnGet()
+        {
+            // Show the logout confirmation page
+        }
+
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
             await _signInManager.SignOutAsync();
             _logger.LogInformation("User logged out.");
-            if (returnUrl != null)
-            {
-                return LocalRedirect(returnUrl);
-            }
-            else
-            {
-                // This needs to be a redirect so that the browser performs a new
-                // request and the identity for the user gets updated.
-                return RedirectToPage();
-            }
+
+            // Always redirect back to the logout page to show the success message
+            // The page will detect the user is no longer authenticated and show the success state
+            return RedirectToPage();
         }
     }
 }

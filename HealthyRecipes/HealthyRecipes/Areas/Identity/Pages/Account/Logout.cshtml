@@ -4,18 +4,129 @@
     ViewData["Title"] = "Log out";
 }
 
-<header>
-    <h1>@ViewData["Title"]</h1>
+<div class="identity-container">
     @{
         if (User.Identity?.IsAuthenticated ?? false)
         {
-            <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
-            </form>
+            <div class="identity-header">
+                <h1 class="identity-title">Log Out</h1>
+                <p class="identity-subtitle">Are you sure you want to leave?</p>
+            </div>
+
+            <div class="identity-card">
+                <div class="logout-confirmation-content">
+                    <div class="logout-icon">🌿</div>
+                    <p class="logout-message">
+                        You're about to end your current session. You can always log back in anytime.
+                    </p>
+                </div>
+
+                <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                    <button type="submit" class="identity-submit logout-submit-btn">Yes, Log me out</button>
+                </form>
+
+                <div class="logout-cancel-container">
+                    <a asp-page="/Index" class="btn-ghost logout-cancel-link">Stay logged in</a>
+                </div>
+            </div>
         }
         else
         {
-            <p>You have successfully logged out of the application.</p>
+            <div class="identity-header">
+                <h1 class="identity-title">Logged Out</h1>
+                <p class="identity-subtitle">See you again soon!</p>
+            </div>
+
+            <div class="identity-card">
+                <div class="logout-success-content">
+                    <div class="logout-success-icon">✓</div>
+                    <h3 class="logout-success-title">Successfully Logged Out</h3>
+                    <p class="logout-success-message">
+                        You've been securely logged out of your account.
+                    </p>
+
+                    <a asp-area="Identity" asp-page="/Account/Login" class="identity-submit logout-login-link">
+                        Log in again
+                    </a>
+
+                    <a asp-page="/Index" class="identity-link logout-home-link">
+                        Return to home page
+                    </a>
+                </div>
+            </div>
         }
     }
-</header>
+</div>
+
+<style>
+    /* Logout Confirmation State */
+    .logout-confirmation-content {
+        text-align: center;
+        margin-bottom: 24px;
+    }
+
+    .logout-icon {
+        font-size: 3.5rem;
+        margin-bottom: 16px;
+    }
+
+    .logout-message {
+        color: var(--mid);
+        margin: 0;
+    }
+
+    .logout-submit-btn {
+        margin-bottom: 12px;
+    }
+
+    .logout-cancel-container {
+        text-align: center;
+        margin-top: 12px;
+    }
+
+    .logout-cancel-link {
+        width: 100%;
+        text-decoration: none;
+    }
+
+    /* Logout Success State */
+    .logout-success-content {
+        text-align: center;
+    }
+
+    .logout-success-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: var(--parchment);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+    }
+
+    .logout-success-title {
+        font-family: var(--font-display);
+        color: var(--forest);
+        margin-bottom: 8px;
+        font-size: 1.375rem;
+    }
+
+    .logout-success-message {
+        color: var(--muted);
+        margin-bottom: 28px;
+    }
+
+    .logout-login-link {
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        margin-bottom: 12px;
+    }
+
+    .logout-home-link {
+        display: block;
+        margin-top: 16px;
+    }
+</style>
