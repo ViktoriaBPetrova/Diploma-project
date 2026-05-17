@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HealthyRecipes.Data.Seeding.MappingSeeders.RecipeMappingSeeders
+namespace HealthyRecipes.Data.Seeding.MappingSeeders.MealPlanMappingSeeders
 {
     public class RecipeMealSeeder
     {

@@ -4,6 +4,7 @@ using HealthyRecipes.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyRecipes.Data.Migrations
 {
     [DbContext(typeof(HealthyRecipesDbContext))]
-    partial class HealthyRecipesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517233718_AddMacrosToMealPlanDaySeeding")]
+    partial class AddMacrosToMealPlanDaySeeding
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4469,56 +4472,56 @@ namespace HealthyRecipes.Data.Migrations
                         new
                         {
                             Id = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Calories = 8357.601f,
-                            Carbs = 741.755f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "A meal plan focused on lean muscle gain.",
-                            Fat = 329.305f,
+                            Fat = 0f,
                             Name = "John's Lean Bulk Plan",
-                            Protein = 597.90497f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("e8a7c3b4-1f5d-4a6c-9b2e-7c3d5f8a9b01")
                         },
                         new
                         {
                             Id = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Calories = 8112f,
-                            Carbs = 919.21f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "A complete week of nutritious plant-based meals. Perfect for yoga practitioners and clean eating enthusiasts.",
-                            Fat = 385.11f,
+                            Fat = 0f,
                             Name = "Sarah's Plant-Based Week",
-                            Protein = 323.66f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("c5e8a3b4-2f6d-4a7c-9b3e-8c4d6f9a0b12")
                         },
                         new
                         {
                             Id = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Calories = 8253.4f,
-                            Carbs = 807.38495f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "High-protein, high-carb meal plan designed for endurance athletes and marathon training.",
-                            Fat = 278.985f,
+                            Fat = 0f,
                             Name = "Mike's Marathon Training Plan",
-                            Protein = 622.2f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("d6f9b4c5-3a7e-4b8d-9c4f-9d5e7a1b2c23")
                         },
                         new
                         {
                             Id = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Calories = 8353.9f,
-                            Carbs = 815.75f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "A sustainable, well-balanced meal plan for overall health and wellness. No extreme dieting required.",
-                            Fat = 383.3f,
+                            Fat = 0f,
                             Name = "Emma's Balanced Nutrition Guide",
-                            Protein = 449.15f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("e7a1c5d6-4b8f-4c9e-9d5a-0e6f8b2c3d34")
                         });

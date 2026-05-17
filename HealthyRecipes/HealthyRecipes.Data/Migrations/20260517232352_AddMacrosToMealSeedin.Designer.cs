@@ -4,6 +4,7 @@ using HealthyRecipes.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyRecipes.Data.Migrations
 {
     [DbContext(typeof(HealthyRecipesDbContext))]
-    partial class HealthyRecipesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260517232352_AddMacrosToMealSeedin")]
+    partial class AddMacrosToMealSeedin
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -4469,56 +4472,56 @@ namespace HealthyRecipes.Data.Migrations
                         new
                         {
                             Id = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Calories = 8357.601f,
-                            Carbs = 741.755f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "A meal plan focused on lean muscle gain.",
-                            Fat = 329.305f,
+                            Fat = 0f,
                             Name = "John's Lean Bulk Plan",
-                            Protein = 597.90497f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("e8a7c3b4-1f5d-4a6c-9b2e-7c3d5f8a9b01")
                         },
                         new
                         {
                             Id = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Calories = 8112f,
-                            Carbs = 919.21f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "A complete week of nutritious plant-based meals. Perfect for yoga practitioners and clean eating enthusiasts.",
-                            Fat = 385.11f,
+                            Fat = 0f,
                             Name = "Sarah's Plant-Based Week",
-                            Protein = 323.66f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("c5e8a3b4-2f6d-4a7c-9b3e-8c4d6f9a0b12")
                         },
                         new
                         {
                             Id = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Calories = 8253.4f,
-                            Carbs = 807.38495f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "High-protein, high-carb meal plan designed for endurance athletes and marathon training.",
-                            Fat = 278.985f,
+                            Fat = 0f,
                             Name = "Mike's Marathon Training Plan",
-                            Protein = 622.2f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("d6f9b4c5-3a7e-4b8d-9c4f-9d5e7a1b2c23")
                         },
                         new
                         {
                             Id = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Calories = 8353.9f,
-                            Carbs = 815.75f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Deleted = false,
                             Description = "A sustainable, well-balanced meal plan for overall health and wellness. No extreme dieting required.",
-                            Fat = 383.3f,
+                            Fat = 0f,
                             Name = "Emma's Balanced Nutrition Guide",
-                            Protein = 449.15f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             UserId = new Guid("e7a1c5d6-4b8f-4c9e-9d5a-0e6f8b2c3d34")
                         });
@@ -4573,281 +4576,281 @@ namespace HealthyRecipes.Data.Migrations
                         new
                         {
                             Id = new Guid("a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d"),
-                            Calories = 1895.55f,
-                            Carbs = 164.495f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 1,
                             DayOfWeek = 1,
                             Deleted = false,
-                            Fat = 79.645f,
+                            Fat = 0f,
                             MealPlanId = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Protein = 124.64f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("b2c3d4e5-6f7a-4b8c-9d0e-1f2a3b4c5d6e"),
-                            Calories = 1516.6001f,
-                            Carbs = 138.83f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 2,
                             DayOfWeek = 2,
                             Deleted = false,
-                            Fat = 48.14f,
+                            Fat = 0f,
                             MealPlanId = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Protein = 131.965f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("c3d4e5f6-7a8b-4c9d-0e1f-2a3b4c5d6e7f"),
-                            Calories = 1583.3f,
-                            Carbs = 147.10501f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 3,
                             DayOfWeek = 3,
                             Deleted = false,
-                            Fat = 74.034996f,
+                            Fat = 0f,
                             MealPlanId = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Protein = 84.995f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("d4e5f6a7-8b9c-4d0e-1f2a-3b4c5d6e7f8a"),
-                            Calories = 1516.6001f,
-                            Carbs = 138.83f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 4,
                             DayOfWeek = 4,
                             Deleted = false,
-                            Fat = 48.14f,
+                            Fat = 0f,
                             MealPlanId = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Protein = 131.965f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("e5f6a7b8-9c0d-4e1f-2a3b-4c5d6e7f8a9b"),
-                            Calories = 1845.55f,
-                            Carbs = 152.495f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 5,
                             DayOfWeek = 5,
                             Deleted = false,
-                            Fat = 79.345f,
+                            Fat = 0f,
                             MealPlanId = new Guid("d3f9a1b2-4c5e-47a9-8b7c-0a1d2e3f4b5c"),
-                            Protein = 124.34f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("f6a7b8c9-0d1e-4f2a-3b4c-5d6e7f8a9b0c"),
-                            Calories = 1593.4f,
-                            Carbs = 165.11f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 1,
                             DayOfWeek = 1,
                             Deleted = false,
-                            Fat = 81.25f,
+                            Fat = 0f,
                             MealPlanId = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Protein = 67.105f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("a7b8c9d0-1e2f-4a3b-4c5d-6e7f8a9b0c1d"),
-                            Calories = 1687.1001f,
-                            Carbs = 220.54501f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 2,
                             DayOfWeek = 2,
                             Deleted = false,
-                            Fat = 65.564995f,
+                            Fat = 0f,
                             MealPlanId = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Protein = 69.57f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("b8c9d0e1-2f3a-4b4c-5d6e-7f8a9b0c1d2e"),
-                            Calories = 1593.4f,
-                            Carbs = 165.11002f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 3,
                             DayOfWeek = 3,
                             Deleted = false,
-                            Fat = 81.25f,
+                            Fat = 0f,
                             MealPlanId = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Protein = 67.104996f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("c9d0e1f2-3a4b-4c5d-6e7f-8a9b0c1d2e3f"),
-                            Calories = 1644.7001f,
-                            Carbs = 203.335f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 4,
                             DayOfWeek = 4,
                             Deleted = false,
-                            Fat = 75.795f,
+                            Fat = 0f,
                             MealPlanId = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Protein = 52.775f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("d0e1f2a3-4b5c-4d6e-7f8a-9b0c1d2e3f4a"),
-                            Calories = 1593.4f,
-                            Carbs = 165.11f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 5,
                             DayOfWeek = 5,
                             Deleted = false,
-                            Fat = 81.25f,
+                            Fat = 0f,
                             MealPlanId = new Guid("e4a2b3c4-5d6e-48b1-9c8d-1b2e3f4a5b6c"),
-                            Protein = 67.105f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("e1f2a3b4-5c6d-4e7f-8a9b-0c1d2e3f4a5b"),
-                            Calories = 1656.3999f,
-                            Carbs = 182.455f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 1,
                             DayOfWeek = 1,
                             Deleted = false,
-                            Fat = 43.285f,
+                            Fat = 0f,
                             MealPlanId = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Protein = 132.635f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("f2a3b4c5-6d7e-4f8a-9b0c-1d2e3f4a5b6c"),
-                            Calories = 1573.15f,
-                            Carbs = 89.975006f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 2,
                             DayOfWeek = 2,
                             Deleted = false,
-                            Fat = 79.564995f,
+                            Fat = 0f,
                             MealPlanId = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Protein = 124.06f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("a3b4c5d6-7e8f-4a9b-0c1d-2e3f4a5b6c7d"),
-                            Calories = 1567.9001f,
-                            Carbs = 177.055f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 3,
                             DayOfWeek = 3,
                             Deleted = false,
-                            Fat = 42.684998f,
+                            Fat = 0f,
                             MealPlanId = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Protein = 117.634995f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("b4c5d6e7-8f9a-4b0c-1d2e-3f4a5b6c7d8e"),
-                            Calories = 1888.05f,
-                            Carbs = 180.845f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 4,
                             DayOfWeek = 4,
                             Deleted = false,
-                            Fat = 70.765f,
+                            Fat = 0f,
                             MealPlanId = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Protein = 130.235f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("c5d6e7f8-9a0b-4c1d-2e3f-4a5b6c7d8e9f"),
-                            Calories = 1567.9001f,
-                            Carbs = 177.055f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 5,
                             DayOfWeek = 5,
                             Deleted = false,
-                            Fat = 42.684998f,
+                            Fat = 0f,
                             MealPlanId = new Guid("f5b3c4d5-6e7f-49c2-1d9e-2c3f4a5b6c7d"),
-                            Protein = 117.634995f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("d6e7f8a9-0b1c-4d2e-3f4a-5b6c7d8e9f0a"),
-                            Calories = 1603.3f,
-                            Carbs = 138.26001f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 1,
                             DayOfWeek = 1,
                             Deleted = false,
-                            Fat = 81.37999f,
+                            Fat = 0f,
                             MealPlanId = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Protein = 89.305f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("e7f8a9b0-1c2d-4e3f-4a5b-6c7d8e9f0a1b"),
-                            Calories = 2000.6501f,
-                            Carbs = 264.16f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 2,
                             DayOfWeek = 2,
                             Deleted = false,
-                            Fat = 65.42f,
+                            Fat = 0f,
                             MealPlanId = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Protein = 94.58499f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("f8a9b0c1-2d3e-4f4a-5b6c-7d8e9f0a1b2c"),
-                            Calories = 1489.6f,
-                            Carbs = 91.67f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 3,
                             DayOfWeek = 3,
                             Deleted = false,
-                            Fat = 89.71999f,
+                            Fat = 0f,
                             MealPlanId = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Protein = 82.53f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("a9b0c1d2-3e4f-4a5b-6c7d-8e9f0a1b2c3d"),
-                            Calories = 1676.9501f,
-                            Carbs = 163.41501f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 4,
                             DayOfWeek = 4,
                             Deleted = false,
-                            Fat = 71.095f,
+                            Fat = 0f,
                             MealPlanId = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Protein = 108.634995f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         },
                         new
                         {
                             Id = new Guid("b0c1d2e3-4f5a-4b6c-7d8e-9f0a1b2c3d4e"),
-                            Calories = 1583.4f,
-                            Carbs = 158.24501f,
+                            Calories = 0f,
+                            Carbs = 0f,
                             CreatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             DayNumber = 5,
                             DayOfWeek = 5,
                             Deleted = false,
-                            Fat = 75.685f,
+                            Fat = 0f,
                             MealPlanId = new Guid("a6c4d5e6-7f8a-41d3-2e1f-3d4a5b6c7d8e"),
-                            Protein = 74.095f,
+                            Protein = 0f,
                             UpdatedAt = new DateTime(2025, 12, 18, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
                 });

@@ -49,6 +49,7 @@ namespace HealthyRecipes.Data
         public DbSet<MealPlanFollower> MealPlanFollowers { get; init; } = null!;
         public DbSet<MealEntry> MealEntries { get; init; } = null!;
         public DbSet<MealPlanDayEntry> MealPlanDayEntries { get; init; } = null!;
+        public DbSet<IngredientMeal> IngredientMeals { get; init; } = null!;
 
         public DbSet<SavedMealPlan> SavedMealPlans { get; init; } = null!;
         public DbSet<SavedRecipe> SavedRecipes { get; init; } = null!;
@@ -72,6 +73,7 @@ namespace HealthyRecipes.Data
             builder.ApplyConfiguration(new MealPlanCategoryConfig());
             builder.ApplyConfiguration(new RecipeIngredientConfig());
             builder.ApplyConfiguration(new RecipeMealConfig());
+            builder.ApplyConfiguration(new IngredientMealConfig());
             builder.ApplyConfiguration(new SavedRecipeConfig());
             builder.ApplyConfiguration(new SavedMealPlanConfig());
             builder.ApplyConfiguration(new SavedIngredientConfig());
@@ -119,6 +121,7 @@ namespace HealthyRecipes.Data
             // MAPPING ENTITIES
             builder.Entity<RecipeIngredient>().HasData(RecipeIngredientSeeder.GenerateRecipeIngredients().ToArray());
             builder.Entity<RecipeMeal>().HasData(RecipeMealSeeder.GenerateRecipeMeals().ToArray());
+            builder.Entity<IngredientMeal>().HasData(IngredientMealSeeder.GenerateIngredientMeals().ToArray());
             builder.Entity<RecipeCategory>().HasData(RecipeCategorySeeder.GenerateRecipeCategory().ToArray());
             builder.Entity<MealPlanCategory>().HasData(MealPlanCategorySeeder.GenerateMealPlanCategory().ToArray());
             builder.Entity<SavedRecipe>().HasData(SavedRecipeSeeder.GenerateSavedRecipe().ToArray());
@@ -136,24 +139,18 @@ namespace HealthyRecipes.Data
             var userRoles = UserRoleSeeder.GenerateUserRoles().ToArray();
             builder.Entity<IdentityUserRole<Guid>>().HasData(userRoles);
 
-
             //ADMIN
             //BannedWords (no dependencies)
             var bannedWords = BannedWordSeeder.GenerateBannedWords().ToArray();
             builder.Entity<BannedWord>().HasData(bannedWords);
-
-            
             //FlaggedContent (depends on Users - already seeded)
             FlaggedContentSeeder.SeedFlaggedContent(builder);
-
-            
             //UserWarnings (depends on Users and FlaggedContent)
             UserWarningSeeder.SeedUserWarnings(builder);
-
-            
             //ActivityLogs (depends on Users - already seeded)
             ActivityLogSeeder.SeedActivityLogs(builder);
-            
+
+
             base.OnModelCreating(builder);
 
         }

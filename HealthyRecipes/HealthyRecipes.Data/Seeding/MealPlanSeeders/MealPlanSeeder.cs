@@ -13,7 +13,7 @@ namespace HealthyRecipes.Data.Seeding.MealPlanSeeders
     {
         public static IEnumerable<MealPlan> GenerateMealPlans()
         {
-            
+
             DateTime seedingDate = new DateTime(2025, 12, 18);
 
             List<MealPlan> mealPlans = new List<MealPlan>()
@@ -23,7 +23,11 @@ namespace HealthyRecipes.Data.Seeding.MealPlanSeeders
                 {
                     Name = MealPlanConstants.UserMealPlanName,
                     Description = MealPlanConstants.UserMealPlanDescription,
-                    UserId = Guid.Parse(MealPlanConstants.UserId)
+                    UserId = Guid.Parse(MealPlanConstants.UserId),
+                    Calories = MealPlanConstants.UserMealPlanCalories,
+                    Protein = MealPlanConstants.UserMealPlanProtein,
+                    Carbs = MealPlanConstants.UserMealPlanCarbs,
+                    Fat = MealPlanConstants.UserMealPlanFat
                 },
 
                 // Meal Plan 2: Sarah's Plant-Based Week
@@ -31,7 +35,11 @@ namespace HealthyRecipes.Data.Seeding.MealPlanSeeders
                 {
                     Name = MealPlanConstants.SarahMealPlanName,
                     Description = MealPlanConstants.SarahMealPlanDescription,
-                    UserId = Guid.Parse(MealPlanConstants.SarahUserId)
+                    UserId = Guid.Parse(MealPlanConstants.SarahUserId),
+                    Calories = MealPlanConstants.SarahMealPlanCalories,
+                    Protein = MealPlanConstants.SarahMealPlanProtein,
+                    Carbs = MealPlanConstants.SarahMealPlanCarbs,
+                    Fat = MealPlanConstants.SarahMealPlanFat
                 },
 
                 // Meal Plan 3: Mike's Marathon Training Plan
@@ -39,7 +47,11 @@ namespace HealthyRecipes.Data.Seeding.MealPlanSeeders
                 {
                     Name = MealPlanConstants.MikeMealPlanName,
                     Description = MealPlanConstants.MikeMealPlanDescription,
-                    UserId = Guid.Parse(MealPlanConstants.MikeUserId)
+                    UserId = Guid.Parse(MealPlanConstants.MikeUserId),
+                    Calories = MealPlanConstants.MikeMealPlanCalories,
+                    Protein = MealPlanConstants.MikeMealPlanProtein,
+                    Carbs = MealPlanConstants.MikeMealPlanCarbs,
+                    Fat = MealPlanConstants.MikeMealPlanFat
                 },
 
                 // Meal Plan 4: Emma's Balanced Nutrition Guide
@@ -47,7 +59,11 @@ namespace HealthyRecipes.Data.Seeding.MealPlanSeeders
                 {
                     Name = MealPlanConstants.EmmaMealPlanName,
                     Description = MealPlanConstants.EmmaMealPlanDescription,
-                    UserId = Guid.Parse(MealPlanConstants.EmmaUserId)
+                    UserId = Guid.Parse(MealPlanConstants.EmmaUserId),
+                    Calories = MealPlanConstants.EmmaMealPlanCalories,
+                    Protein = MealPlanConstants.EmmaMealPlanProtein,
+                    Carbs = MealPlanConstants.EmmaMealPlanCarbs,
+                    Fat = MealPlanConstants.EmmaMealPlanFat
                 }
             };
 

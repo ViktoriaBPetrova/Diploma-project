@@ -40,7 +40,10 @@ namespace HealthyRecipes.Services.Meals
                 return await _context.Meals
                     .Include(m => m.RecipeMeals)
                         .ThenInclude(rm => rm.Recipe)
+                    .Include(m => m.IngredientMeals)        
+                        .ThenInclude(im => im.Ingredient)
                     .Include(m => m.MealPlanDay)
+                        .ThenInclude(md => md.MealPlan)
                     .FirstOrDefaultAsync(m => m.Id == id && !m.Deleted);
             }
             catch (Exception ex)
@@ -138,15 +141,33 @@ namespace HealthyRecipes.Services.Meals
                 var meal = await _context.Meals
                     .Include(m => m.RecipeMeals)
                         .ThenInclude(rm => rm.Recipe)
+                    .Include(m => m.IngredientMeals)       
+                        .ThenInclude(im => im.Ingredient)
                     .FirstOrDefaultAsync(m => m.Id == mealId && !m.Deleted);
 
                 if (meal == null) return false;
 
                 var activeRecipes = meal.RecipeMeals.Where(rm => !rm.Deleted && rm.Recipe != null).ToList();
-                meal.Calories = activeRecipes.Sum(rm => rm.Recipe!.Calories);
-                meal.Protein = activeRecipes.Sum(rm => rm.Recipe!.Protein);
-                meal.Carbs = activeRecipes.Sum(rm => rm.Recipe!.Carbs);
-                meal.Fat = activeRecipes.Sum(rm => rm.Recipe!.Fat);
+                var activeIngredients = meal.IngredientMeals.Where(im => !im.Deleted && im.Ingredient != null).ToList();
+
+                var recipeCalories = activeRecipes.Sum(rm => rm.Recipe!.Calories);
+                var ingredientCalories = activeIngredients.Sum(im => ((im.Ingredient.CaloriesPer100g / 100) * im.QuantityInGrams));
+
+                var recipeProtein = activeRecipes.Sum(rm => rm.Recipe!.Protein);
+                var ingredientProtein = activeIngredients.Sum(im => ((im.Ingredient.ProteinPer100g / 100) * im.QuantityInGrams));
+
+                var recipeCarbs = activeRecipes.Sum(rm => rm.Recipe!.Carbs);
+                var ingredientCarbs = activeIngredients.Sum(im => ((im.Ingredient.CarbsPer100g / 100) * im.QuantityInGrams));
+
+                var recipeFat = activeRecipes.Sum(rm => rm.Recipe!.Fat);
+                var ingredientFat = activeIngredients.Sum(im => ((im.Ingredient.FatPer100g / 100) * im.QuantityInGrams));
+
+
+                meal.Calories = recipeCalories + ingredientCalories; 
+                meal.Protein = recipeProtein + ingredientProtein; 
+                meal.Carbs = recipeCarbs + ingredientCarbs; 
+                meal.Fat = recipeFat + ingredientFat; 
+
                 meal.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();

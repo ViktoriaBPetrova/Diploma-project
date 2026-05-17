@@ -189,7 +189,7 @@
                     </div>
                    
                 </div>
-                </div>
+        </div>
 
                 <ul class="recipe-ingredients-list" id="ingredients-list">
                     @foreach (var ingredient in Model.Ingredients)
@@ -204,7 +204,7 @@
                             data-original-unit="@(ingredient.OriginalUnit ?? "grams")"
                             data-original-formatted="@ingredient.FormattedQuantity">
                             <span class="ingredient-quantity">@ingredient.FormattedQuantity</span>
-                            <span class="ingredient-name">@ingredient.IngredientName</span>
+                            <a asp-action="Details" asp-controller="Ingredient" asp-route-id="@ingredient.IngredientId"> @ingredient.IngredientName</a>
                             @if (isAuthor)
                             {
                                 <button type="button"
@@ -220,6 +220,7 @@
                         </li>
                     }
                 </ul>
+
             <!-- Comments Section - MOVED HERE -->
             <div class="recipe-comments-section">
                 <div class="recipe-comments-header">
@@ -621,19 +622,6 @@
         const cancelBtn = document.getElementById('cancel-add-ingredient');
         const ingredientsList = document.getElementById('ingredients-list');
 
-        console.log('Elements found:', {
-            addIngredientBtn: !!addIngredientBtn,
-            searchContainer: !!searchContainer,
-            searchInput: !!searchInput,
-            searchResults: !!searchResults,
-            quantityForm: !!quantityForm,
-            quantityInput: !!quantityInput,
-           
-            confirmBtn: !!confirmBtn,
-            cancelBtn: !!cancelBtn,
-            ingredientsList: !!ingredientsList
-        });
-
         let searchTimeout;
 
         // Show/hide search container with expand animation
@@ -664,8 +652,7 @@
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 const term = this.value.trim();
-                
-                console.log('Search input:', term);
+
                 clearTimeout(searchTimeout);
                 
                 if (term.length < 2) {
@@ -715,7 +702,6 @@
         }
 
         function selectIngredient(id, name) {
-            console.log('Selected ingredient:', id, name);
             selectedIngredientId = id;
             selectedIngredientName = name;
             searchInput.value = name;
@@ -801,7 +787,7 @@
             });
         }
 
-        // Confirm add ingredient - FIXED to preserve original unit
+        // Confirm add ingredient -  preserve original unit
         if (confirmBtn) {
             confirmBtn.addEventListener('click', async function() {
                 const inputs = document.querySelectorAll('.measurement-input-compact');
@@ -809,9 +795,9 @@
                 let unit = 'grams';
                 let foundOriginalInput = false;
 
-                // FIRST: Try to find which field the user originally filled
+                // FIRST: Tries to find which field the user originally filled
                 // by checking which one was the last to be modified (has focus or was changed)
-                // OR check which field has a value that's different from the others
+                // OR checks which field has a value that's different from the others
 
                 // Better approach: Find the field that was the SOURCE of conversion
                 // We'll track this with a data attribute set during conversion
@@ -833,7 +819,7 @@
                     }
                 }
 
-                console.log('Adding ingredient:', selectedIngredientId, quantity, unit);
+                
 
                 if (!selectedIngredientId || !quantity) {
                     alert('Please fill in a quantity');
@@ -906,7 +892,7 @@
 
             li.innerHTML = `
                 <span class="ingredient-quantity">${formattedQuantity}</span>
-                <span class="ingredient-name">${name}</span>
+                <a href="/Ingredient/Details/${id}"> ${name}</a>
                 <button type="button"
                         class="btn-delete-ingredient"
                         data-ingredient-id="${id}"

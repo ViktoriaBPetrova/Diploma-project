@@ -1,5 +1,8 @@
 @model HealthyRecipes.Web.ViewModels.MealPlan.MealPlanIndexViewModel
-@{ ViewData["Title"] = "Meal Plans"; }
+@{
+    var isMineMode = Model.ViewMode == "mine";
+    ViewData["Title"] = isMineMode ? "My Meal Plans" : "Meal Plans";
+}
 
 <div class="container">
     <div class="page-header">
@@ -19,6 +22,7 @@
     <!-- Advanced Filter Panel -->
     <div class="filter-panel">
         <form method="get" asp-action="Index" id="filterForm">
+            <input type="hidden" name="view" value="@Model.ViewMode" />
             <div class="filter-header" onclick="toggleFilters()">
                 <h3>🔍 Advanced Filters</h3>
                 <button type="button" class="btn-ghost" id="toggleBtn">Show Filters</button>
@@ -155,65 +159,56 @@
                 <!-- Actions -->
                 <div class="filter-actions">
                     <button type="submit" class="btn-primary">Apply Filters</button>
-                    <a asp-action="Index" class="btn-ghost">Reset All</a>
+                    <a asp-action="Index" asp-route-view="@Model.ViewMode" class="btn-ghost">Reset All</a>
                 </div>
 
             </div>
         </form>
     </div>
 
-    <!-- My Plans Section -->
-    @if (Model.MyMealPlans.Any())
+    @if (!isMineMode && Model.MyMealPlans != null && Model.MyMealPlans.Any())
     {
-        <h2 class="section-title">My Plans</h2>
-        <div class="grid-2 meal-plan-index-grid">
-            @foreach (var plan in Model.MyMealPlans)
-            {
-                <partial name="_MealPlanCard" model="plan" />
-            }
-        </div>
-
-    }
-    else
-    {
-
-        @if (User.Identity?.IsAuthenticated == true)
+    <h2 class="section-title">My Meal Plans</h2>
+    <div class="grid-2 meal-plan-index-grid">
+        @foreach (var plan in Model.MyMealPlans)
         {
-            <div class="empty-state">
-                <div class="empty-state-icon">🥦</div>
-            <h3>You haven`t created any MealPlans yet!</h3>
-        </div>
+            <partial name="_MealPlanCard" model="plan" />
         }
+    </div>
+    <a asp-action="Index" asp-route-view="mine" class="btn-ghost">View all my meal plans →</a>
     }
 
-    <!-- Browse All Plans Section (with filters) -->
-    <h2 class="section-title">Browse All Plans</h2>
-    
-    @if (Model.TotalCount > 0)
-    {
-        <div class="meal-plan-results-info">
-            <p>Showing @Model.BrowseAllMealPlans.Count() of @Model.TotalCount meal plans</p>
-        </div>
+    <!-- Main results -->
+    @{
+        var plansToDisplay = isMineMode ? Model.MyMealPlans : Model.BrowseAllMealPlans;
+        var sectionTitle = isMineMode ? "My Meal Plans" : "Browse All Meal Plans";
     }
 
-    @if (Model.BrowseAllMealPlans.Any())
+    <h2 class="section-title">@sectionTitle</h2>
+
+    @if (plansToDisplay != null && plansToDisplay.Any())
     {
-        <div class="grid-2">
-            @foreach (var plan in Model.BrowseAllMealPlans)
+            <div class="results-info">
+                <p>Showing @plansToDisplay.Count() of @Model.TotalCount @(isMineMode ? "of your meal plans" : "meal plans")</p>
+            </div>
+
+            <div class="grid-2">
+                @foreach (var plan in plansToDisplay)
+                {
+                    <partial name="_MealPlanCard" model="plan" />
+                }
+            </div>
+
+            <!-- Pagination  -->
+            @if (Model.TotalPages > 1)
             {
-                <partial name="_MealPlanCard" model="plan" />
-            }
-        </div>
-
-        <!-- Pagination -->
-        @if (Model.TotalPages > 1)
-        {
-            <div class="pagination">
+                <div class="pagination">
                 @if (Model.PageNumber > 1)
                 {
-                    <a asp-action="Index" 
+                    <a asp-action="Index" asp-route-view="@Model.ViewMode"
                        asp-all-route-data="@GetCurrentFilters(Model.Filter, Model.PageNumber - 1)"
-                       class="btn-ghost">← Previous</a>
+                       class="btn-ghost">← Previous
+                   </a>
                 }
 
                 @for (int i = Math.Max(1, Model.PageNumber - 2); i <= Math.Min(Model.TotalPages, Model.PageNumber + 2); i++)
@@ -224,29 +219,46 @@
                     }
                     else
                     {
-                        <a asp-action="Index" 
-                           asp-all-route-data="@GetCurrentFilters(Model.Filter, i)">@i</a>
+                        <a asp-action="Index" asp-route-view="@Model.ViewMode"
+                           asp-all-route-data="@GetCurrentFilters(Model.Filter, i)">@i
+                        </a>
                     }
                 }
 
                 @if (Model.PageNumber < Model.TotalPages)
                 {
-                    <a asp-action="Index" 
+                   <a asp-action="Index" asp-route-view="@Model.ViewMode"
                        asp-all-route-data="@GetCurrentFilters(Model.Filter, Model.PageNumber + 1)"
-                       class="btn-ghost">Next →</a>
+                       class="btn-ghost">Next →
+                   </a>
                 }
-            </div>
+                </div>
+            }
         }
-    }
-    else if (!Model.MyMealPlans.Any())
+    else
     {
         <div class="empty-state">
-            <div class="empty-state-icon">📋</div>
-            <h3>No meal plans found</h3>
-            <p>Try adjusting your filters or create your first meal plan.</p>
-            <a asp-action="Create" class="btn-primary">Create a plan</a>
+            <div class="empty-state-icon">🥗</div>
+            <h3>@(isMineMode ? "You haven't created any meal plans yet" : "No meal plans found")</h3>
+            @if (isMineMode)
+            {
+                <a asp-action="Create" class="btn-primary">Create Your First Meal Plan</a>
+            }
+            else
+            {
+                <p>Try adjusting your filters.</p>
+                <a asp-action="Index" class="btn-ghost">Clear all filters</a>
+            }
         </div>
     }
+
+     @if (isMineMode)
+    {
+    <div class="profile-back-link">
+        <a asp-controller="User" asp-action="Profile" class="btn-ghost">← Back to Profile</a>
+    </div>
+    }
+
 </div>
 
 @functions {

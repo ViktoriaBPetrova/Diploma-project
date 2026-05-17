@@ -4,6 +4,10 @@
 }
 
 <div class="plan-details-container">
+    @* Hidden form to provide anti-forgery token for AJAX requests *@
+    <form id="ajax-token-form" style="display: none;">
+    @Html.AntiForgeryToken()
+    </form>
     <!-- Header Section -->
     <div class="plan-header">
         <div class="plan-header-content">
@@ -313,7 +317,17 @@
                                         </div>
                                     }
                                 </div>
+
+                                @* INGREDIENTS SECTION - THE PARTIAL VIEW *@
+                                @if (meal.Ingredients.Any())
+                                {
                                 
+                                    ViewData["MealId"] = meal.Id;
+                                    ViewData["IsOwner"] = Model.IsOwner;
+                                
+                                    @await Html.PartialAsync("_MealIngredientsPartial", meal.Ingredients)
+                                }
+
                                 @if (Model.IsOwner)
                                 {
                                     <button class="add-recipe-btn" data-meal-id="@meal.Id">
@@ -324,6 +338,7 @@
                                         </svg>
                                         Add Recipe
                                     </button>
+                                    
                                     
                                     <div class="recipe-search-panel" data-meal-id="@meal.Id" style="display: none;">
                                         <div class="search-controls">
@@ -355,7 +370,16 @@
                                         
                                         <div class="recipe-search-results"></div>
                                     </div>
+
+                                     
                                 }
+
+                                
+        
+
+
+
+                                           
                             </div>
                         }
                     </div>

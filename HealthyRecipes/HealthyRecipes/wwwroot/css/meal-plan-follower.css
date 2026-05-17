@@ -1238,14 +1238,16 @@
     line-height: 1.6;
 }
 
-/* ── Sidebar (Fixed) ────────────────────────────────────────── */
+/* ── Sidebar  ────────────────────────────────────────── */
 .follower-sidebar {
     position: relative;
+    align-self: stretch !important;
+    margin-bottom: var(--space-2xl);
 }
 
 .sidebar-sticky {
     position: sticky;
-    top: 80px;
+    top: 70px;
 }
 
 .sidebar-today-card {
@@ -1463,3 +1465,5 @@
         font-size: 0.875rem;
     }
 }
+
+       

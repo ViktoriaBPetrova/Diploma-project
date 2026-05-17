@@ -24,5 +24,6 @@ namespace HealthyRecipes.Web.ViewModels.MealPlan
     {
         public int Type { get; set; }
         public List<Guid> RecipeIds { get; set; } = new List<Guid>();
+        public List<IngredientMealInputViewModel> Ingredients {  get; set; } = new List<IngredientMealInputViewModel> { };
     }
 }

@@ -81,11 +81,13 @@ namespace HealthyRecipes.Web.Controllers
         }
 
         // GET: /Recipe
-        public async Task<IActionResult> Index([FromQuery] RecipeFilterViewModel filter)
+        public async Task<IActionResult> Index([FromQuery] RecipeFilterViewModel filter, [FromQuery] string? view)
         {
             try
             {
                 Guid? currentUserId = null;
+                
+
                 if (User.Identity?.IsAuthenticated == true)
                 {
                     var user = await _userManager.GetUserAsync(User);
@@ -117,64 +119,80 @@ namespace HealthyRecipes.Web.Controllers
                     SortOrder = filter.SortOrder
                 };
 
-                // Get filtered recipes from service (this does all the heavy lifting)
-                var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto);
-
                 // Get all categories for filter UI
                 var categories = await _categoryService.GetAllCategoriesAsync();
 
                 // Get saved recipe IDs and allergies for current user
                 HashSet<Guid> savedIds = new();
-                HashSet<Guid> allergyIngredientIds = new();
-                List<Recipe> myRecipes = new List<Recipe>();
+                List<Recipe> userRecipes = new List<Recipe>();
 
 
                 if (currentUserId != null)
                 {
                     var my = await _recipeService.GetRecipesByUserAsync((Guid)currentUserId);
-                    myRecipes = my.ToList();
+                    userRecipes = my.ToList();
 
                     var saved = await _savedRecipeService.GetSavedRecipesByUserAsync((Guid)currentUserId);
                     savedIds = saved.Select(sr => sr.RecipeId).ToHashSet();
-
-                    var allergies = await _allergyService.GetAllergiesByUserAsync((Guid)currentUserId);
-                    allergyIngredientIds = allergies.Select(a => a.IngredientId).ToHashSet();
                 }
 
+                List<RecipeCardViewModel>? myCards = null;
+                List<RecipeCardViewModel>? cards = null;
+                int count = 0;
 
-                // Map My Recipes
-                var myCards = new List<RecipeCardViewModel>();
-                foreach (var recipe in myRecipes)
+                if (view == "mine" && currentUserId != null)
                 {
-                    var avgRating = await _commentRatingService.GetAverageRatingAsync(recipe.Id);
-                    var ratings = await _commentRatingService.GetRatingsByRecipeAsync(recipe.Id);
-                    var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(recipe.Id);
+                    // Get filtered recipes from service
+                    var (myRecipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto, userRecipes);
+                    count = totalCount;
 
-                    myCards.Add(new RecipeCardViewModel
+                    // Map My Recipes 
+                    myCards = new List<RecipeCardViewModel>();
+                    foreach (var recipe in myRecipes)
                     {
-                        Id = recipe.Id,
-                        Title = recipe.Title,
-                        Info = recipe.Info,
-                        Calories = recipe.Calories,
-                        Protein = recipe.Protein,
-                        Carbs = recipe.Carbs,
-                        Fat = recipe.Fat,
-                        PrepTime = recipe.PrepTime,
-                        Difficulty = recipe.Difficulty,
-                        ImageUrl = recipe.PrimaryImageUrl,
-                        AverageRating = avgRating,
-                        RatingCount = ratings.Count(),
-                        CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
-                        IsSaved = savedIds.Contains(recipe.Id),
-                        AuthorName = recipe.User?.UserName ?? "Unknown",
-                        AuthorId = recipe.UserId
-                    });
-                }
+                        var avgRating = await _commentRatingService.GetAverageRatingAsync(recipe.Id);
+                        var ratings = await _commentRatingService.GetRatingsByRecipeAsync(recipe.Id);
+                        var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(recipe.Id);
 
-                // Map to RecipeCardViewModel
-                var cards = new List<RecipeCardViewModel>();
-                foreach (var recipe in recipes)
+                        myCards.Add(new RecipeCardViewModel
+                        {
+                            Id = recipe.Id,
+                            Title = recipe.Title,
+                            Info = recipe.Info,
+                            Calories = recipe.Calories,
+                            Protein = recipe.Protein,
+                            Carbs = recipe.Carbs,
+                            Fat = recipe.Fat,
+                            PrepTime = recipe.PrepTime,
+                            Difficulty = recipe.Difficulty,
+                            ImageUrl = recipe.PrimaryImageUrl,
+                            AverageRating = avgRating,
+                            RatingCount = ratings.Count(),
+                            CategoryNames = recipeCategories.Select(rc => rc.Category?.Name ?? "").Where(n => n != ""),
+                            IsSaved = savedIds.Contains(recipe.Id),
+                            AuthorName = recipe.User?.UserName ?? "Unknown",
+                            AuthorId = recipe.UserId
+                        });
+                    }
+                }
+                else
                 {
+                    var allRecipes = await _recipeService.GetAllRecipesAsync();
+
+                    // Exclude user's own recipes from browse results
+                    if (currentUserId != null)
+                    {
+                        allRecipes = allRecipes.Where(r => r.UserId != currentUserId).ToList();
+                    }
+
+                    // Get filtered recipes from service
+                    var (recipes, totalCount) = await _recipeService.GetFilteredRecipesAsync(filterDto, allRecipes);
+                    count = totalCount;
+
+                    // Map others recipes
+                    cards = new List<RecipeCardViewModel>();
+                    foreach (var recipe in recipes)
+                    {
                     var avgRating = await _commentRatingService.GetAverageRatingAsync(recipe.Id);
                     var ratings = await _commentRatingService.GetRatingsByRecipeAsync(recipe.Id);
                     var recipeCategories = await _recipeCategoryService.GetCategoriesByRecipeAsync(recipe.Id);
@@ -198,6 +216,7 @@ namespace HealthyRecipes.Web.Controllers
                         AuthorName = recipe.User?.UserName ?? "Unknown",
                         AuthorId = recipe.UserId
                     });
+                    }
                 }
 
                 // Create view model
@@ -208,14 +227,15 @@ namespace HealthyRecipes.Web.Controllers
                     SearchQuery = filter.SearchTerm,
                     SelectedCategoryId = filter.CategoryIds.FirstOrDefault(),
                     CurrentPage = filter.PageNumber,
-                    TotalPages = (int)Math.Ceiling((double)totalCount / filter.PageSize),
+                    TotalPages = (int)Math.Ceiling((double)count / filter.PageSize),
                     Categories = categories.Select(c => new CategoryFilterViewModel
                     {
                         Id = c.Id,
                         Name = c.Name
                     }),
                     Filter = filter,
-                    TotalCount = totalCount
+                    TotalCount = count,
+                    ViewMode = view
                 };
 
                 return View(vm);
@@ -569,7 +589,7 @@ namespace HealthyRecipes.Web.Controllers
                     recipe.VideoUrl = null;
                 }
             }
-            else if (vm.NewVideoFile != null)
+            if (vm.NewVideoFile != null)
             {
                 if (!_fileUploadService.IsValidVideo(vm.NewVideoFile))
                 {

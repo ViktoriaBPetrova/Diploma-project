@@ -103,7 +103,21 @@ namespace HealthyRecipes.Services.MealPlanDays
 
                 existing.Deleted = true;
                 existing.DeletedAt = DateTime.UtcNow;
-                existing.UpdatedAt = DateTime.UtcNow;
+                foreach (var meal in existing.Meals)
+                {
+                    meal.Deleted = true;
+                    meal.DeletedAt = DateTime.UtcNow;
+                    foreach (var ingredientMeal in meal.IngredientMeals)
+                    {
+                        ingredientMeal.Deleted = true;
+                        ingredientMeal.DeletedAt = DateTime.UtcNow;
+                    }
+                    foreach (var recipeMeal in meal.RecipeMeals)
+                    {
+                        recipeMeal.Deleted = true;
+                        recipeMeal.DeletedAt = DateTime.UtcNow;
+                    }
+                }
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("MealPlanDay {Id} soft deleted", id);
                 return true;
@@ -124,7 +138,21 @@ namespace HealthyRecipes.Services.MealPlanDays
 
                 existing.Deleted = false;
                 existing.DeletedAt = null;
-                existing.UpdatedAt = DateTime.UtcNow;
+                foreach (var meal in existing.Meals)
+                {
+                    meal.Deleted = false;
+                    meal.DeletedAt = null;
+                    foreach (var ingredientMeal in meal.IngredientMeals)
+                    {
+                        ingredientMeal.Deleted = false;
+                        ingredientMeal.DeletedAt = null;
+                    }
+                    foreach (var recipeMeal in meal.RecipeMeals)
+                    {
+                        recipeMeal.Deleted = false;
+                        recipeMeal.DeletedAt = null;
+                    }
+                }
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("MealPlanDay {Id} restored", id);
                 return true;

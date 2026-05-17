@@ -23,7 +23,7 @@ namespace HealthyRecipes.Services.Recipes
         Task<IEnumerable<Recipe>> GetRecipeAsync(Func<Recipe, bool> predicate);
         Task<IEnumerable<Recipe>> GetRecipesByUserAsync(Guid userId);
 
-        Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(IngredientFilterDto filter);
+        Task<(IEnumerable<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(IngredientFilterDto filter, IEnumerable<Recipe> recipes);
 
         Task<bool> SoftDeleteRecipeAsync(Guid id);
 

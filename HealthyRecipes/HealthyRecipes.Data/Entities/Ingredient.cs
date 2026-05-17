@@ -19,6 +19,7 @@ namespace HealthyRecipes.Data.Entities
             RecipeIngredients = new List<RecipeIngredient>();
             Allergies = new List<Allergy>();
             SavedIngredients = new List<SavedIngredient>();
+            IngredientMeals = new List<IngredientMeal>();
         }
         public Ingredient(DateTime createdAt, Guid id) : this()
         {
@@ -59,6 +60,7 @@ namespace HealthyRecipes.Data.Entities
         // ---------- Navigation Collections ----------
         public IEnumerable<RecipeIngredient> RecipeIngredients { get; set; }
         public IEnumerable<SavedIngredient> SavedIngredients { get; set; }
+        public IEnumerable<IngredientMeal> IngredientMeals { get; set; }
 
         public IEnumerable<Allergy> Allergies { get; set; }
 

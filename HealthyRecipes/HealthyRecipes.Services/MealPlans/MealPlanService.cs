@@ -80,6 +80,30 @@ namespace HealthyRecipes.Services.MealPlans
             }
         }
 
+        public async Task<IEnumerable<MealPlan>> GetAllMealPlansAsync(bool includeDeleted = false)
+        {
+            try
+            {
+                return await _context.MealPlans
+                    .Include(mp => mp.MealPlanDays)
+                        .ThenInclude(d => d.Meals)
+                            .ThenInclude(meal => meal.RecipeMeals)
+                                .ThenInclude(rm => rm.Recipe)
+                    .Include(mp => mp.MealPlanCategories)
+                    .Include(mp => mp.MealPlanFollowers)
+                    .Include(m => m.SavedMealPlans)
+                    .Include(mp => mp.User)
+                    .Where(r => includeDeleted || !r.Deleted)
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all mealplans");
+                throw;
+            }
+        }
+
         public async Task<bool> UpdateMealPlanAsync(MealPlan mealPlan)
         {
             if (mealPlan == null)
@@ -125,9 +149,29 @@ namespace HealthyRecipes.Services.MealPlans
                     return false;
                 }
 
+                foreach (var day in existing.MealPlanDays)
+                {
+                    day.Deleted = true;
+                    day.DeletedAt = DateTime.UtcNow;
+                    foreach (var meal in day.Meals)
+                    {
+                        meal.Deleted = true;
+                        meal.DeletedAt = DateTime.UtcNow;
+                        foreach (var ingredientMeal in meal.IngredientMeals)
+                        {
+                            ingredientMeal.Deleted = true;
+                            ingredientMeal.DeletedAt = DateTime.UtcNow;
+                        }
+                        foreach (var recipeMeal in meal.RecipeMeals)
+                        {
+                            recipeMeal.Deleted = true;
+                            recipeMeal.DeletedAt = DateTime.UtcNow;
+                        }
+                    }
+                }
+
                 existing.Deleted = true;
                 existing.DeletedAt = DateTime.UtcNow;
-                existing.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
@@ -154,9 +198,30 @@ namespace HealthyRecipes.Services.MealPlans
                     return false;
                 }
 
+                foreach (var day in existing.MealPlanDays)
+                {
+                    day.Deleted = false;
+                    day.DeletedAt = null;
+
+                    foreach (var meal in day.Meals)
+                    {
+                        meal.Deleted = false;
+                        meal.DeletedAt = null;
+                        foreach (var ingredientMeal in meal.IngredientMeals)
+                        {
+                            ingredientMeal.Deleted = false;
+                            ingredientMeal.DeletedAt = null;
+                        }
+                        foreach (var recipeMeal in meal.RecipeMeals)
+                        {
+                            recipeMeal.Deleted = false;
+                            recipeMeal.DeletedAt = null;
+                        }
+                    }
+                }
+
                 existing.Deleted = false;
                 existing.DeletedAt = null;
-                existing.UpdatedAt = DateTime.UtcNow;
 
                 await _context.SaveChangesAsync();
 
@@ -203,22 +268,16 @@ namespace HealthyRecipes.Services.MealPlans
             }
         }
 
-        public async Task<(List<MealPlan> MealPlans, int TotalCount)> GetFilteredMealPlansAsync(MealPlanFilterDto filter)
+        public async Task<(List<MealPlan> MealPlans, int TotalCount)> GetFilteredMealPlansAsync(MealPlanFilterDto filter, IEnumerable<MealPlan> mealplans)
         {
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
+            if (mealplans == null)
+                throw new ArgumentNullException(nameof(mealplans));
 
             try
             {
-                var query = _context.MealPlans
-                    .Include(mp => mp.MealPlanDays)
-                        .ThenInclude(mpd => mpd.Meals)
-                            .ThenInclude(m => m.RecipeMeals)
-                                .ThenInclude(rm => rm.Recipe)
-                    .Include(mp => mp.MealPlanCategories)
-                        .ThenInclude(mpc => mpc.Category)
-                    .Include(mp => mp.User)
-                    .Where(mp => !mp.Deleted)
+                var query = mealplans
                     .AsQueryable();
 
                 // Search term - search in Name and Description
@@ -301,7 +360,7 @@ namespace HealthyRecipes.Services.MealPlans
                 }
 
                 // Total count before pagination
-                var totalCount = await query.CountAsync();
+                var totalCount = query.Count();
 
                 // Sorting
                 query = filter.SortBy?.ToLower() switch
@@ -330,14 +389,14 @@ namespace HealthyRecipes.Services.MealPlans
                 };
 
                 // Pagination
-                var mealPlans = await query
+                var output = query
                     .Skip((filter.PageNumber - 1) * filter.PageSize)
                     .Take(filter.PageSize)
-                    .ToListAsync();
+                    .ToList();
 
-                _logger.LogInformation("Retrieved {Count} meal plans out of {Total} with filters", mealPlans.Count, totalCount);
+                _logger.LogInformation("Retrieved {Count} meal plans out of {Total} with filters", output.Count, totalCount);
 
-                return (mealPlans, totalCount);
+                return (output, totalCount);
             }
             catch (Exception ex)
             {

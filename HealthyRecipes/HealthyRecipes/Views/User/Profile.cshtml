@@ -122,8 +122,8 @@
     {
         <!-- Primary Actions - My Content -->
         <div class="profile-actions">
-            <a asp-controller="Recipe" asp-action="Index" class="btn-ghost">My recipes</a>
-            <a asp-controller="MealPlan" asp-action="Index" class="btn-primary">My meal plans</a>
+            <a asp-controller="Recipe" asp-action="Index" asp-route-view="mine" class="btn-ghost">My recipes</a>
+            <a asp-controller="MealPlan" asp-action="Index" asp-route-view="mine" class="btn-primary">My meal plans</a>
         </div>
 
         <!-- Secondary Actions - Activity & Stats -->

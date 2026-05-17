@@ -1,4 +1,5 @@
 using HealthyRecipes.Data.Enums;
+using HealthyRecipes.Web.ViewModels.Recipe;
 
 namespace HealthyRecipes.Web.ViewModels.MealPlan
 {
@@ -11,5 +12,6 @@ namespace HealthyRecipes.Web.ViewModels.MealPlan
         public float Carbs { get; set; }
         public float Fat { get; set; }
         public IEnumerable<MealRecipeViewModel> Recipes { get; set; } = new List<MealRecipeViewModel>();
+        public IEnumerable<IngredientMealViewModel> Ingredients { get; set; } = new List<IngredientMealViewModel>();
     }
 }

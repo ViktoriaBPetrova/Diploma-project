@@ -17,6 +17,7 @@ namespace HealthyRecipes.Data.Entities
             UpdatedAt = DateTime.UtcNow;
             RecipeMeals = new List<RecipeMeal>();
             MealEntries = new List<MealEntry>();
+            IngredientMeals = new List<IngredientMeal>();
 
         }
         public Meal(DateTime createdAt, Guid id) : this()
@@ -55,6 +56,7 @@ namespace HealthyRecipes.Data.Entities
         // Navigation to mapping tables 
         public IEnumerable<RecipeMeal> RecipeMeals { get; set; }
         public IEnumerable<MealEntry> MealEntries { get; set; }
+        public IEnumerable<IngredientMeal> IngredientMeals { get; set; }
 
 
         // ---------- Soft Delete ----------

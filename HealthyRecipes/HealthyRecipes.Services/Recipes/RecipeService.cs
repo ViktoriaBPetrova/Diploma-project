@@ -21,25 +21,6 @@ namespace HealthyRecipes.Services.Recipes
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
-        public async Task<Guid> CreateRecipeAsync(Recipe recipe)
-        {
-            if (recipe == null)
-                throw new ArgumentNullException(nameof(recipe));
-
-            try
-            {
-                _context.Recipes.Add(recipe);
-                await _context.SaveChangesAsync();
-
-                _logger.LogInformation("Recipe created successfully with ID: {RecipeId}", recipe.Id);
-                return recipe.Id;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating recipe");
-                throw;
-            }
-        }
         public async Task<Recipe?> GetRecipeByIdAsync(Guid id)
         {
             try
@@ -59,6 +40,30 @@ namespace HealthyRecipes.Services.Recipes
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving recipe with ID: {RecipeId}", id);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<Recipe>> GetRecipesByUserAsync(Guid userId)
+        {
+            try
+            {
+                return await _context.Recipes
+                    .Include(r => r.RecipeCategories)
+                        .ThenInclude(rc => rc.Category)
+                    .Include(r => r.CommentRatings)
+                    .Include(r => r.RecipeIngredients)
+                        .ThenInclude(ri => ri.Ingredient)
+                    .Include(r => r.RecipeMeals)
+                    .Include(r => r.SavedRecipes)
+                    .Include(r => r.User)
+                    .Where(m => m.UserId == userId && !m.Deleted)
+                    .OrderByDescending(m => m.CreatedAt)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving recipes for user: {UserId}", userId);
                 throw;
             }
         }
@@ -109,6 +114,26 @@ namespace HealthyRecipes.Services.Recipes
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving recipes with predicate");
+                throw;
+            }
+        }
+
+        public async Task<Guid> CreateRecipeAsync(Recipe recipe)
+        {
+            if (recipe == null)
+                throw new ArgumentNullException(nameof(recipe));
+
+            try
+            {
+                _context.Recipes.Add(recipe);
+                await _context.SaveChangesAsync();
+
+                _logger.LogInformation("Recipe created successfully with ID: {RecipeId}", recipe.Id);
+                return recipe.Id;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error creating recipe");
                 throw;
             }
         }
@@ -252,46 +277,17 @@ namespace HealthyRecipes.Services.Recipes
             }
         }
 
-        public async Task<IEnumerable<Recipe>> GetRecipesByUserAsync(Guid userId)
+        public async Task<(IEnumerable<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(IngredientFilterDto filter, IEnumerable<Recipe> recipes)
         {
-            try
-            {
-                return await _context.Recipes
-                    .Include(r => r.RecipeCategories)
-                        .ThenInclude(rc => rc.Category)
-                    .Include(r => r.CommentRatings)
-                    .Include(r => r.RecipeIngredients)
-                        .ThenInclude(ri => ri.Ingredient)
-                    .Include(r => r.RecipeMeals)
-                    .Include(r => r.SavedRecipes)
-                    .Include(r => r.User)
-                    .Where(m => m.UserId == userId && !m.Deleted)
-                    .OrderByDescending(m => m.CreatedAt)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error retrieving recipes for user: {UserId}", userId);
-                throw;
-            }
-        }
-
-        public async Task<(List<Recipe> Recipes, int TotalCount)> GetFilteredRecipesAsync(IngredientFilterDto filter)
-        {
+            if (recipes == null)
+                throw new ArgumentNullException(nameof(recipes));
             if (filter == null)
                 throw new ArgumentNullException(nameof(filter));
 
             try
             {
-                var query = _context.Recipes
-                    .Include(r => r.RecipeCategories)
-                        .ThenInclude(rc => rc.Category)
-                    .Include(r => r.RecipeIngredients)
-                        .ThenInclude(ri => ri.Ingredient)
-                    .Include(r => r.CommentRatings)
-                    .Include(r => r.User)
-                    .Where(r => !r.Deleted)
-                    .AsQueryable();
+                var query = recipes.AsQueryable();
+
 
                 // Search term
                 if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
@@ -380,7 +376,7 @@ namespace HealthyRecipes.Services.Recipes
                 }
 
                 // Total count before pagination
-                var totalCount = await query.CountAsync();
+                var totalCount = query.Count();
 
                 // Sorting
                 query = filter.SortBy?.ToLower() switch
@@ -406,14 +402,14 @@ namespace HealthyRecipes.Services.Recipes
                 };
 
                 // Pagination
-                var recipes = await query
+                var output = query
                     .Skip((filter.PageNumber - 1) * filter.PageSize)
                     .Take(filter.PageSize)
-                    .ToListAsync();
+                    .ToList();
 
-                _logger.LogInformation("Retrieved {Count} recipes out of {Total} with filters", recipes.Count, totalCount);
+                _logger.LogInformation("Retrieved {Count} recipes out of {Total} with filters", output.Count, totalCount);
 
-                return (recipes, totalCount);
+                return (output, totalCount);
             }
             catch (Exception ex)
             {
