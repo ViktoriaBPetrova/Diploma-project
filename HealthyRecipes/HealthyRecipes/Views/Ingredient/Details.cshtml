@@ -1,0 +1,374 @@
+@model HealthyRecipes.Web.Models.Ingredient.DetailsIngredientViewModel
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="ingredient-details-container">
+    <div class="ingredient-details-header">
+        <div class="ingredient-title-section">
+            <h1 class="ingredient-name">@Model.Name</h1>
+            @if (!string.IsNullOrEmpty(Model.Brand))
+            {
+                <p class="ingredient-brand">@Model.Brand</p>
+            }
+            <div class="ingredient-meta">
+                <span class="ingredient-source">Source: @Model.Source</span>
+                @if (!string.IsNullOrEmpty(Model.CreatedByUserName))
+                {
+                    <span class="ingredient-author">Added by @Model.CreatedByUserName</span>
+                }
+            </div>
+        </div>
+
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <div class="ingredient-actions">
+                <form asp-action="ToggleSave" asp-route-id="@Model.Id" method="post" class="action-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-save @(Model.IsSaved ? "saved" : "")">
+                        @(Model.IsSaved ? "★ Saved" : "☆ Save")
+                    </button>
+                </form>
+
+                <form asp-action="ToggleAllergy" asp-route-id="@Model.Id" method="post" class="action-form">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn-allergy @(Model.IsAllergen ? "marked" : "")">
+                        @(Model.IsAllergen ? "⚠ Allergen" : "Mark as Allergen")
+                    </button>
+                </form>
+
+                @if (Model.IsCurrentUserCreator || User.IsInRole("Admin"))
+                {
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn-edit">Edit</a>
+
+                    @if (!Model.IsDeleted)
+                    {
+                        <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="action-form" 
+                              onsubmit="return confirm('Are you sure you want to delete this ingredient?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-delete">Delete</button>
+                        </form>
+                    }
+                    else if (User.IsInRole("Admin"))
+                    {
+                        <form asp-action="Restore" asp-route-id="@Model.Id" method="post" class="action-form">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-restore">Restore</button>
+                        </form>
+                    }
+                }
+            </div>
+        }
+    </div>
+
+    @if (Model.IsDeleted)
+    {
+        <div class="ingredient-deleted-notice">
+            <p>⚠ This ingredient has been deleted and is only visible to administrators.</p>
+        </div>
+    }
+
+    <div class="ingredient-details-content">
+        <section class="nutrition-section">
+            <h2>Nutrition Facts (per 100g)</h2>
+            <div class="nutrition-grid">
+                <div class="nutrition-item">
+                    <span class="nutrition-label">Calories</span>
+                    <span class="nutrition-value">@Model.CaloriesPer100g.ToString("F1") kcal</span>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-label">Protein</span>
+                    <span class="nutrition-value">@Model.ProteinPer100g.ToString("F1")g</span>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-label">Carbs</span>
+                    <span class="nutrition-value">@Model.CarbsPer100g.ToString("F1")g</span>
+                </div>
+                <div class="nutrition-item">
+                    <span class="nutrition-label">Fat</span>
+                    <span class="nutrition-value">@Model.FatPer100g.ToString("F1")g</span>
+                </div>
+            </div>
+        </section>
+
+        @if (Model.RecipeCount > 0)
+        {
+            <section class="recipes-section">
+                <h2>Used in @Model.RecipeCount @(Model.RecipeCount == 1 ? "Recipe" : "Recipes")</h2>
+                @if (Model.RecipeNames.Any())
+                {
+                    <ul class="recipe-list">
+                        @foreach (var recipeName in Model.RecipeNames)
+                        {
+                            <li>@recipeName</li>
+                        }
+                        @if (Model.RecipeCount > 10)
+                        {
+                            <li class="more-recipes">...and @(Model.RecipeCount - 10) more</li>
+                        }
+                    </ul>
+                }
+            </section>
+        }
+
+        <section class="metadata-section">
+            <div class="metadata-item">
+                <span class="metadata-label">Created:</span>
+                <span class="metadata-value">@Model.CreatedAt.ToLocalTime().ToString("MMM dd, yyyy")</span>
+            </div>
+            <div class="metadata-item">
+                <span class="metadata-label">Last Updated:</span>
+                <span class="metadata-value">@Model.UpdatedAt.ToLocalTime().ToString("MMM dd, yyyy")</span>
+            </div>
+        </section>
+    </div>
+
+    <div class="ingredient-details-footer">
+        <a asp-action="Index" class="btn-back">← Back to Ingredients</a>
+    </div>
+</div>
+
+<style>
+    .ingredient-details-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: var(--space-xl);
+    }
+
+    .ingredient-details-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: var(--space-lg);
+        margin-bottom: var(--space-xl);
+        padding-bottom: var(--space-lg);
+        border-bottom: 2px solid var(--border);
+    }
+
+    .ingredient-title-section {
+        flex: 1;
+    }
+
+    .ingredient-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 2.5rem;
+        color: var(--forest);
+        margin: 0 0 var(--space-sm) 0;
+    }
+
+    .ingredient-brand {
+        font-size: 1.125rem;
+        color: var(--sage);
+        margin: 0 0 var(--space-md) 0;
+    }
+
+    .ingredient-meta {
+        display: flex;
+        gap: var(--space-md);
+        font-size: 0.875rem;
+        color: var(--charcoal);
+        opacity: 0.7;
+    }
+
+    .ingredient-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    .action-form {
+        margin: 0;
+    }
+
+    .ingredient-actions button,
+    .ingredient-actions a {
+        padding: var(--space-sm) var(--space-md);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+        text-decoration: none;
+        text-align: center;
+        border: 1px solid var(--border);
+        background: white;
+        color: var(--charcoal);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .ingredient-actions button:hover,
+    .ingredient-actions a:hover {
+        background: var(--parchment);
+        border-color: var(--sage);
+    }
+
+    .btn-save.saved {
+        background: var(--gold);
+        color: white;
+        border-color: var(--gold);
+    }
+
+    .btn-allergy.marked {
+        background: #d9534f;
+        color: white;
+        border-color: #d9534f;
+    }
+
+    .btn-edit {
+        background: var(--sage);
+        color: white;
+        border-color: var(--sage);
+    }
+
+    .btn-delete {
+        background: #d9534f;
+        color: white;
+        border-color: #d9534f;
+    }
+
+    .btn-restore {
+        background: var(--forest);
+        color: white;
+        border-color: var(--forest);
+    }
+
+    .ingredient-deleted-notice {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: var(--radius);
+        padding: var(--space-md);
+        margin-bottom: var(--space-lg);
+        color: #856404;
+    }
+
+    .ingredient-details-content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xl);
+    }
+
+    .nutrition-section h2,
+    .recipes-section h2,
+    .metadata-section h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: var(--forest);
+        margin: 0 0 var(--space-md) 0;
+    }
+
+    .nutrition-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-md);
+        background: var(--parchment);
+        padding: var(--space-lg);
+        border-radius: var(--radius-lg);
+    }
+
+    .nutrition-item {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+
+    .nutrition-label {
+        font-size: 0.875rem;
+        color: var(--sage);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .nutrition-value {
+        font-size: 1.5rem;
+        color: var(--forest);
+        font-weight: 700;
+    }
+
+    .recipe-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .recipe-list li {
+        padding: var(--space-sm) 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .recipe-list li:last-child {
+        border-bottom: none;
+    }
+
+    .more-recipes {
+        font-style: italic;
+        color: var(--sage);
+    }
+
+    .metadata-section {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        padding: var(--space-md);
+        background: var(--parchment);
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+    }
+
+    .metadata-item {
+        display: flex;
+        gap: var(--space-sm);
+    }
+
+    .metadata-label {
+        font-weight: 600;
+        color: var(--sage);
+    }
+
+    .metadata-value {
+        color: var(--charcoal);
+    }
+
+    .ingredient-details-footer {
+        margin-top: var(--space-xl);
+        padding-top: var(--space-lg);
+        border-top: 1px solid var(--border);
+    }
+
+    .btn-back {
+        display: inline-block;
+        padding: var(--space-sm) var(--space-lg);
+        background: var(--forest);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--radius);
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .btn-back:hover {
+        background: var(--sage);
+        color: white;
+    }
+
+    @@media (max-width: 768px) {
+        .ingredient-details-header {
+            flex-direction: column;
+        }
+
+        .ingredient-actions {
+            flex-direction: row;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .ingredient-actions button,
+        .ingredient-actions a {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .nutrition-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>

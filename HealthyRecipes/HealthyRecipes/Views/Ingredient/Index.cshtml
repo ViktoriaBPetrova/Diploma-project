@@ -145,6 +145,7 @@
                             <th>Allergy</th>
                             <th>Favorite</th>
                         }
+                        <th>Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -184,7 +185,18 @@
                                     
                                 </td>
                             }
+                            <td>
+
+                                <form asp-action="Details" asp-route-id="@ing.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-save">
+                                        Details
+                                    </button>
+                                </form>
+
+                            </td>
                         </tr>
+
                     }
                 </tbody>
             </table>
